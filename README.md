@@ -62,10 +62,10 @@ pytest -v
 # 3) Levantar Backend FastAPI (puerto 8000)
 uvicorn backend.main:app --reload
 
-# 4) En otra terminal, levantar Frontend PWA (puerto 5173)
+# 4) En otra terminal, levantar Frontend PWA (puerto 5173) con pnpm
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ### 3. Conexión con el Repositorio Remoto en GitHub y Git Flow
