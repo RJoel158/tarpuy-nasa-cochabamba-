@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
+import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { fetchZones, fetchCrops, fetchRecommendations, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
 import { speakQuechua, speakSpanish, stopSpeaking } from "./services/speechService.js";
 
@@ -73,13 +74,16 @@ export default function App() {
 
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-4 font-sans">
-      <header className="bg-emerald-950 text-white p-4 rounded-3xl shadow flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight">Tarpuy NASA Cochabamba</h1>
+      <header className="bg-emerald-950 text-white p-4 rounded-3xl shadow flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <InstitutionalBrandBar variant="header" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🌱</span>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight">Tarpuy NASA Cochabamba</h1>
+            </div>
+            <p className="text-xs text-emerald-300 font-medium">Rotación Agrícola Multimodal y Resiliente • NASA Space Apps 2026</p>
           </div>
-          <p className="text-xs text-emerald-300 font-medium">Rotación Agrícola Multimodal y Resiliente • NASA Space Apps 2026</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5 ${!forceOffline && isOnline ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-amber-500/20 text-amber-300 border border-amber-500/40"}`}>
@@ -131,6 +135,8 @@ export default function App() {
           <TechnicalMode activeZoneId={zoneId} onSelectZone={setZoneId} zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} />
         )}
       </main>
+
+      <InstitutionalBrandBar variant="footer" />
     </div>
   );
 }
