@@ -1,7 +1,7 @@
 import React from "react";
 import { Volume2 } from "lucide-react";
 import CropCalendarBar from "./CropCalendarBar.jsx";
-import { CropIllustration, CheckIllustration } from "./FarmPictograms.jsx";
+import { CheckIllustration } from "./FarmPictograms.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
 const PLAIN_TITLES = {
@@ -65,30 +65,8 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         </div>
       </div>
 
-      {/* Illustrated Crop Sequence */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {(strategy.crop_sequence || []).map((crop, idx) => (
-          <div
-            key={idx}
-            className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/70 min-w-0"
-          >
-            <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-              <CropIllustration name={crop.crop_name} className="w-10 h-10" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block">
-                {tr(lang, "stepPrefix")} {idx + 1}
-              </span>
-              <span className="text-sm font-bold text-[#0B2545] leading-tight block break-words">
-                {crop.crop_name}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 12-Month Timeline */}
-      <CropCalendarBar cropSequence={strategy.crop_sequence} indicators={indicators} />
+      {/* Intuitive 12-Month Illustrated Rotation Calendar & Stages */}
+      <CropCalendarBar cropSequence={strategy.crop_sequence} indicators={indicators} lang={lang} />
 
       {/* Concise Plain Explanation (prioritizes active language) */}
       <div className="space-y-1.5 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
