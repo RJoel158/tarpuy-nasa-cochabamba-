@@ -1,8 +1,42 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useState, useCallback } from "react";
 import L from "leaflet";
-import { LocateFixed, MapPin, Check } from "lucide-react";
+import { LocateFixed, MapPin, Check, Layers } from "lucide-react";
 import { ZONE_GEO_CATALOG } from "../../utils/geoUtils.js";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
+import {
+  GAMC_WMS_PATH,
+  fetchGamcServices,
+  fetchGamcFeatureInfo,
+  featureInfoRows,
+  wmsTileOptions,
+} from "../../services/gamcClient.js";
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function popupHtml(chunks) {
+  const blocks = chunks.map((chunk) => {
+    const rows = chunk.rows
+      .map((props) =>
+        Object.entries(props)
+          .filter(([key]) => !String(key).startsWith("_"))
+          .slice(0, 8)
+          .map(
+            ([key, val]) =>
+              `<tr><th style="text-align:left;padding:2px 8px 2px 0;color:#64748b;font-weight:600;">${escapeHtml(key)}</th><td>${escapeHtml(val)}</td></tr>`
+          )
+          .join("")
+      )
+      .join("");
+    return `<p style="margin:0 0 6px;font-weight:700;color:#0B2545;">${escapeHtml(chunk.title)}</p><table style="font-size:12px;border-collapse:collapse;">${rows}</table>`;
+  });
+  return `<div style="max-width:240px;font-family:system-ui,sans-serif;">${blocks.join("<hr style='margin:8px 0;border:0;border-top:1px solid #e2e8f0;'/>")}</div>`;
+}
 
 export default function CochabambaMap({
   zones = [],
@@ -17,14 +51,25 @@ export default function CochabambaMap({
   forceOffline,
   isOnline,
   tall = false,
+  isAdvanced = false,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
+  const wmsRef = useRef({});
   const pickRef = useRef(onPickMapPoint);
   const selectRef = useRef(onSelectZone);
   pickRef.current = onPickMapPoint;
   selectRef.current = onSelectZone;
+
+  const [mapEpoch, setMapEpoch] = useState(0);
+  const [gamcTheme, setGamcTheme] = useState("");
+  const [gamcServices, setGamcServices] = useState([]);
+  const [enabledIds, setEnabledIds] = useState(() => new Set());
+  const enabledRef = useRef(enabledIds);
+  const servicesRef = useRef(gamcServices);
+  enabledRef.current = enabledIds;
+  servicesRef.current = gamcServices;
 
   const canUseLeaflet = !forceOffline && isOnline;
 
@@ -40,20 +85,86 @@ export default function CochabambaMap({
   }, [zones]);
 
   useEffect(() => {
+    if (!canUseLeaflet) {
+      setGamcServices([]);
+      return;
+    }
+    let cancelled = false;
+    fetchGamcServices()
+      .then((data) => {
+        if (cancelled) return;
+        setGamcTheme(data.theme || "");
+        setGamcServices(data.services || []);
+      })
+      .catch(() => {
+        if (!cancelled) setGamcServices([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canUseLeaflet]);
+
+  useEffect(() => {
+    if (!gamcServices.length) {
+      setEnabledIds(new Set());
+      return;
+    }
+    if (isAdvanced) {
+      setEnabledIds(new Set(gamcServices.filter((s) => s.default_on).map((s) => s.service_id)));
+    } else {
+      setEnabledIds(new Set());
+    }
+  }, [gamcServices, isAdvanced]);
+
+  const queryGamc = useCallback(async (e) => {
+    const map = mapRef.current;
+    const enabled = [...enabledRef.current];
+    if (!map || enabled.length === 0) return;
+    const size = map.getSize();
+    const bounds = map.getBounds();
+    const sw = L.CRS.EPSG3857.project(bounds.getSouthWest());
+    const ne = L.CRS.EPSG3857.project(bounds.getNorthEast());
+    const pt = map.latLngToContainerPoint(e.latlng);
+    const bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    const chunks = [];
+    for (const serviceId of enabled) {
+      const geo = await fetchGamcFeatureInfo({
+        serviceId,
+        bbox,
+        width: size.x,
+        height: size.y,
+        x: pt.x,
+        y: pt.y,
+      });
+      const rows = featureInfoRows(geo);
+      if (!rows.length) continue;
+      const svc = servicesRef.current.find((s) => s.service_id === serviceId);
+      chunks.push({ title: svc?.title || "Capa GAMC", rows });
+    }
+    if (!chunks.length) return;
+    L.popup().setLatLng(e.latlng).setContent(popupHtml(chunks)).openOn(map);
+  }, []);
+
+  const queryRef = useRef(queryGamc);
+  queryRef.current = queryGamc;
+
+  useEffect(() => {
     if (!canUseLeaflet || !containerRef.current) return;
     if (!mapRef.current) {
       const map = L.map(containerRef.current, { center: [-17.68, -65.95], zoom: 8, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 14,
+        maxZoom: 19,
       }).addTo(map);
       const allPts = ZONE_GEO_CATALOG.flatMap((z) => z.polygon);
       map.fitBounds(L.latLngBounds(allPts), { padding: [36, 46] });
-      map.on("click", (e) => {
-        pickRef.current?.(e.latlng.lat, e.latlng.lng, "mapa");
+      map.on("click", (evt) => {
+        pickRef.current?.(evt.latlng.lat, evt.latlng.lng, "mapa");
+        queryRef.current?.(evt);
       });
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
+      setMapEpoch((n) => n + 1);
     }
 
     const layer = layerRef.current;
@@ -142,16 +253,68 @@ export default function CochabambaMap({
   }, [canUseLeaflet, activeZoneId, zoneList, userPoint]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!canUseLeaflet || !map || !mapEpoch) return;
+    const wanted = enabledIds;
+    Object.entries(wmsRef.current).forEach(([sid, layer]) => {
+      if (!wanted.has(sid)) {
+        map.removeLayer(layer);
+        delete wmsRef.current[sid];
+      }
+    });
+    gamcServices.forEach((svc) => {
+      if (!wanted.has(svc.service_id) || wmsRef.current[svc.service_id]) return;
+      const layer = L.tileLayer.wms(GAMC_WMS_PATH, wmsTileOptions(svc));
+      layer.addTo(map);
+      wmsRef.current[svc.service_id] = layer;
+    });
+  }, [canUseLeaflet, enabledIds, gamcServices, mapEpoch]);
+
+  useEffect(() => {
     if (!canUseLeaflet && mapRef.current) {
+      Object.values(wmsRef.current).forEach((layer) => {
+        try {
+          mapRef.current.removeLayer(layer);
+        } catch {
+          /* map already tearing down */
+        }
+      });
+      wmsRef.current = {};
       mapRef.current.remove();
       mapRef.current = null;
       layerRef.current = null;
     }
   }, [canUseLeaflet]);
 
+  const toggleService = (serviceId) => {
+    setEnabledIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(serviceId)) next.delete(serviceId);
+      else next.add(serviceId);
+      return next;
+    });
+  };
+
+  const fitPeriurbanos = () => {
+    const map = mapRef.current;
+    const svc =
+      gamcServices.find((s) => s.id === "periurbanos_categorizado") || gamcServices[0];
+    if (!map || !svc?.bounds) return;
+    const { south, west, north, east } = svc.bounds;
+    map.fitBounds(
+      [
+        [south, west],
+        [north, east],
+      ],
+      { padding: [24, 24], maxZoom: 13 }
+    );
+    if (!enabledIds.has(svc.service_id)) {
+      setEnabledIds((prev) => new Set(prev).add(svc.service_id));
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
-      {/* Top Map Action Bar */}
       <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2 flex-1 min-w-[200px] sm:max-w-xs">
           <MapPin className="w-4 h-4 text-[#0284C7] shrink-0" />
@@ -162,20 +325,70 @@ export default function CochabambaMap({
             variant="light"
           />
         </div>
-        <button
-          type="button"
-          onClick={onDetectGps}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer shrink-0"
-        >
-          <LocateFixed className="w-3.5 h-3.5 shrink-0" />
-          <span>Usar mi GPS</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {canUseLeaflet && gamcServices.length > 0 ? (
+            <button
+              type="button"
+              onClick={fitPeriurbanos}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5 shrink-0 text-[#0284C7]" />
+              <span>Ver periurbanos</span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onDetectGps}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
+          >
+            <LocateFixed className="w-3.5 h-3.5 shrink-0" />
+            <span>Usar mi GPS</span>
+          </button>
+        </div>
       </div>
 
-      {/* Interactive Leaflet Map / Offline Vector Map */}
       <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} relative w-full bg-slate-900`}>
         {canUseLeaflet ? (
-          <div ref={containerRef} className="w-full h-full z-10" />
+          <>
+            <div ref={containerRef} className="w-full h-full z-10" />
+            {gamcServices.length > 0 ? (
+              <div className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-[#0284C7]">Capas GAMC</p>
+                <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2">{gamcTheme}</p>
+                <div className="mt-2 space-y-2">
+                  {gamcServices.map((svc) => {
+                    const on = enabledIds.has(svc.service_id);
+                    return (
+                      <label key={svc.service_id} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 accent-[#0284C7]"
+                          checked={on}
+                          onChange={() => toggleService(svc.service_id)}
+                        />
+                        <span className="text-xs font-semibold text-[#0B2545] leading-snug">{svc.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {gamcServices
+                  .filter((svc) => enabledIds.has(svc.service_id))
+                  .map((svc) => (
+                    <ul key={`legend-${svc.service_id}`} className="mt-2 space-y-1 border-t border-slate-100 pt-2">
+                      {(svc.legend_classes || []).map((cls) => (
+                        <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+                          <span
+                            className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
+                            style={{ background: cls.color }}
+                          />
+                          <span>{cls.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className="w-full h-full relative flex items-center justify-center p-4 select-none">
             <svg viewBox="0 0 320 200" className="w-full h-full">
@@ -198,7 +411,6 @@ export default function CochabambaMap({
         )}
       </div>
 
-      {/* Recognizable Zone Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-slate-50 border-t border-slate-200">
         {zoneList.map((z) => {
           const active = z.id === activeZoneId;
@@ -225,6 +437,7 @@ export default function CochabambaMap({
           );
         })}
       </div>
+      {geoStatus ? <p className="sr-only">{geoStatus}</p> : null}
     </div>
   );
 }
