@@ -1,0 +1,1203 @@
+{
+  "dataset_version": "1.0.0",
+  "project": "Tarpuy NASA Cochabamba - Field Shift (NASA Space Apps 2026)",
+  "phase": "Phase 0 Baseline Seed Dataset",
+  "status_note": "All monthly indicators and satellite baselines are seeded with data_status='phase0_seed_pending_etl' to provide clean operational contracts prior to Phase 1/2 automated pipeline ingests.",
+  "soil_data_geographic_boundary_note": "USDA SSURGO and Web Soil Survey (WSS) databases only cover the United States territorial bounds. For all Cochabamba zones, soil attributes are synthesized from ISRIC SoilGrids 250m, FAO GAEZ v4, and regional Bolivian agropedological studies.",
+  "zones": [
+    {
+      "zone_id": "punata_valle_alto",
+      "name": "Punata - Valle Alto",
+      "quechua_name": "Punata - Jatun Qhiswa",
+      "subregion": "Valle Alto",
+      "municipality": "Punata",
+      "coordinates": {
+        "lat": -17.542,
+        "lon": -65.835
+      },
+      "elevation_msnm": 2750,
+      "slope_category": "Plana a suavemente ondulada (1 - 4%)",
+      "soil_context": {
+        "usda_ssurgo_applicability_note": "USDA SSURGO/WSS does not cover Bolivia. Soil profile derived from ISRIC SoilGrids 250m, FAO GAEZ v4, and local agropedological surveys from Centro de Investigaciones Pairumani.",
+        "sources_used": [
+          "ISRIC SoilGrids 250m (2020)",
+          "FAO GAEZ v4 (Agro-Ecological Zones)",
+          "Centro Fitoecogenético de Pairumani (Suelos Valle Alto Cochabamba)"
+        ],
+        "texture_class": "Franco arcillo-limoso a franco",
+        "ph_range": {
+          "min": 7.2,
+          "max": 7.9,
+          "classification": "Ligeramente alcalino"
+        },
+        "organic_matter_pct": {
+          "mean": 1.45,
+          "rating": "low"
+        },
+        "salinity_risk": "moderate",
+        "erosion_vulnerability": "moderate",
+        "drainage_class": "Moderadamente bien drenado con pie de arado superficial compactado",
+        "compaction_risk": "Alta debido a roturación repetitiva con yunta/tractor sobre humedad inadecuada"
+      },
+      "nasa_datasets_used": {
+        "nasa_power": "NASA POWER Climatology (T2M_MIN, T2M_MAX, PRECTOTCORR, WS2M, ALLSKY_SFC_SW_DWN) at 0.5x0.5 deg resolution",
+        "smap": "NASA SMAP L4 Global 9km Surface and Root-Zone Soil Moisture (critical deficit < 0.12 m3/m3 in winter)",
+        "modis_sentinel": "MODIS MOD13Q1 250m & Sentinel-2 MSI 10m NDVI (prolonged bare soil dips to NDVI 0.15-0.18 May-Oct)",
+        "gpm_imerg": "GPM IMERG Final Run V06 precipitation estimates calibrated for Cochabamba Valley",
+        "srtm": "SRTM 30m 1 Arc-Second Global DEM confirming gentle valley floor slope of 1.8-3.2%",
+        "ecostress": "ECOSTRESS Evaporative Stress Index (ESI) revealing intense late-spring water stress",
+        "gldas": "GLDAS Noah Land Surface Model v2.1 soil moisture and evapotranspiration fluxes",
+        "fao_gaez": "FAO GAEZ v4 agro-climatic thermal regime: Temperate semi-arid interandean valley"
+      },
+      "monthly_harmonized_indicators": [
+        {
+          "month": 1,
+          "month_name": "Enero",
+          "temp_min_c": 11.2,
+          "temp_max_c": 24.8,
+          "precip_mm": 98.5,
+          "soil_moisture_index": 0.58,
+          "ndvi_mean": 0.54,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 2,
+          "month_name": "Febrero",
+          "temp_min_c": 10.8,
+          "temp_max_c": 24.1,
+          "precip_mm": 86.2,
+          "soil_moisture_index": 0.55,
+          "ndvi_mean": 0.61,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 3,
+          "month_name": "Marzo",
+          "temp_min_c": 9.5,
+          "temp_max_c": 24.6,
+          "precip_mm": 48.0,
+          "soil_moisture_index": 0.44,
+          "ndvi_mean": 0.56,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 4,
+          "month_name": "Abril",
+          "temp_min_c": 6.8,
+          "temp_max_c": 25.2,
+          "precip_mm": 18.5,
+          "soil_moisture_index": 0.31,
+          "ndvi_mean": 0.41,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 5,
+          "month_name": "Mayo",
+          "temp_min_c": 3.1,
+          "temp_max_c": 25.0,
+          "precip_mm": 4.2,
+          "soil_moisture_index": 0.21,
+          "ndvi_mean": 0.28,
+          "frost_risk_days": 2,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 6,
+          "month_name": "Junio",
+          "temp_min_c": 0.5,
+          "temp_max_c": 24.2,
+          "precip_mm": 1.5,
+          "soil_moisture_index": 0.14,
+          "ndvi_mean": 0.18,
+          "frost_risk_days": 8,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 7,
+          "month_name": "Julio",
+          "temp_min_c": -0.8,
+          "temp_max_c": 23.9,
+          "precip_mm": 2.0,
+          "soil_moisture_index": 0.11,
+          "ndvi_mean": 0.16,
+          "frost_risk_days": 12,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 8,
+          "month_name": "Agosto",
+          "temp_min_c": 2.4,
+          "temp_max_c": 26.1,
+          "precip_mm": 4.8,
+          "soil_moisture_index": 0.10,
+          "ndvi_mean": 0.15,
+          "frost_risk_days": 4,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 9,
+          "month_name": "Septiembre",
+          "temp_min_c": 6.5,
+          "temp_max_c": 27.4,
+          "precip_mm": 9.6,
+          "soil_moisture_index": 0.12,
+          "ndvi_mean": 0.17,
+          "frost_risk_days": 1,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 10,
+          "month_name": "Octubre",
+          "temp_min_c": 9.1,
+          "temp_max_c": 28.3,
+          "precip_mm": 22.4,
+          "soil_moisture_index": 0.18,
+          "ndvi_mean": 0.21,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 11,
+          "month_name": "Noviembre",
+          "temp_min_c": 10.4,
+          "temp_max_c": 27.9,
+          "precip_mm": 41.5,
+          "soil_moisture_index": 0.29,
+          "ndvi_mean": 0.29,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 12,
+          "month_name": "Diciembre",
+          "temp_min_c": 11.0,
+          "temp_max_c": 26.2,
+          "precip_mm": 82.8,
+          "soil_moisture_index": 0.49,
+          "ndvi_mean": 0.42,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        }
+      ],
+      "bare_soil_periods": [
+        {
+          "period_id": "punata_winter_spring_bare_soil",
+          "start_month": "Junio",
+          "end_month": "Septiembre",
+          "duration_months": 4,
+          "satellite_signature": "MODIS/Sentinel NDVI < 0.18 y SMAP humedad superficial < 0.12 m3/m3",
+          "associated_risks": [
+            "Erosión eólica severa impulsada por vientos secos de agosto (WS2M > 4.2 m/s)",
+            "Degradación y mineralización oxidativa de materia orgánica superficial",
+            "Costra superficial por desecación que dificulta la posterior infiltración de lluvia"
+          ],
+          "recommended_cover_intervention": "Consorcio Avena-Vicia sembrado a finales de febrero con humedad residual de salida de lluvias"
+        }
+      ],
+      "climate_risks_summary": {
+        "primary_risk": "Déficit severo de humedad en invierno y primavera (SMAP < 0.12 m3/m3)",
+        "secondary_risk": "Erosión eólica de suelos descubiertos en agosto y heladas nocturnas invernales",
+        "frost_risk_level": "moderate",
+        "drought_risk_level": "high",
+        "water_erosion_risk": "low",
+        "wind_erosion_risk": "high",
+        "heat_stress_risk": "low"
+      },
+      "uncertainty_notes": {
+        "spatial_resolution_limits": "NASA POWER grilla de 0.5 grados y SMAP 9-36km integran piedemontes con piso de valle, requiriendo calibración con estaciones locales de San Benito.",
+        "cloud_cover_mitigation": "Durante enero y febrero, la nubosidad andina interfiere con MODIS óptico; se emplean compuestos de 16 días y microondas pasivas de SMAP.",
+        "topographic_microclimate_disclaimer": "Las inversiones térmicas nocturnas en fondo de valle pueden generar heladas localizadas no siempre detectadas por la celda satelital gruesa.",
+        "confidence_score_pct": 86
+      },
+      "strategies": [
+        {
+          "strategy_id": "punata_strat_baseline",
+          "strategy_type": "current_baseline",
+          "title_es": "Línea Base: Maíz a temporal con barbecho limpio invernal",
+          "title_qu": "Ñawpaq Yachay: Sara ch'aki pachapi, qasi jallp'a chiri mit'api",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Verano agrícola (Nov - Abr)",
+              "start_month": 11,
+              "end_month": 4,
+              "agronomic_role": "Cultivo principal para choclo y chala"
+            },
+            {
+              "crop_id": "bare_soil_fallow",
+              "crop_name": "Barbecho limpio sin cobertura",
+              "season_label": "Invierno / Estiaje (May - Oct)",
+              "start_month": 5,
+              "end_month": 10,
+              "agronomic_role": "Descanso tradicional pasivo (suelo desnudo)"
+            }
+          ],
+          "priority_alignment_score": 0.38,
+          "why_suggested": "Representa el patrón productivo dominante de los agricultores de Punata; proporciona grano y forraje pero deja el suelo desprotegido 6 meses, degradando la fertilidad y facilitando la erosión.",
+          "nasa_evidence": "MODIS/Sentinel-2 NDVI desciende a 0.15-0.18 entre junio y septiembre confirmando suelo desnudo. SMAP L4 humedad en raíz cae a 0.10 m3/m3. NASA POWER registra vientos secos de 4.2 m/s en agosto sobre terreno pulverizado.",
+          "benefits": [
+            "Familiaridad técnica completa del productor",
+            "Cosecha conocida de choclo comercial y chala seca para ganado",
+            "Cero inversión monetaria adicional en semillas de cobertura"
+          ],
+          "information_gaps": [
+            "Falta de medición in-situ continua de la compactación por pie de arado",
+            "Tasa de mineralización neta de la materia orgánica no cuantificada a nivel parcela"
+          ],
+          "local_validation_risks": [
+            "Pérdida continua de la capa fértil superficial por voladura de polvo en agosto",
+            "Agotamiento acumulativo de nitrógeno sin reposición biológica",
+            "Vulnerabilidad extrema ante el retraso de las lluvias de noviembre"
+          ],
+          "spanish_summary": "La práctica tradicional de sembrar solo maíz y dejar la parcela pelada en invierno empobrece la tierra con el viento y seca la poca humedad que queda.",
+          "quechua_summary": "Saratalla tarpuspa jallp'ata ch'usaqta saqeptiyki, wayraqa allpa kawsayta aparqapun, jallp'ataq ch'akiripun. Mana allinchu.",
+          "audio_refs": {
+            "es": "audio/punata_baseline_es.mp3",
+            "qu": "audio/punata_baseline_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "red",
+            "frost": "green",
+            "erosion": "red"
+          }
+        },
+        {
+          "strategy_id": "punata_strat_cover_avena_vicia",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Regenerativa: Maíz -> Consorcio Avena-Vicia de cobertura",
+          "title_qu": "Allinchasqa Muyuy: Sara -> Avenawan Wikawan qapuq forraje",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Verano agrícola (Oct - Feb)",
+              "start_month": 10,
+              "end_month": 2,
+              "agronomic_role": "Grano comercial y choclo con siembra temprana"
+            },
+            {
+              "crop_id": "avena_vicia",
+              "crop_name": "Avena con Vicia",
+              "season_label": "Otoño - Invierno (Mar - Jun)",
+              "start_month": 3,
+              "end_month": 6,
+              "agronomic_role": "Cobertura viva fijadora de N y heno proteico lechero"
+            },
+            {
+              "crop_id": "mulch_residue",
+              "crop_name": "Rastrojo protector / Mulch",
+              "season_label": "Estiaje tardío (Jul - Sep)",
+              "start_month": 7,
+              "end_month": 9,
+              "agronomic_role": "Manto orgánico que anula evaporación y erosión eólica"
+            }
+          ],
+          "priority_alignment_score": 0.89,
+          "why_suggested": "Aprovecha la humedad residual de febrero-marzo detectada por SMAP para sembrar avena y vicia, cubriendo el suelo en invierno, fijando nitrógeno y produciendo heno proteico en época de escasez ganadera.",
+          "nasa_evidence": "GPM/IMERG muestra 75 mm de precipitación residual en febrero-marzo. SMAP L4 registra humedad superficial de 0.22 m3/m3 adecuada para germinación. MODIS NDVI proyectado sube a 0.44 en invierno erradicando la firma de suelo desnudo.",
+          "benefits": [
+            "Eliminación total de la erosión eólica durante los fuertes vientos de agosto",
+            "Fijación biológica de 80 a 110 kg N/ha que reduce el gasto en fertilizantes químicos",
+            "Producción de 4.5 t/ha de heno de alto valor proteico para vacas lecheras",
+            "Mayor retención de agua e infiltración para la siguiente siembra de maíz"
+          ],
+          "information_gaps": [
+            "Disponibilidad de semilla certificada de Vicia villosa en mercados locales de Punata",
+            "Calibración de la tasa de evapotranspiración real de la vicia vs recarga freática"
+          ],
+          "local_validation_risks": [
+            "Fallo de establecimiento si las lluvias de febrero cesan abruptamente",
+            "Riesgo de sobrepastoreo por animales vecinos si la parcela no está delimitada"
+          ],
+          "spanish_summary": "Al terminar el maíz en febrero, sembramos avena con vicia. Esta mezcla protege el suelo del viento en invierno, alimenta a las vacas lecheras y le devuelve fertilidad a la tierra.",
+          "quechua_summary": "Sara tukukuptin, avenata wikawan chapuspa tarpuna. Chayqa chiripi wayramanta jallp'ata jark'an, baka uñakunapaq mikhunata qun, jallp'atataq wanuwan junt'achin.",
+          "audio_refs": {
+            "es": "audio/punata_avena_vicia_es.mp3",
+            "qu": "audio/punata_avena_vicia_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "green",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        },
+        {
+          "strategy_id": "punata_strat_legume_diversified",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Plurianual: Alfalfa perenne -> Papa Huaycha -> Maíz",
+          "title_qu": "Unay Kawsay Muyuy: Alfalfa kimsantin wata -> Huaycha Papa -> Sara",
+          "crop_sequence": [
+            {
+              "crop_id": "alfalfa",
+              "crop_name": "Alfalfa perenne",
+              "season_label": "Años 1 al 3 (Perenne con cortes periódicos)",
+              "start_month": 1,
+              "end_month": 12,
+              "agronomic_role": "Fijación masiva de nitrógeno, descompactación y forraje"
+            },
+            {
+              "crop_id": "papa_huaycha",
+              "crop_name": "Papa Huaycha",
+              "season_label": "Año 4 (Oct - Abr)",
+              "start_month": 10,
+              "end_month": 4,
+              "agronomic_role": "Cultivo cabeza de rotación de alta rentabilidad comercial"
+            },
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Año 5 (Oct - May)",
+              "start_month": 10,
+              "end_month": 5,
+              "agronomic_role": "Aprovechamiento de fertilidad residual y producción de grano"
+            }
+          ],
+          "priority_alignment_score": 0.82,
+          "why_suggested": "Para parcelas con acceso a pozo comunitario o riego intermitente, la alfalfa rompe el pie de arado con raíces de 3 metros, acumula nitrógeno y genera ingresos semanales constantes por venta de forraje.",
+          "nasa_evidence": "ECOSTRESS indica estrés evaporativo extremo en suelos sin sombra continua. SRTM confirma topografía plana apta para tabladas de riego. SMAP valida que suelos con alfalfar mantienen estabilidad hídrica durante picos térmicos.",
+          "benefits": [
+            "Ingresos semanales continuos por corte y venta en ferias locales",
+            "Descompactación natural profunda sin necesidad de maquinaria pesada",
+            "Fijación de más de 200 kg N/ha/año",
+            "Incremento del 35% en rendimiento de papa posterior sin urea química"
+          ],
+          "information_gaps": [
+            "Caudal aforado de fuentes subterráneas durante sequías de varios años",
+            "Sensibilidad a salinidad en napas freáticas superficiales"
+          ],
+          "local_validation_risks": [
+            "Compromiso de la parcela durante 3 años sin sembrar maíz anual",
+            "Costo inicial de semilla y preparación de suelo para alfalfa"
+          ],
+          "spanish_summary": "Sembrar alfalfa durante tres años limpia la tierra, rompe el suelo duro y da pasto verde todo el año para vender en la feria. Luego la papa rinde con fuerza sin químicos.",
+          "quechua_summary": "Kimsantin wata alfalfata tarpuspa, jallp'a ukhuta phaskinchik, q'omer qhurata sapa simana qhatuman aparisunman. Chaymanta papata tarpuspaqa, sumaqta puqunqa.",
+          "audio_refs": {
+            "es": "audio/punata_alfalfa_es.mp3",
+            "qu": "audio/punata_alfalfa_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        }
+      ]
+    },
+    {
+      "zone_id": "tapacari_zona_andina",
+      "name": "Tapacarí - Zona Andina",
+      "quechua_name": "Tapaqari - Puna Urqukuna",
+      "subregion": "Zona Andina / Cuenca Alta",
+      "municipality": "Tapacarí",
+      "coordinates": {
+        "lat": -17.510,
+        "lon": -66.615
+      },
+      "elevation_msnm": 3680,
+      "slope_category": "Fuertemente inclinada a escarpada (18 - 35%)",
+      "soil_context": {
+        "usda_ssurgo_applicability_note": "USDA SSURGO does not cover Bolivia. Andean steep-slope soil profile modeled from ISRIC SoilGrids 250m, FAO GAEZ terrain suitability, and regional agronomical characterization of the Tapacarí River Basin.",
+        "sources_used": [
+          "ISRIC SoilGrids 250m (2020)",
+          "FAO GAEZ v4 (Terrain and Soil Suitability)",
+          "Estudio de Suelos y Cuencas Tapacarí (PROMIC / Gobernación de Cochabamba)"
+        ],
+        "texture_class": "Franco arenoso pedregoso a franco limoso superficial",
+        "ph_range": {
+          "min": 5.8,
+          "max": 6.8,
+          "classification": "Moderadamente ácido a neutro"
+        },
+        "organic_matter_pct": {
+          "mean": 1.1,
+          "rating": "low"
+        },
+        "salinity_risk": "low",
+        "erosion_vulnerability": "severe",
+        "drainage_class": "Excesivo a algo excesivo con alta escorrentía superficial",
+        "compaction_risk": "Baja compactación profunda pero susceptibilidad crítica al encostrado y pérdida de capa arable por escorrentía"
+      },
+      "nasa_datasets_used": {
+        "nasa_power": "NASA POWER Climatology (T2M_MIN plunging to -5.8°C in July; 15-26 frost risk days per winter month)",
+        "smap": "NASA SMAP L4 Global 9km Soil Moisture showing rapid surface runoff and moisture loss on mountain slopes",
+        "modis_sentinel": "MODIS & Sentinel-2 MSI NDVI tracking fast green-up in Dec-Jan followed by severe post-harvest bare slopes",
+        "gpm_imerg": "GPM IMERG calibrated convective precipitation showing flash storm intensities exceeding 25 mm/h in summer",
+        "srtm": "SRTM 30m Global DEM calculating steep slope gradients of 22-34% requiring contour and vegetative barriers",
+        "ecostress": "ECOSTRESS thermal radiometer capturing acute cold-air pooling in Andean ravines and ridges",
+        "gldas": "GLDAS Noah Land Surface Model runoff and mountain snow/frost dynamics",
+        "fao_gaez": "FAO GAEZ v4 agro-climatic thermal regime: High-altitude cold semi-arid Andean Puna"
+      },
+      "monthly_harmonized_indicators": [
+        {
+          "month": 1,
+          "month_name": "Enero",
+          "temp_min_c": 4.2,
+          "temp_max_c": 16.5,
+          "precip_mm": 115.0,
+          "soil_moisture_index": 0.52,
+          "ndvi_mean": 0.48,
+          "frost_risk_days": 1,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 2,
+          "month_name": "Febrero",
+          "temp_min_c": 4.0,
+          "temp_max_c": 16.1,
+          "precip_mm": 102.5,
+          "soil_moisture_index": 0.50,
+          "ndvi_mean": 0.53,
+          "frost_risk_days": 1,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 3,
+          "month_name": "Marzo",
+          "temp_min_c": 3.1,
+          "temp_max_c": 16.8,
+          "precip_mm": 65.0,
+          "soil_moisture_index": 0.42,
+          "ndvi_mean": 0.47,
+          "frost_risk_days": 3,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 4,
+          "month_name": "Abril",
+          "temp_min_c": 0.8,
+          "temp_max_c": 17.2,
+          "precip_mm": 22.0,
+          "soil_moisture_index": 0.28,
+          "ndvi_mean": 0.35,
+          "frost_risk_days": 8,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 5,
+          "month_name": "Mayo",
+          "temp_min_c": -2.5,
+          "temp_max_c": 16.9,
+          "precip_mm": 6.0,
+          "soil_moisture_index": 0.18,
+          "ndvi_mean": 0.24,
+          "frost_risk_days": 17,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 6,
+          "month_name": "Junio",
+          "temp_min_c": -5.2,
+          "temp_max_c": 16.0,
+          "precip_mm": 2.5,
+          "soil_moisture_index": 0.12,
+          "ndvi_mean": 0.16,
+          "frost_risk_days": 24,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 7,
+          "month_name": "Julio",
+          "temp_min_c": -5.8,
+          "temp_max_c": 15.8,
+          "precip_mm": 3.0,
+          "soil_moisture_index": 0.10,
+          "ndvi_mean": 0.14,
+          "frost_risk_days": 26,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 8,
+          "month_name": "Agosto",
+          "temp_min_c": -3.6,
+          "temp_max_c": 17.4,
+          "precip_mm": 7.0,
+          "soil_moisture_index": 0.09,
+          "ndvi_mean": 0.14,
+          "frost_risk_days": 20,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 9,
+          "month_name": "Septiembre",
+          "temp_min_c": -0.5,
+          "temp_max_c": 18.5,
+          "precip_mm": 14.5,
+          "soil_moisture_index": 0.11,
+          "ndvi_mean": 0.15,
+          "frost_risk_days": 10,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 10,
+          "month_name": "Octubre",
+          "temp_min_c": 2.2,
+          "temp_max_c": 19.4,
+          "precip_mm": 28.0,
+          "soil_moisture_index": 0.17,
+          "ndvi_mean": 0.18,
+          "frost_risk_days": 4,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 11,
+          "month_name": "Noviembre",
+          "temp_min_c": 3.5,
+          "temp_max_c": 18.8,
+          "precip_mm": 46.5,
+          "soil_moisture_index": 0.25,
+          "ndvi_mean": 0.23,
+          "frost_risk_days": 2,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 12,
+          "month_name": "Diciembre",
+          "temp_min_c": 4.1,
+          "temp_max_c": 17.2,
+          "precip_mm": 78.0,
+          "soil_moisture_index": 0.39,
+          "ndvi_mean": 0.36,
+          "frost_risk_days": 1,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        }
+      ],
+      "bare_soil_periods": [
+        {
+          "period_id": "tapacari_winter_postharvest_bare_soil",
+          "start_month": "Junio",
+          "end_month": "Octubre",
+          "duration_months": 5,
+          "satellite_signature": "MODIS/Sentinel NDVI entre 0.14 y 0.18 en pendientes SRTM > 25%",
+          "associated_risks": [
+            "Erosión hídrica en surcos y cárcavas con las primeras tormentas convectivas de noviembre-diciembre",
+            "Pérdida de hasta 45 t/ha/año de suelo arable por lavado pluvial torrencial",
+            "Heladas nocturnas severas (hasta -5.8°C) que queman cualquier brote desprotegido"
+          ],
+          "recommended_cover_intervention": "Siembra de Tarwi en franjas transversales y Cebada/Avena de rescate para amarrar suelo"
+        }
+      ],
+      "climate_risks_summary": {
+        "primary_risk": "Erosión hídrica severa por tormentas convectivas de verano sobre laderas empinadas (SRTM > 25%)",
+        "secondary_risk": "Heladas nocturnas recurrentes de mayo a agosto (NASA POWER T2M_MIN < -5°C)",
+        "frost_risk_level": "severe",
+        "drought_risk_level": "moderate",
+        "water_erosion_risk": "severe",
+        "wind_erosion_risk": "moderate",
+        "heat_stress_risk": "none"
+      },
+      "uncertainty_notes": {
+        "spatial_resolution_limits": "La celda SRTM de 30m no resuelve micro-terrazas o zanjas ancestrales de infiltración menores a 15m; requiere inspección visual en terreno.",
+        "cloud_cover_mitigation": "En laderas andinas altas, la persistencia de niebla orográfica matutina puede alterar índices térmicos de MODIS y ECOSTRESS.",
+        "topographic_microclimate_disclaimer": "Las laderas con exposición Norte reciben hasta 30% más radiación solar que las laderas con exposición Sur, variando el riesgo de helada a nivel microcuenca.",
+        "confidence_score_pct": 82
+      },
+      "strategies": [
+        {
+          "strategy_id": "tapacari_strat_baseline",
+          "strategy_type": "current_baseline",
+          "title_es": "Línea Base: Papa Huaycha temporal -> Barbecho largo de ladera",
+          "title_qu": "Ñawpaq Yachay: Huaycha papa urqupi -> Purun jallp'a unay watakuna",
+          "crop_sequence": [
+            {
+              "crop_id": "papa_huaycha",
+              "crop_name": "Papa Huaycha",
+              "season_label": "Verano andino (Oct - May)",
+              "start_month": 10,
+              "end_month": 5,
+              "agronomic_role": "Cultivo principal de subsistencia y venta comercial"
+            },
+            {
+              "crop_id": "bare_soil_fallow",
+              "crop_name": "Barbecho seco desprotegido en pendiente",
+              "season_label": "Invierno / Estiaje (Jun - Oct)",
+              "start_month": 6,
+              "end_month": 10,
+              "agronomic_role": "Descanso pasivo tradicional en pendiente descubierta"
+            }
+          ],
+          "priority_alignment_score": 0.35,
+          "why_suggested": "Práctica tradicional de secano andino; al cosechar la papa en mayo, la ladera queda con tierra suelta y vulnerable que es lavada por las primeras lluvias intensas de noviembre.",
+          "nasa_evidence": "SRTM calcula pendientes del 28%. GPM/IMERG detecta eventos de lluvia de 30 mm en 45 minutos en diciembre. MODIS NDVI cae a 0.14 en invierno, exponiendo suelo suelto que pierde más de 45 t/ha de suelo fértil al año.",
+          "benefits": [
+            "Ingreso inmediato y alimento seguro para la familia por la cosecha de papa",
+            "Manejo agrícola ancestral transmitido por generaciones",
+            "Sin necesidad de insumos adicionales foráneos"
+          ],
+          "information_gaps": [
+            "Falta de medición de pérdida de suelo por estación de aforo en la subcuenca",
+            "Variabilidad microclimática entre laderas de solana y umbría"
+          ],
+          "local_validation_risks": [
+            "Pérdida irreversible del horizonte orgánico superficial por arrastre pluvial",
+            "Afloramiento de rocas que obliga al abandono forzoso de la parcela en pocos años",
+            "Agotamiento acelerado de nutrientes que reduce el tamaño de los tubérculos"
+          ],
+          "spanish_summary": "Sembrar papa y dejar la ladera pelada hace que las primeras lluvias torrenciales de noviembre se lleven toda la tierra fértil quebrada abajo.",
+          "quechua_summary": "Papallata tarpuspa urquta q'alata saqeptinchik, paranmantin allpa lluskhispa mayuman rin. Jallp'a chinkapun.",
+          "audio_refs": {
+            "es": "audio/tapacari_baseline_es.mp3",
+            "qu": "audio/tapacari_baseline_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "red",
+            "frost": "yellow",
+            "erosion": "red"
+          }
+        },
+        {
+          "strategy_id": "tapacari_strat_tarwi_papa_contour",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Protectora: Tarwi en fajas -> Papa Huaycha -> Cebada",
+          "title_qu": "Urqu Jark'ay Muyuy: Tarwi wachupi -> Huaycha Papa -> Siwara",
+          "crop_sequence": [
+            {
+              "crop_id": "tarwi",
+              "crop_name": "Tarwi (Chocho andino)",
+              "season_label": "Año 1 (Oct - May)",
+              "start_month": 10,
+              "end_month": 5,
+              "agronomic_role": "Fijador de nitrógeno, biofumigante y anclaje de ladera"
+            },
+            {
+              "crop_id": "papa_huaycha",
+              "crop_name": "Papa Huaycha",
+              "season_label": "Año 2 (Oct - May)",
+              "start_month": 10,
+              "end_month": 5,
+              "agronomic_role": "Cultivo comercial aprovechando nitrógeno y sanidad del tarwi"
+            },
+            {
+              "crop_id": "cebada",
+              "crop_name": "Cebada forrajera",
+              "season_label": "Año 3 (Nov - Abr)",
+              "start_month": 11,
+              "end_month": 4,
+              "agronomic_role": "Cobertura densa, supresión de malezas y forraje para ovinos"
+            }
+          ],
+          "priority_alignment_score": 0.91,
+          "why_suggested": "El tarwi posee una potente raíz pivotante que sujeta el suelo en pendientes andinas escarpadas, fija 140 kg N/ha y sus alcaloides desinfectan el suelo contra el gorgojo antes de sembrar papa.",
+          "nasa_evidence": "Pendiente SRTM de 28% mitigada por el anclaje radicular del tarwi. NASA POWER T2M_MIN confirma resistencia a heladas de hasta -4°C. MODIS NDVI se mantiene sobre 0.35 reduciendo el factor de erosión USLE en 75%.",
+          "benefits": [
+            "Reducción de la erosión hídrica en ladera en más del 70%",
+            "Biofumigación natural contra gorgojo de los Andes y nematodos de la papa",
+            "Aporte de 120-160 kg N/ha biológico gratuito al perfil del suelo",
+            "Cosecha de grano andino con 44% de proteína y forraje de cebada para ovejas"
+          ],
+          "information_gaps": [
+            "Articulación de acopio y desamargado comercial para venta masiva de grano de tarwi",
+            "Curvas de nivel exactas adaptadas a parcelas tradicionales menores a media hectárea"
+          ],
+          "local_validation_risks": [
+            "Toxicidad por alcaloides si el grano no se desamarga adecuadamente antes del consumo",
+            "Mayor esfuerzo manual de mano de obra durante la cosecha del tarwi"
+          ],
+          "spanish_summary": "Sembrar tarwi en franjas antes de la papa amarra la tierra en la pendiente con sus raíces hondas, mata los gusanos de la papa y abona la tierra gratis.",
+          "quechua_summary": "Tarwita wachuypi tarpuspa, saphinwan allpata urqupi wataykun, kurukunata wañuchin, papapaqtaq wanu kawsayta saqin.",
+          "audio_refs": {
+            "es": "audio/tapacari_tarwi_papa_es.mp3",
+            "qu": "audio/tapacari_tarwi_papa_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "green",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        },
+        {
+          "strategy_id": "tapacari_strat_quinua_haba_intercrop",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Resiliente: Haba Pairumani -> Quinua Real -> Avena rústica",
+          "title_qu": "Chiri Mich'uk Muyuy: Hawas -> Kinwa -> Avena forraje",
+          "crop_sequence": [
+            {
+              "crop_id": "haba",
+              "crop_name": "Haba Pairumani",
+              "season_label": "Año 1 (Nov - May)",
+              "start_month": 11,
+              "end_month": 5,
+              "agronomic_role": "Fijación de nitrógeno y tolerancia al frío andino"
+            },
+            {
+              "crop_id": "quinua",
+              "crop_name": "Quinua Real de Valle",
+              "season_label": "Año 2 (Oct - Abr)",
+              "start_month": 10,
+              "end_month": 4,
+              "agronomic_role": "Grano comercial de alta resistencia a sequía y valor nutritivo"
+            },
+            {
+              "crop_id": "avena_vicia",
+              "crop_name": "Avena con Vicia",
+              "season_label": "Año 3 (Feb - Jun)",
+              "start_month": 2,
+              "end_month": 6,
+              "agronomic_role": "Forraje proteico de invierno y corte de erosión hídrica"
+            }
+          ],
+          "priority_alignment_score": 0.85,
+          "why_suggested": "Diversificación sin papa para romper el ciclo biológico de plagas de suelo; el haba enriquece el suelo para la quinua, la cual tolera la sequía andina y produce grano de alto valor.",
+          "nasa_evidence": "NASA POWER confirma que T2M_MIN en floración tardía no quema la flor de haba mejorada Pairumani. SMAP valida suficiencia hídrica para quinua (0.15-0.20 m3/m3). GPM marca ventana óptima de siembra en noviembre.",
+          "benefits": [
+            "Ruptura completa del ciclo de hongos y plagas de la papa",
+            "Diversificación económica con dos granos de alto valor de venta (haba y quinua)",
+            "Excelente tolerancia a heladas leves y periodos de veranillo andino",
+            "Rastrojos ricos en proteína vegetal para el ganado ovino y camélido"
+          ],
+          "information_gaps": [
+            "Monitoreo de vientos fuertes en la maduración de la quinua para prevenir tumbado de panojas",
+            "Disponibilidad de trilladoras mecánicas portátiles en comunidades de Tapacarí"
+          ],
+          "local_validation_risks": [
+            "Sensibilidad de la quinua a exceso de humedad si las lluvias de febrero son excepcionales",
+            "Manejo cuidadoso de la saponina en el lavado de quinua"
+          ],
+          "spanish_summary": "Rotar haba con quinua y avena permite cosechar granos muy nutritivos y caros, descansa la tierra de las enfermedades de la papa y da forraje verde a las ovejas.",
+          "quechua_summary": "Hawasta kinwawan muyuchispaqa, allpa samarin, mana unquykuna qhatinchu, qullqipaq mikhunataq, uwijakunapaqtaq ch'aki qhura kanqa.",
+          "audio_refs": {
+            "es": "audio/tapacari_quinua_haba_es.mp3",
+            "qu": "audio/tapacari_quinua_haba_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "green",
+            "soil": "green",
+            "frost": "yellow",
+            "erosion": "green"
+          }
+        }
+      ]
+    },
+    {
+      "zone_id": "mizque_cono_sur",
+      "name": "Mizque - Cono Sur",
+      "quechua_name": "Mizque - Urin Suyu",
+      "subregion": "Cono Sur / Valle Mesotérmico Seco",
+      "municipality": "Mizque",
+      "coordinates": {
+        "lat": -17.941,
+        "lon": -65.341
+      },
+      "elevation_msnm": 2050,
+      "slope_category": "Valle aluvial plano a terrazas onduladas (2 - 8%)",
+      "soil_context": {
+        "usda_ssurgo_applicability_note": "USDA SSURGO does not apply outside the US. Soil parameters compiled from ISRIC SoilGrids 250m, FAO GAEZ v4, and regional semi-arid valley agrometeorological characterization of the Mizque Basin.",
+        "sources_used": [
+          "ISRIC SoilGrids 250m (2020)",
+          "FAO GAEZ v4 (Semi-arid Mesothermic)",
+          "Estudios Hidroagronómicos Cuenca Río Mizque (SEARPI / Prefectura Cochabamba)"
+        ],
+        "texture_class": "Franco limoso a franco arenoso calcáreo",
+        "ph_range": {
+          "min": 7.4,
+          "max": 8.2,
+          "classification": "Moderadamente alcalino a alcalino"
+        },
+        "organic_matter_pct": {
+          "mean": 1.15,
+          "rating": "low"
+        },
+        "salinity_risk": "high",
+        "erosion_vulnerability": "moderate",
+        "drainage_class": "Bueno en terrazas, moderado en suelos aluviales bajos",
+        "compaction_risk": "Alta susceptibilidad a sellado y encostrado superficial por desecación térmica intensa"
+      },
+      "nasa_datasets_used": {
+        "nasa_power": "NASA POWER Climatology (T2M_MAX reaching 33.2°C in Oct-Nov; severe annual rain deficit < 360 mm)",
+        "smap": "NASA SMAP L4 Global 9km Soil Moisture showing chronic moisture deficit (< 0.08 m3/m3 in winter-spring)",
+        "modis_sentinel": "MODIS MOD13Q1 & Sentinel-2 MSI NDVI detecting severe prolonged bare soil signatures for over 6 months",
+        "gpm_imerg": "GPM IMERG precipitation recording erratic summer rains with prolonged mid-summer dry spells ('veranillos')",
+        "srtm": "SRTM 30m Global DEM showing low-gradient alluvial valley terraces (2-5%) and surrounding dry mountain slopes",
+        "ecostress": "ECOSTRESS Evaporative Stress Index (ESI) capturing critical crop water stress during spring heatwaves",
+        "gldas": "GLDAS Noah Land Surface Model estimating high potential evapotranspiration exceeding 1350 mm/yr",
+        "fao_gaez": "FAO GAEZ v4 agro-climatic thermal regime: Dry semi-arid interandean mesothermic valley"
+      },
+      "monthly_harmonized_indicators": [
+        {
+          "month": 1,
+          "month_name": "Enero",
+          "temp_min_c": 14.5,
+          "temp_max_c": 28.5,
+          "precip_mm": 78.0,
+          "soil_moisture_index": 0.44,
+          "ndvi_mean": 0.46,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 2,
+          "month_name": "Febrero",
+          "temp_min_c": 14.2,
+          "temp_max_c": 28.0,
+          "precip_mm": 72.0,
+          "soil_moisture_index": 0.42,
+          "ndvi_mean": 0.50,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 3,
+          "month_name": "Marzo",
+          "temp_min_c": 13.1,
+          "temp_max_c": 28.8,
+          "precip_mm": 42.0,
+          "soil_moisture_index": 0.33,
+          "ndvi_mean": 0.42,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 4,
+          "month_name": "Abril",
+          "temp_min_c": 10.2,
+          "temp_max_c": 29.5,
+          "precip_mm": 12.0,
+          "soil_moisture_index": 0.22,
+          "ndvi_mean": 0.30,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 5,
+          "month_name": "Mayo",
+          "temp_min_c": 6.8,
+          "temp_max_c": 29.0,
+          "precip_mm": 3.5,
+          "soil_moisture_index": 0.15,
+          "ndvi_mean": 0.22,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 6,
+          "month_name": "Junio",
+          "temp_min_c": 4.2,
+          "temp_max_c": 28.2,
+          "precip_mm": 1.5,
+          "soil_moisture_index": 0.10,
+          "ndvi_mean": 0.16,
+          "frost_risk_days": 1,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 7,
+          "month_name": "Julio",
+          "temp_min_c": 3.8,
+          "temp_max_c": 28.0,
+          "precip_mm": 1.8,
+          "soil_moisture_index": 0.08,
+          "ndvi_mean": 0.14,
+          "frost_risk_days": 2,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 8,
+          "month_name": "Agosto",
+          "temp_min_c": 6.5,
+          "temp_max_c": 30.8,
+          "precip_mm": 3.2,
+          "soil_moisture_index": 0.07,
+          "ndvi_mean": 0.13,
+          "frost_risk_days": 0,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 9,
+          "month_name": "Septiembre",
+          "temp_min_c": 10.4,
+          "temp_max_c": 32.5,
+          "precip_mm": 8.0,
+          "soil_moisture_index": 0.08,
+          "ndvi_mean": 0.14,
+          "frost_risk_days": 0,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 10,
+          "month_name": "Octubre",
+          "temp_min_c": 13.0,
+          "temp_max_c": 33.2,
+          "precip_mm": 18.0,
+          "soil_moisture_index": 0.11,
+          "ndvi_mean": 0.16,
+          "frost_risk_days": 0,
+          "bare_soil_flag": true,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 11,
+          "month_name": "Noviembre",
+          "temp_min_c": 14.1,
+          "temp_max_c": 32.8,
+          "precip_mm": 34.0,
+          "soil_moisture_index": 0.19,
+          "ndvi_mean": 0.21,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        },
+        {
+          "month": 12,
+          "month_name": "Diciembre",
+          "temp_min_c": 14.6,
+          "temp_max_c": 30.2,
+          "precip_mm": 66.0,
+          "soil_moisture_index": 0.35,
+          "ndvi_mean": 0.34,
+          "frost_risk_days": 0,
+          "bare_soil_flag": false,
+          "data_status": "phase0_seed_pending_etl"
+        }
+      ],
+      "bare_soil_periods": [
+        {
+          "period_id": "mizque_extreme_dry_hot_bare_soil",
+          "start_month": "Junio",
+          "end_month": "Octubre",
+          "duration_months": 5,
+          "satellite_signature": "MODIS/Sentinel NDVI < 0.16 y SMAP humedad de suelo < 0.08 m3/m3 con radiación solar alta",
+          "associated_risks": [
+            "Estrés térmico y salinización superficial por evaporación violenta de sales del suelo",
+            "Calentamiento de la superficie del suelo por encima de 45°C destruyendo la biología edáfica",
+            "Formación de costras compactas duras que impiden la infiltración del agua de riego"
+          ],
+          "recommended_cover_intervention": "Acolchado orgánico (mulch) de rastrojo y franjas vivas perennes de Alfalfa"
+        }
+      ],
+      "climate_risks_summary": {
+        "primary_risk": "Sequía severa prolongada y déficit de humedad (SMAP < 0.08 m3/m3)",
+        "secondary_risk": "Estrés térmico agudo en primavera (NASA POWER T2M_MAX > 33°C) y salinización del suelo",
+        "frost_risk_level": "low",
+        "drought_risk_level": "severe",
+        "water_erosion_risk": "moderate",
+        "wind_erosion_risk": "moderate",
+        "heat_stress_risk": "severe"
+      },
+      "uncertainty_notes": {
+        "spatial_resolution_limits": "Los caudales variables de riego por turnos desde el río Mizque no se reflejan en el producto satelital SMAP de 9km.",
+        "cloud_cover_mitigation": "La nubosidad es baja en época seca, permitiendo alta precisión en observaciones de ECOSTRESS y MODIS entre mayo y octubre.",
+        "topographic_microclimate_disclaimer": "Las riberas del río Mizque tienen mayor humedad freática que las terrazas agrícolas altas, donde la sequedad satelital es más pronunciada.",
+        "confidence_score_pct": 88
+      },
+      "strategies": [
+        {
+          "strategy_id": "mizque_strat_baseline",
+          "strategy_type": "current_baseline",
+          "title_es": "Línea Base: Monocultivo Maíz/Cebolla con suelo expuesto al calor",
+          "title_qu": "Ñawpaq Yachay: Sara chanta Sibulla, ruphaypi qasi jallp'a",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle / Cebolla de riego",
+              "season_label": "Época bajo riego de río (Ago - Ene)",
+              "start_month": 8,
+              "end_month": 1,
+              "agronomic_role": "Cultivo comercial intensivo bajo riego de turno"
+            },
+            {
+              "crop_id": "bare_soil_fallow",
+              "crop_name": "Suelo descubierto expuesto a calor extremo",
+              "season_label": "Estiaje seco y caliente (Feb - Jul)",
+              "start_month": 2,
+              "end_month": 7,
+              "agronomic_role": "Barbecho tradicional desprovisto de cobertura vegetal"
+            }
+          ],
+          "priority_alignment_score": 0.36,
+          "why_suggested": "Práctica común comercial orientada al mercado de cebolla y choclo temprano; deja la tierra completamente descubierta durante meses de radiación intensa, evaporando el agua subterránea y cociendo los microorganismos del suelo.",
+          "nasa_evidence": "ECOSTRESS registra un índice de estrés evaporativo máximo (ESI > 0.85). NASA POWER T2M_MAX supera 33°C en septiembre-octubre sobre suelo desnudo. SMAP registra humedad residual menor al 8%, colapsando la biología del suelo.",
+          "benefits": [
+            "Ingresos monetarios rápidos por venta en mercados de Sucre y Cochabamba",
+            "Alineación con el calendario tradicional de turnos de agua del río"
+          ],
+          "information_gaps": [
+            "Falta de medición de conductividad eléctrica para monitorear sales en pozos locales",
+            "Aforo satelital del caudal exacto en tomas rústicas del río Mizque"
+          ],
+          "local_validation_risks": [
+            "Salinización progresiva e irreversible de las terrazas más fértiles",
+            "Formación de costra dura impenetrable que incrementa el gasto de combustible en tractor",
+            "Muerte masiva de microorganismos benéficos del suelo por temperaturas de superficie mayores a 45°C"
+          ],
+          "spanish_summary": "Dejar el suelo pelado bajo el fuerte sol de Mizque quema la tierra, evapora el agua de riego y hace brotar salitre blanco que mata los cultivos.",
+          "quechua_summary": "Mizquepi jallp'ata ruphaypi q'alata saqeptiyki, intiq ruphaynin allpata ruphachin, kachi llimphitataq lluqsichimun. Jallp'a wañupun.",
+          "audio_refs": {
+            "es": "audio/mizque_baseline_es.mp3",
+            "qu": "audio/mizque_baseline_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "red",
+            "soil": "red",
+            "frost": "green",
+            "erosion": "yellow"
+          }
+        },
+        {
+          "strategy_id": "mizque_strat_drought_cover_mulch",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Climática: Maíz adaptado -> Mulch Avena-Vicia -> Haba",
+          "title_qu": "Ch'aki Jark'ay Muyuy: Sinchi sara -> Qapuq chiri forraje -> Hawas",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz adaptado de ciclo corto",
+              "season_label": "Verano lluvioso (Nov - Feb)",
+              "start_month": 11,
+              "end_month": 2,
+              "agronomic_role": "Grano comercial aprovechando las lluvias concentradas de verano"
+            },
+            {
+              "crop_id": "avena_vicia",
+              "crop_name": "Avena con Vicia para forraje y mulch",
+              "season_label": "Otoño con humedad residual (Mar - Jun)",
+              "start_month": 3,
+              "end_month": 6,
+              "agronomic_role": "Producción de forraje y colchón orgánico protector"
+            },
+            {
+              "crop_id": "mulch_residue",
+              "crop_name": "Colchón de rastrojo seco (Mulch térmico)",
+              "season_label": "Primavera cálida (Jul - Oct)",
+              "start_month": 7,
+              "end_month": 10,
+              "agronomic_role": "Aislamiento térmico que reduce temperatura del suelo 10°C y retiene agua"
+            }
+          ],
+          "priority_alignment_score": 0.89,
+          "why_suggested": "Creación de un acolchado vegetal orgánico ('mulch') que reduce la temperatura superficial del suelo en 8-12°C durante el calor primaveral extremo detectado por NASA POWER, frenando la evaporación voraz registrada por ECOSTRESS.",
+          "nasa_evidence": "ECOSTRESS demuestra reducción del 40% en evapotranspiración improductiva con acolchado. NASA POWER muestra temperaturas superficiales mitigadas de 46°C a 31°C bajo rastrojo. SMAP confirma retención de 0.16 m3/m3 de humedad bajo cobertura.",
+          "benefits": [
+            "Ahorro de hasta 45% del agua de riego durante la época crítica de sequía",
+            "Eliminación de la costra salina superficial gracias a la sombra del mulch",
+            "Provisión de forraje de alta calidad para vacas y chivos de la cuenca",
+            "Aumento del 25% en materia orgánica del suelo en dos ciclos"
+          ],
+          "information_gaps": [
+            "Sensibilización comunitaria para erradicar la quema tradicional de rastrojos",
+            "Disponibilidad de cuchillas rolo-aplastadoras para manejo mecánico del mulch"
+          ],
+          "local_validation_risks": [
+            "Posible proliferación de insectos cortadores si el rastrojo no se maneja adecuadamente",
+            "Requerimiento de supervisión en el primer riego para evitar taponamiento de surcos"
+          ],
+          "spanish_summary": "Tapar la tierra con un colchón de rastrojo de avena y vicia mantiene el suelo fresco bajo el sol caliente de Mizque y ahorra casi la mitad del agua de riego.",
+          "quechua_summary": "Avenawan wikawan jallp'ata qhataykuspaqa, allpa chirillapuni kashan, intip ruphaynin mana phatachinchu, yakutataq sumaqta waqaychan.",
+          "audio_refs": {
+            "es": "audio/mizque_cover_mulch_es.mp3",
+            "qu": "audio/mizque_cover_mulch_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "green",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        },
+        {
+          "strategy_id": "mizque_strat_agroforestry_alfalfa_grain",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Diversificada: Alfalfa en fajas -> Quinua de Valle -> Maíz",
+          "title_qu": "Tinkusqa Muyuy: Alfalfa wachupi -> Kinwa -> Sara",
+          "crop_sequence": [
+            {
+              "crop_id": "alfalfa",
+              "crop_name": "Alfalfa perenne en franjas vivas",
+              "season_label": "Años 1 y 2 (Perenne permanente)",
+              "start_month": 1,
+              "end_month": 12,
+              "agronomic_role": "Barrera microclimática cortaviento, forraje continuo y desalinización"
+            },
+            {
+              "crop_id": "quinua",
+              "crop_name": "Quinua tolerante a salinidad",
+              "season_label": "Franja anual 1 (Oct - Feb)",
+              "start_month": 10,
+              "end_month": 2,
+              "agronomic_role": "Grano comercial de bajo consumo hídrico y tolerancia a sales"
+            },
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle con abono verde",
+              "season_label": "Franja anual 2 (Mar - Jun)",
+              "start_month": 3,
+              "end_month": 6,
+              "agronomic_role": "Producción de choclo aprovechando fertilidad residual fijada"
+            }
+          ],
+          "priority_alignment_score": 0.84,
+          "why_suggested": "Las franjas de alfalfa actúan como barreras microclimáticas reduciendo el viento caliente desecante y la evaporación del suelo en Mizque, mientras proporcionan forraje constante y mejoran la infiltración.",
+          "nasa_evidence": "NASA POWER vientos secos de 4.0 m/s en agosto frenados por franjas vegetales. MODIS NDVI muestra verdor permanente en las terrazas aluviales. SMAP confirma mayor tasa de infiltración de lluvias torrenciales de verano.",
+          "benefits": [
+            "Corte continuo de pasto verde de alfalfa con venta asegurada a productores locales",
+            "Cosecha de quinua que tolera suelos ligeramente alcalinos sin mermar su rendimiento",
+            "Mitigación notable del efecto secante del viento cálido de primavera",
+            "Protección contra la acumulación de salitre por sombra biológica continua"
+          ],
+          "information_gaps": [
+            "Dimensionamiento exacto del ancho de franjas según el paso de yunta o motocultor",
+            "Evaluación de la tasa de extracción de sales por cortes sucesivos de alfalfa"
+          ],
+          "local_validation_risks": [
+            "Competencia por agua lateral si las franjas de alfalfa no se riegan oportunamente",
+            "Inversión inicial en semilla de alfalfa y nivelación de parcelas"
+          ],
+          "spanish_summary": "Sembrar franjas de alfalfa entre la quinua y el maíz frena el viento caliente, produce forraje fresco todo el año y no deja que el salitre suba a la superficie.",
+          "quechua_summary": "Wachukunapi alfalfata kinwawan sarawan tarpuspa, wayra ruphayta jark'anchik, uywakunapaq q'omer qhurata sapa p'unchay jurq'unchik.",
+          "audio_refs": {
+            "es": "audio/mizque_alfalfa_grain_es.mp3",
+            "qu": "audio/mizque_alfalfa_grain_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        }
+      ]
+    }
+  ]
+}
+

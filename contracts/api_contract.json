@@ -1,0 +1,749 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_name": "Tarpuy NASA Cochabamba Data and API Contract",
+  "schema_version": "1.0.0",
+  "project": "Tarpuy NASA Cochabamba - Field Shift (NASA Space Apps 2026)",
+  "description": "Standardized data contract shared across etl/, engine/, backend/, and frontend/. Governs zone metadata, harmonized NASA Earth Observation indicators, soil context, crop catalogs, and multimodal rotation recommendations for smallholders in Cochabamba, Bolivia.",
+  "soil_data_geographic_boundary_note": "USDA SSURGO and Web Soil Survey (WSS) databases only cover the continental United States and insular territories. For Cochabamba, Bolivia, soil context is provided via ISRIC SoilGrids 250m, FAO GAEZ v4 agro-ecological zoning, and local Cochabamba agronomic soil survey validations.",
+  "endpoints": {
+    "/api/zones": {
+      "method": "GET",
+      "summary": "List all supported agro-ecological pilot zones in Cochabamba",
+      "description": "Returns a summary list of pilot zones with basic geographic, elevation, and Quechua naming metadata for selection maps and cards.",
+      "parameters": [],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ZoneSummary"
+          }
+        }
+      }
+    },
+    "/api/zones/{zone_id}": {
+      "method": "GET",
+      "summary": "Get full agro-ecological profile and satellite baseline for a specific zone",
+      "description": "Returns comprehensive zone metadata, soil characteristics, 12-month harmonized NASA climatology/indicators, bare soil vulnerability periods, and uncertainty caveats.",
+      "parameters": [
+        {
+          "name": "zone_id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "enum": ["punata_valle_alto", "tapacari_zona_andina", "mizque_cono_sur"]
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "$ref": "#/definitions/ZoneDetail"
+        }
+      }
+    },
+    "/api/recommend": {
+      "method": "POST",
+      "summary": "Generate comparative crop rotation strategies",
+      "description": "Evaluates farmer priorities and constraints against NASA satellite evidence and returns at least 3 rotation strategies (1 baseline + 2 adaptive alternatives) with bilingual Quechua/Spanish audio scripts and visual traffic-light indicators.",
+      "request_body": {
+        "required": true,
+        "content_type": "application/json",
+        "schema": {
+          "$ref": "#/definitions/RecommendationRequest"
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "$ref": "#/definitions/RecommendationResponse"
+        }
+      }
+    },
+    "/api/offline-bundle/{zone_id}": {
+      "method": "GET",
+      "summary": "Download self-contained offline bundle for PWA synchronization",
+      "description": "Returns an all-in-one pre-packaged JSON bundle containing the zone profile, crops catalog, pre-computed rotation strategies, and audio transcriptions/base64 pointers for offline execution in remote valleys with zero cellular connectivity.",
+      "parameters": [
+        {
+          "name": "zone_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "$ref": "#/definitions/OfflineBundle"
+        }
+      }
+    },
+    "/api/poster/{zone_id}": {
+      "method": "GET",
+      "summary": "Generate visual printable cartilla/poster metadata",
+      "description": "Returns formatted layout metadata for printing physical extensionist posters (cartillas comunitarias) tailored to low-literacy farmers with color-coded rotation calendars, icons, and QR codes linking to Quechua voice notes.",
+      "parameters": [
+        {
+          "name": "zone_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "strategy_id",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "$ref": "#/definitions/PosterMetadata"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ZoneSummary": {
+      "type": "object",
+      "required": ["zone_id", "name", "quechua_name", "subregion", "municipality", "coordinates", "elevation_msnm", "slope_category"],
+      "properties": {
+        "zone_id": { "type": "string" },
+        "name": { "type": "string" },
+        "quechua_name": { "type": "string" },
+        "subregion": { "type": "string" },
+        "municipality": { "type": "string" },
+        "coordinates": {
+          "type": "object",
+          "required": ["lat", "lon"],
+          "properties": {
+            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+            "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        },
+        "elevation_msnm": { "type": "integer" },
+        "slope_category": { "type": "string" }
+      }
+    },
+    "SoilContext": {
+      "type": "object",
+      "required": [
+        "usda_ssurgo_applicability_note",
+        "sources_used",
+        "texture_class",
+        "ph_range",
+        "organic_matter_pct",
+        "salinity_risk",
+        "erosion_vulnerability",
+        "drainage_class"
+      ],
+      "properties": {
+        "usda_ssurgo_applicability_note": {
+          "type": "string",
+          "description": "Clarifies that USDA SSURGO/WSS is strictly US-only; global complements (ISRIC SoilGrids, FAO GAEZ, local studies) are applied."
+        },
+        "sources_used": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of soil data providers used for this Bolivian Andean zone (e.g., ISRIC SoilGrids 250m, FAO GAEZ v4, Centro Pairumani, CIAT Bolivia)."
+        },
+        "texture_class": { "type": "string" },
+        "ph_range": {
+          "type": "object",
+          "required": ["min", "max", "classification"],
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "classification": { "type": "string" }
+          }
+        },
+        "organic_matter_pct": {
+          "type": "object",
+          "required": ["mean", "rating"],
+          "properties": {
+            "mean": { "type": "number" },
+            "rating": { "type": "string", "enum": ["very_low", "low", "moderate", "optimal"] }
+          }
+        },
+        "salinity_risk": { "type": "string", "enum": ["low", "moderate", "high", "severe"] },
+        "erosion_vulnerability": { "type": "string", "enum": ["low", "moderate", "high", "very_high", "severe"] },
+        "drainage_class": { "type": "string" },
+        "compaction_risk": { "type": "string" }
+      }
+    },
+    "NasaDatasetsUsed": {
+      "type": "object",
+      "required": [
+        "nasa_power",
+        "smap",
+        "modis_sentinel",
+        "gpm_imerg",
+        "srtm",
+        "ecostress",
+        "gldas",
+        "fao_gaez"
+      ],
+      "properties": {
+        "nasa_power": { "type": "string", "description": "Daily solar radiation, min/max air temperatures, relative humidity, precipitation, wind speed at 0.5x0.5 deg" },
+        "smap": { "type": "string", "description": "L3/L4 surface (0-5cm) and root-zone (0-100cm) soil moisture index (m3/m3)" },
+        "modis_sentinel": { "type": "string", "description": "MOD13Q1 250m & Sentinel-2 10m NDVI / EVI time-series for vegetation vigor and bare soil detection" },
+        "gpm_imerg": { "type": "string", "description": "Global Precipitation Measurement IMERG calibrated precipitation estimates and storm intensity" },
+        "srtm": { "type": "string", "description": "Shuttle Radar Topography Mission 30m digital elevation model and slope gradient calculation" },
+        "ecostress": { "type": "string", "description": "Evaporative Stress Index (ESI) and actual evapotranspiration (ET) from ISS thermal radiometer" },
+        "gldas": { "type": "string", "description": "Global Land Data Assimilation System Noah land surface model soil moisture and heat flux" },
+        "fao_gaez": { "type": "string", "description": "FAO Global Agro-Ecological Zones agro-climatic resources, thermal regimes, and crop suitability" }
+      }
+    },
+    "MonthlyHarmonizedIndicator": {
+      "type": "object",
+      "required": [
+        "month",
+        "month_name",
+        "temp_min_c",
+        "temp_max_c",
+        "precip_mm",
+        "soil_moisture_index",
+        "ndvi_mean",
+        "frost_risk_days",
+        "bare_soil_flag",
+        "data_status"
+      ],
+      "properties": {
+        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "month_name": { "type": "string" },
+        "temp_min_c": { "type": "number", "description": "Average monthly minimum temperature in Celsius (NASA POWER T2M_MIN)" },
+        "temp_max_c": { "type": "number", "description": "Average monthly maximum temperature in Celsius (NASA POWER T2M_MAX)" },
+        "precip_mm": { "type": "number", "description": "Harmonized monthly rainfall in mm (GPM IMERG + NASA POWER PRECTOTCORR)" },
+        "soil_moisture_index": { "type": "number", "minimum": 0, "maximum": 1, "description": "Normalized soil moisture saturation 0-1 derived from SMAP L4 root-zone" },
+        "ndvi_mean": { "type": "number", "minimum": -1, "maximum": 1, "description": "Mean Normalized Difference Vegetation Index (MODIS MOD13Q1 / Sentinel-2)" },
+        "frost_risk_days": { "type": "integer", "minimum": 0, "maximum": 31, "description": "Days with T2M_MIN <= 0°C (frost danger to vulnerable crops)" },
+        "bare_soil_flag": { "type": "boolean", "description": "True if NDVI < 0.20 and fractional vegetation cover < 15%, indicating high erosion vulnerability" },
+        "data_status": {
+          "type": "string",
+          "enum": ["phase0_seed_pending_etl", "etl_verified_provisional", "recalibrated_final"],
+          "description": "Tag indicating whether data is Phase 0 baseline seed or live ETL verified product"
+        }
+      }
+    },
+    "BareSoilPeriod": {
+      "type": "object",
+      "required": ["period_id", "start_month", "end_month", "duration_months", "satellite_signature", "associated_risks", "recommended_cover_intervention"],
+      "properties": {
+        "period_id": { "type": "string" },
+        "start_month": { "type": "string" },
+        "end_month": { "type": "string" },
+        "duration_months": { "type": "integer" },
+        "satellite_signature": { "type": "string" },
+        "associated_risks": { "type": "array", "items": { "type": "string" } },
+        "recommended_cover_intervention": { "type": "string" }
+      }
+    },
+    "ClimateRisksSummary": {
+      "type": "object",
+      "required": ["primary_risk", "secondary_risk", "frost_risk_level", "drought_risk_level", "water_erosion_risk", "wind_erosion_risk", "heat_stress_risk"],
+      "properties": {
+        "primary_risk": { "type": "string" },
+        "secondary_risk": { "type": "string" },
+        "frost_risk_level": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
+        "drought_risk_level": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
+        "water_erosion_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
+        "wind_erosion_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
+        "heat_stress_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] }
+      }
+    },
+    "UncertaintyNotes": {
+      "type": "object",
+      "required": [
+        "spatial_resolution_limits",
+        "cloud_cover_mitigation",
+        "topographic_microclimate_disclaimer",
+        "confidence_score_pct"
+      ],
+      "properties": {
+        "spatial_resolution_limits": { "type": "string" },
+        "cloud_cover_mitigation": { "type": "string" },
+        "topographic_microclimate_disclaimer": { "type": "string" },
+        "confidence_score_pct": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "VisualTrafficLight": {
+      "type": "object",
+      "required": ["water", "soil", "frost", "erosion"],
+      "properties": {
+        "water": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Water balance & drought resistance rating" },
+        "soil": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Soil health, biological N-fixation, & structure restoration" },
+        "frost": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Frost tolerance & thermal risk level" },
+        "erosion": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Erosion prevention & bare soil coverage" }
+      }
+    },
+    "AudioRefs": {
+      "type": "object",
+      "required": ["es", "qu"],
+      "properties": {
+        "es": { "type": "string", "description": "Audio file path or URL for Spanish explanation" },
+        "qu": { "type": "string", "description": "Audio file path or URL for Quechua cochabambino explanation" }
+      }
+    },
+    "CropSequenceItem": {
+      "type": "object",
+      "required": ["crop_id", "crop_name", "season_label", "start_month", "end_month", "agronomic_role"],
+      "properties": {
+        "crop_id": { "type": "string" },
+        "crop_name": { "type": "string" },
+        "season_label": { "type": "string" },
+        "start_month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "end_month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "agronomic_role": { "type": "string" }
+      }
+    },
+    "RotationStrategy": {
+      "type": "object",
+      "required": [
+        "strategy_id",
+        "strategy_type",
+        "title_es",
+        "title_qu",
+        "crop_sequence",
+        "priority_alignment_score",
+        "why_suggested",
+        "nasa_evidence",
+        "benefits",
+        "information_gaps",
+        "local_validation_risks",
+        "spanish_summary",
+        "quechua_summary",
+        "audio_refs",
+        "visual_traffic_light"
+      ],
+      "properties": {
+        "strategy_id": { "type": "string" },
+        "strategy_type": { "type": "string", "enum": ["current_baseline", "adaptive_alternative"] },
+        "title_es": { "type": "string" },
+        "title_qu": { "type": "string" },
+        "crop_sequence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CropSequenceItem" }
+        },
+        "priority_alignment_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "why_suggested": { "type": "string" },
+        "nasa_evidence": { "type": "string" },
+        "benefits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "information_gaps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "local_validation_risks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "spanish_summary": { "type": "string" },
+        "quechua_summary": { "type": "string" },
+        "audio_refs": { "$ref": "#/definitions/AudioRefs" },
+        "visual_traffic_light": { "$ref": "#/definitions/VisualTrafficLight" }
+      }
+    },
+    "ZoneDetail": {
+      "type": "object",
+      "required": [
+        "zone_id",
+        "name",
+        "quechua_name",
+        "subregion",
+        "municipality",
+        "coordinates",
+        "elevation_msnm",
+        "slope_category",
+        "soil_context",
+        "nasa_datasets_used",
+        "monthly_harmonized_indicators",
+        "bare_soil_periods",
+        "climate_risks_summary",
+        "uncertainty_notes",
+        "strategies"
+      ],
+      "properties": {
+        "zone_id": { "type": "string" },
+        "name": { "type": "string" },
+        "quechua_name": { "type": "string" },
+        "subregion": { "type": "string" },
+        "municipality": { "type": "string" },
+        "coordinates": {
+          "type": "object",
+          "required": ["lat", "lon"],
+          "properties": {
+            "lat": { "type": "number" },
+            "lon": { "type": "number" }
+          }
+        },
+        "elevation_msnm": { "type": "integer" },
+        "slope_category": { "type": "string" },
+        "soil_context": { "$ref": "#/definitions/SoilContext" },
+        "nasa_datasets_used": { "$ref": "#/definitions/NasaDatasetsUsed" },
+        "monthly_harmonized_indicators": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/definitions/MonthlyHarmonizedIndicator" }
+        },
+        "bare_soil_periods": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/BareSoilPeriod" }
+        },
+        "climate_risks_summary": { "$ref": "#/definitions/ClimateRisksSummary" },
+        "uncertainty_notes": { "$ref": "#/definitions/UncertaintyNotes" },
+        "strategies": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/definitions/RotationStrategy" }
+        }
+      }
+    },
+    "RecommendationRequest": {
+      "type": "object",
+      "required": ["zone_id", "current_crop_id", "farmer_priorities", "constraints"],
+      "properties": {
+        "zone_id": {
+          "type": "string",
+          "enum": ["punata_valle_alto", "tapacari_zona_andina", "mizque_cono_sur"]
+        },
+        "current_crop_id": {
+          "type": "string",
+          "enum": [
+            "papa_huaycha",
+            "maiz_valle",
+            "haba",
+            "tarwi",
+            "quinua",
+            "cebada",
+            "avena_vicia",
+            "alfalfa"
+          ]
+        },
+        "farmer_priorities": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "water_conservation",
+              "nitrogen_fixation",
+              "erosion_control",
+              "forage_value",
+              "organic_matter",
+              "market_income"
+            ]
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "required": ["irrigation_access", "equipment_level", "language_preference"],
+          "properties": {
+            "irrigation_access": {
+              "type": "string",
+              "enum": ["none_secano", "deficit_auxiliary", "full_canal_well"]
+            },
+            "equipment_level": {
+              "type": "string",
+              "enum": ["manual_yunta", "mixed_tractor_service", "mechanized"]
+            },
+            "language_preference": {
+              "type": "string",
+              "enum": ["es", "qu", "bilingual"]
+            }
+          }
+        }
+      }
+    },
+    "RecommendationResponse": {
+      "type": "object",
+      "required": [
+        "zone_id",
+        "evaluated_at",
+        "current_crop_id",
+        "priorities_considered",
+        "strategies",
+        "data_provenance"
+      ],
+      "properties": {
+        "zone_id": { "type": "string" },
+        "evaluated_at": { "type": "string", "format": "date-time" },
+        "current_crop_id": { "type": "string" },
+        "priorities_considered": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "strategies": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/definitions/RotationStrategy" },
+          "description": "Must return at least 3 strategies: 1 current_baseline and at least 2 adaptive_alternative options"
+        },
+        "data_provenance": {
+          "type": "object",
+          "required": ["nasa_datasets", "soil_dataset", "etl_status"],
+          "properties": {
+            "nasa_datasets": { "type": "array", "items": { "type": "string" } },
+            "soil_dataset": { "type": "string" },
+            "etl_status": { "type": "string" }
+          }
+        }
+      }
+    },
+    "OfflineBundle": {
+      "type": "object",
+      "required": ["bundle_id", "zone_id", "generated_at", "version", "zone_profile", "crops_catalog", "precomputed_recommendations"],
+      "properties": {
+        "bundle_id": { "type": "string" },
+        "zone_id": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "version": { "type": "string" },
+        "zone_profile": { "$ref": "#/definitions/ZoneDetail" },
+        "crops_catalog": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "precomputed_recommendations": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/RotationStrategy" }
+        }
+      }
+    },
+    "PosterMetadata": {
+      "type": "object",
+      "required": ["zone_id", "zone_name_es", "zone_name_qu", "calendar_layout", "qr_code_audio_url", "visual_icons"],
+      "properties": {
+        "zone_id": { "type": "string" },
+        "zone_name_es": { "type": "string" },
+        "zone_name_qu": { "type": "string" },
+        "calendar_layout": { "type": "array", "items": { "type": "object" } },
+        "qr_code_audio_url": { "type": "string" },
+        "visual_icons": { "type": "object" }
+      }
+    }
+  },
+  "example_payloads": {
+    "recommendation_request_example": {
+      "zone_id": "punata_valle_alto",
+      "current_crop_id": "maiz_valle",
+      "farmer_priorities": [
+        "water_conservation",
+        "erosion_control",
+        "forage_value"
+      ],
+      "constraints": {
+        "irrigation_access": "deficit_auxiliary",
+        "equipment_level": "manual_yunta",
+        "language_preference": "bilingual"
+      }
+    },
+    "recommendation_response_example": {
+      "zone_id": "punata_valle_alto",
+      "evaluated_at": "2026-11-14T00:00:00Z",
+      "current_crop_id": "maiz_valle",
+      "priorities_considered": [
+        "water_conservation",
+        "erosion_control",
+        "forage_value"
+      ],
+      "strategies": [
+        {
+          "strategy_id": "punata_strat_baseline",
+          "strategy_type": "current_baseline",
+          "title_es": "Línea Base Tradicional: Maíz de temporal con barbecho limpio invernal",
+          "title_qu": "Ñawpaq Yachay: Sara ch'aki pachapi, qasi jallp'a chiri mit'api",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Verano agrícola (Nov - Abr)",
+              "start_month": 11,
+              "end_month": 4,
+              "agronomic_role": "Cultivo principal para choclo y chala"
+            },
+            {
+              "crop_id": "bare_soil_fallow",
+              "crop_name": "Barbecho limpio sin cobertura",
+              "season_label": "Invierno / Estiaje (May - Oct)",
+              "start_month": 5,
+              "end_month": 10,
+              "agronomic_role": "Descanso tradicional pasivo (suelo desnudo)"
+            }
+          ],
+          "priority_alignment_score": 0.38,
+          "why_suggested": "Representa el patrón productivo actual predominante en el Valle Alto. Deja el suelo expuesto 6 meses al viento y sequedad.",
+          "nasa_evidence": "MODIS/Sentinel-2 NDVI desciende a 0.17 entre mayo y octubre confirmando suelo desnudo. SMAP L4 humedad en raíz cae por debajo de 0.11 m3/m3. NASA POWER registra vientos secos de 4.2 m/s en agosto sobre terreno pulverizado.",
+          "benefits": [
+            "Conocimiento tradicional consolidado",
+            "Cosecha asegurada de grano y chala si las lluvias son regulares",
+            "Cero inversión en semillas de cobertura"
+          ],
+          "information_gaps": [
+            "Falta de medición in-situ de compactación por yunta continua",
+            "Tasa de mineralización neta de materia orgánica no calibrada localmente"
+          ],
+          "local_validation_risks": [
+            "Pérdida irreversible de horizonte fértil por erosión eólica en agosto",
+            "Agotamiento acumulativo de nitrógeno sin recarga biológica",
+            "Vulnerabilidad extrema si el inicio de lluvias se posterga a diciembre"
+          ],
+          "spanish_summary": "La práctica tradicional de sembrar solo maíz y dejar la parcela pelada en invierno empobrece la tierra con el viento y seca la poca humedad que queda.",
+          "quechua_summary": "Saratalla tarpuspa jallp'ata ch'usaqta saqeptiyki, wayraqa allpa kawsayta aparqapun, jallp'ataq ch'akiripun. Mana allinchu.",
+          "audio_refs": {
+            "es": "audio/punata_baseline_es.mp3",
+            "qu": "audio/punata_baseline_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "red",
+            "frost": "green",
+            "erosion": "red"
+          }
+        },
+        {
+          "strategy_id": "punata_strat_cover_avena_vicia",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Regenerativa: Maíz -> Consorcio Avena-Vicia de cobertura invernal",
+          "title_qu": "Allinchasqa Muyuy: Sara -> Avenawan Wikawan qapuq forraje chiri mit'api",
+          "crop_sequence": [
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Verano agrícola (Oct - Feb)",
+              "start_month": 10,
+              "end_month": 2,
+              "agronomic_role": "Grano comercial y choclo con siembra temprana"
+            },
+            {
+              "crop_id": "avena_vicia",
+              "crop_name": "Avena con Vicia",
+              "season_label": "Otoño - Invierno (Mar - Jun)",
+              "start_month": 3,
+              "end_month": 6,
+              "agronomic_role": "Cobertura viva fijadora de N y heno proteico lechero"
+            },
+            {
+              "crop_id": "mulch_residue",
+              "crop_name": "Rastrojo protector / Mulch",
+              "season_label": "Estiaje tardío (Jul - Sep)",
+              "start_month": 7,
+              "end_month": 9,
+              "agronomic_role": "Manto orgánico que anula evaporación y erosión eólica"
+            }
+          ],
+          "priority_alignment_score": 0.89,
+          "why_suggested": "Aprovecha la humedad residual de febrero-marzo detectada por SMAP para establecer un manto de avena y vicia que fija nitrógeno, alimenta al ganado lechero y erradica el suelo desnudo en invierno.",
+          "nasa_evidence": "GPM/IMERG muestra 75 mm de lluvia residual en febrero-marzo. SMAP L4 registra humedad superficial de 0.22 m3/m3 ideal para emergencia de vicia. MODIS NDVI proyectado sube de 0.17 a 0.44 en invierno eliminando la firma de bare soil.",
+          "benefits": [
+            "Eliminación total de erosión eólica en los vientos de agosto",
+            "Fijación biológica de 80 a 110 kg N/ha reduciendo uso de fertilizantes químicos",
+            "Producción de 4.5 t/ha de heno proteico para ganado lechero en época de escasez",
+            "Aumento de materia orgánica e infiltración para la siguiente siembra"
+          ],
+          "information_gaps": [
+            "Disponibilidad de semilla de Vicia villosa certificada en ferias de Punata",
+            "Calibración de tasa de consumo hídrico de la vicia vs recarga freática"
+          ],
+          "local_validation_risks": [
+            "Fallo de establecimiento si la retirada de lluvias en febrero es repentina",
+            "Riesgo de sobrepastoreo descontrolado si no se acuerda con vecinos"
+          ],
+          "spanish_summary": "Al terminar el maíz en febrero, sembramos avena mezclada con vicia. Esta mezcla protege el suelo del viento en invierno, alimenta a las vacas lecheras y le devuelve fertilidad a la tierra.",
+          "quechua_summary": "Sara tukukuptin, avenata wikawan chapuspa tarpuna. Chayqa chiripi wayramanta jallp'ata jark'an, baka uñakunapaq mikhunata qun, jallp'atataq wanuwan junt'achin.",
+          "audio_refs": {
+            "es": "audio/punata_avena_vicia_es.mp3",
+            "qu": "audio/punata_avena_vicia_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "green",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        },
+        {
+          "strategy_id": "punata_strat_legume_diversified",
+          "strategy_type": "adaptive_alternative",
+          "title_es": "Alternativa Multianual: Alfalfa perenne -> Papa Huaycha -> Maíz de Valle",
+          "title_qu": "Unay Kawsay Muyuy: Alfalfa kimsantin wata -> Huaycha Papa -> Sara",
+          "crop_sequence": [
+            {
+              "crop_id": "alfalfa",
+              "crop_name": "Alfalfa perenne",
+              "season_label": "Años 1 al 3 (Perenne con cortes periódicos)",
+              "start_month": 1,
+              "end_month": 12,
+              "agronomic_role": "Fijación masiva de nitrógeno, descompactación y forraje"
+            },
+            {
+              "crop_id": "papa_huaycha",
+              "crop_name": "Papa Huaycha",
+              "season_label": "Año 4 (Oct - Abr)",
+              "start_month": 10,
+              "end_month": 4,
+              "agronomic_role": "Cultivo cabeza de rotación de alta rentabilidad comercial"
+            },
+            {
+              "crop_id": "maiz_valle",
+              "crop_name": "Maíz de Valle",
+              "season_label": "Año 5 (Oct - May)",
+              "start_month": 10,
+              "end_month": 5,
+              "agronomic_role": "Aprovechamiento de fertilidad residual y producción de grano"
+            }
+          ],
+          "priority_alignment_score": 0.82,
+          "why_suggested": "Para parcelas con acceso a pozo comunitario o riego intermitente, la alfalfa rompe el pie de arado con raíces de 3 metros, acumula nitrógeno y genera ingresos semanales constantes por venta de forraje.",
+          "nasa_evidence": "ECOSTRESS indica estrés evaporativo extremo en suelos sin sombra continua. SRTM confirma topografía plana apta para tabladas de riego. SMAP valida que suelos con alfalfar mantienen estabilidad hídrica durante picos térmicos.",
+          "benefits": [
+            "Ingresos semanales continuos por corte y venta en ferias locales",
+            "Descompactación natural profunda sin necesidad de maquinaria pesada",
+            "Fijación de más de 200 kg N/ha/año",
+            "Incremento del 35% en rendimiento de papa posterior sin urea química"
+          ],
+          "information_gaps": [
+            "Caudal aforado de fuentes subterráneas durante sequías de varios años",
+            "Sensibilidad a salinidad en napas freáticas superficiales"
+          ],
+          "local_validation_risks": [
+            "Compromiso de la parcela durante 3 años sin sembrar maíz anual",
+            "Costo inicial de semilla y preparación de suelo para alfalfa"
+          ],
+          "spanish_summary": "Sembrar alfalfa durante tres años limpia la tierra, rompe el suelo duro y da pasto verde todo el año para vender en la feria. Luego la papa rinde con fuerza sin químicos.",
+          "quechua_summary": "Kimsantin wata alfalfata tarpuspa, jallp'a ukhuta phaskinchik, q'omer qhurata sapa simana qhatuman aparisunman. Chaymanta papata tarpuspaqa, sumaqta puqunqa.",
+          "audio_refs": {
+            "es": "audio/punata_alfalfa_es.mp3",
+            "qu": "audio/punata_alfalfa_qu.mp3"
+          },
+          "visual_traffic_light": {
+            "water": "yellow",
+            "soil": "green",
+            "frost": "green",
+            "erosion": "green"
+          }
+        }
+      ],
+      "data_provenance": {
+        "nasa_datasets": [
+          "NASA POWER (Climatology & Radiation)",
+          "SMAP L4 (Root-zone soil moisture)",
+          "MODIS/Sentinel-2 (NDVI bare soil detection)",
+          "GPM/IMERG (Precipitation)",
+          "SRTM (Elevation & Slope)"
+        ],
+        "soil_dataset": "ISRIC SoilGrids 250m & FAO GAEZ v4 (USDA SSURGO substituted due to US-only coverage)",
+        "etl_status": "phase0_seed_pending_etl"
+      }
+    }
+  }
+}
+

@@ -1,0 +1,243 @@
+{
+  "catalog_version": "1.0.0",
+  "project": "Tarpuy NASA Cochabamba - Field Shift (NASA Space Apps 2026)",
+  "region": "Cochabamba, Bolivia",
+  "total_crops": 8,
+  "description": "Agronomic catalog of 8 key Andean and Valley crops for rotational planning, pest cycle disruption, and bare soil eradication in Cochabamba.",
+  "crops": [
+    {
+      "crop_id": "papa_huaycha",
+      "name_es": "Papa Huaycha",
+      "name_qu": "Huaycha Papa (Akshu)",
+      "botanical_family": "Solanaceae",
+      "cycle_days": {
+        "min": 120,
+        "max": 160,
+        "mean": 140
+      },
+      "altitude_range_msnm": {
+        "min": 2600,
+        "max": 3800
+      },
+      "water_demand": "high",
+      "frost_tolerance": "medium",
+      "drought_tolerance": "medium",
+      "nitrogen_fixing": {
+        "is_fixing": false,
+        "description": "Extractor neto de nitrógeno, potasio y fósforo. No fija nitrógeno biológico; requiere alternar obligatoriamente con leguminosas para recuperar el perfil edáfico."
+      },
+      "erosion_protection": "low",
+      "forage_value": "none",
+      "market_suitability": "Muy alta y demanda diaria permanente. Cultivo comercial por excelencia en mercados de Cochabamba (La Pampa, Punata, Quillacollo) con alta liquidez para la economía campesina.",
+      "soil_health_role": "Cultivo de cabeza de rotación de alta rentabilidad pero severo desgaste nutricional. Su aporque remueve suelo y su cosecha deja la superficie pulverizada y desnuda en invierno. Susceptible al gorgojo de los Andes (Premnotrypes spp.), tizón tardío (Phytophthora infestans) y nematodo del quiste (Globodera spp.); no repetir consecutivamente en la misma parcela.",
+      "typical_planting_months": [10, 11, 12],
+      "typical_harvest_months": [3, 4, 5],
+      "local_notes_cochabamba": "En el Valle Alto y Zona Andina de Cochabamba, la Huaycha es la variedad reina de consumo. Si no se siembra con cultivo de cobertura posterior, la parcela queda expuesta a la severa erosión eólica de agosto y al lavado pluvial de las primeras tormentas de primavera."
+    },
+    {
+      "crop_id": "maiz_valle",
+      "name_es": "Maíz de Valle (Choclero / Huillcaparu / Uchukullo)",
+      "name_qu": "Sara",
+      "botanical_family": "Poaceae",
+      "cycle_days": {
+        "min": 140,
+        "max": 190,
+        "mean": 165
+      },
+      "altitude_range_msnm": {
+        "min": 2000,
+        "max": 2900
+      },
+      "water_demand": "high",
+      "frost_tolerance": "low",
+      "drought_tolerance": "low",
+      "nitrogen_fixing": {
+        "is_fixing": false,
+        "description": "Consumidor intensivo de nitrógeno y zinc. No fija nitrógeno; genera abundante rastrojo fibroso con alta relación C:N que inmoviliza nitrógeno si no se complementa con leguminosas."
+      },
+      "erosion_protection": "medium",
+      "forage_value": "high",
+      "market_suitability": "Muy alta en dos momentos: choclo tierno de verano (alta cotización urbana) y grano seco para chicha (guiñapo), mote y tostado en ferias locales.",
+      "soil_health_role": "Generador de biomasa y carbono orgánico estructural. Su sistema radicular profundo mejora la porosidad si se corta sin arrancar de raíz. Deja suelo desnudo si la chala se sobrepastorea por ganado en invierno.",
+      "typical_planting_months": [9, 10, 11],
+      "typical_harvest_months": [2, 3, 4],
+      "local_notes_cochabamba": "Emblema cultural y productivo de Punata, Cliza, Arani y Mizque. El déficit de humedad detectado por SMAP en octubre a menudo obliga a demorar la siembra o agotar reservas de pozos artesianos."
+    },
+    {
+      "crop_id": "haba",
+      "name_es": "Haba (Pairumani / Criolla)",
+      "name_qu": "Hawas",
+      "botanical_family": "Fabaceae",
+      "cycle_days": {
+        "min": 120,
+        "max": 160,
+        "mean": 140
+      },
+      "altitude_range_msnm": {
+        "min": 2500,
+        "max": 3600
+      },
+      "water_demand": "medium",
+      "frost_tolerance": "high",
+      "drought_tolerance": "medium",
+      "nitrogen_fixing": {
+        "is_fixing": true,
+        "description": "Fijación biológica simbiótica vigorosa con Rhizobium leguminosarum bv. viciae; fija entre 80 y 160 kg N/ha, reponiendo la fertilidad química natural del suelo."
+      },
+      "erosion_protection": "medium",
+      "forage_value": "high",
+      "market_suitability": "Alta; se comercializa verde (vainas tiernas para k'allu, silpancho y sopas tradicionales) y grano seco (tostado, harinas para pito, exportación regional).",
+      "soil_health_role": "Cultivo restaurador por excelencia en la rotación andina. Interrumpe ciclos biológicos de plagas de la papa y cereales, aporta rastrojo rico en nitrógeno de rápida descomposición y mejora la microfauna beneficiosa.",
+      "typical_planting_months": [11, 12],
+      "typical_harvest_months": [3, 4, 5],
+      "local_notes_cochabamba": "Las variedades Pairumani 1 y Pairumani 3, mejoradas en Cochabamba, presentan alta resistencia a frío y óptimo llenado de grano en los valles altos y cabeceras de cuenca como Tapacarí."
+    },
+    {
+      "crop_id": "tarwi",
+      "name_es": "Tarwi (Chocho andino / Lupino)",
+      "name_qu": "Tarwi (Chuchus)",
+      "botanical_family": "Fabaceae",
+      "cycle_days": {
+        "min": 150,
+        "max": 210,
+        "mean": 180
+      },
+      "altitude_range_msnm": {
+        "min": 2800,
+        "max": 3850
+      },
+      "water_demand": "low",
+      "frost_tolerance": "high",
+      "drought_tolerance": "high",
+      "nitrogen_fixing": {
+        "is_fixing": true,
+        "description": "Fijador biológico sobresaliente en simbiosis con Bradyrhizobium sp.; fija entre 120 y 200 kg N/ha y moviliza fósforo ocluido gracias a exudados de raíces proteoides."
+      },
+      "erosion_protection": "high",
+      "forage_value": "none",
+      "market_suitability": "Media-alta y con demanda creciente; supergrano andino de 42-48% de proteína y 20% de lípidos. Requiere proceso de desamargado en agua corriente o planta local.",
+      "soil_health_role": "Descompactador radicular profundo (raíz pivotante de hasta 2 metros). Sus alcaloides quinolizidínicos actúan como biofumigante natural en el suelo, abatiendo larvas de gorgojo de los Andes y hongos antes de la papa.",
+      "typical_planting_months": [10, 11],
+      "typical_harvest_months": [4, 5],
+      "local_notes_cochabamba": "Cultivo estratégico para las laderas de Tapacarí, Bolívar y Arque. Al anclarse fuertemente en pendientes pronunciadas identificadas por SRTM, evita deslizamientos de tierra en la temporada de lluvias torrenciales."
+    },
+    {
+      "crop_id": "quinua",
+      "name_es": "Quinua (Variedades de Valle y Altiplano)",
+      "name_qu": "Kinwa",
+      "botanical_family": "Amaranthaceae",
+      "cycle_days": {
+        "min": 130,
+        "max": 180,
+        "mean": 150
+      },
+      "altitude_range_msnm": {
+        "min": 2500,
+        "max": 3900
+      },
+      "water_demand": "low",
+      "frost_tolerance": "medium",
+      "drought_tolerance": "high",
+      "nitrogen_fixing": {
+        "is_fixing": false,
+        "description": "No fija nitrógeno, pero posee una eficiencia fisiológica superior en el uso de nutrientes y agua, requiriendo menor fertilización que los cereales convencionales."
+      },
+      "erosion_protection": "medium",
+      "forage_value": "medium",
+      "market_suitability": "Muy alta; cultivo de valor comercial internacional y regional. Mercado establecido en ferias y acopiadores de Cochabamba para grano perlado y subproductos.",
+      "soil_health_role": "Tolera salinidad moderada a alta y pH alcalino común en suelos de Valle Alto y terrazas aluviales de Mizque. Rompe ciclos fitosanitarios de hongos y nematodos de las familias Solanaceae y Poaceae.",
+      "typical_planting_months": [10, 11],
+      "typical_harvest_months": [3, 4],
+      "local_notes_cochabamba": "En valles interandinos y laderas semiáridas de Cochabamba, la quinua ofrece una alternativa de mínimo consumo de agua cuando SMAP y GLDAS proyectan sequías en el ciclo estival."
+    },
+    {
+      "crop_id": "cebada",
+      "name_es": "Cebada (Grano / Forraje criollo)",
+      "name_qu": "Siwara",
+      "botanical_family": "Poaceae",
+      "cycle_days": {
+        "min": 80,
+        "max": 130,
+        "mean": 105
+      },
+      "altitude_range_msnm": {
+        "min": 2500,
+        "max": 4000
+      },
+      "water_demand": "low",
+      "frost_tolerance": "high",
+      "drought_tolerance": "high",
+      "nitrogen_fixing": {
+        "is_fixing": false,
+        "description": "No fijadora; eficiente barredora de nitrógeno residual que evita la lixiviación a capas profundas."
+      },
+      "erosion_protection": "high",
+      "forage_value": "high",
+      "market_suitability": "Media-alta; mercado local muy activo para forraje seco (rollos de paja), grano tostado (pito de cebada para alimentación familiar) y maltería rústica.",
+      "soil_health_role": "Macollamiento rápido que forma una alfombra protectora contra el impacto de gotas de lluvia. Sus raíces fibrosas superficiales aglutinan agregados de suelo, reduciendo el desprendimiento de partículas finas."
+      ,
+      "typical_planting_months": [11, 12, 1],
+      "typical_harvest_months": [3, 4, 5],
+      "local_notes_cochabamba": "Cultivo salvavidas para las alturas de Tapacarí y zonas secas de Punata. Su ciclo corto permite sembrarla tardíamente cuando el retraso de lluvias impide sembrar papa o maíz a tiempo."
+    },
+    {
+      "crop_id": "avena_vicia",
+      "name_es": "Consorcio Avena - Vicia (Avena con Vicia)",
+      "name_qu": "Avenawan Wikawan chapusqa",
+      "botanical_family": "Poaceae + Fabaceae",
+      "cycle_days": {
+        "min": 85,
+        "max": 125,
+        "mean": 105
+      },
+      "altitude_range_msnm": {
+        "min": 2400,
+        "max": 3800
+      },
+      "water_demand": "low",
+      "frost_tolerance": "high",
+      "drought_tolerance": "high",
+      "nitrogen_fixing": {
+        "is_fixing": true,
+        "description": "La Vicia fija biológicamente entre 70 y 120 kg N/ha; la Avena actúa como tutor mecánico y absorbe parte del nitrógeno transferido, generando una biomasa de alta calidad con relación C:N balanceada (20:1)."
+      },
+      "erosion_protection": "high",
+      "forage_value": "high",
+      "market_suitability": "Alta; el heno enfardado de avena-vicia alcanza los mejores precios entre ganaderos de leche de Punata, San Benito y Quillacollo por su elevado aporte proteico (16-19%).",
+      "soil_health_role": "Cultivo de cobertura invernal estrella. Elimina por completo el barbecho desnudo ('bare soil') entre mayo y octubre; el rastrojo forma un mantillo orgánico que preserva la humedad superficial y suprime malezas agresivas.",
+      "typical_planting_months": [2, 3, 10, 11],
+      "typical_harvest_months": [5, 6, 1, 2],
+      "local_notes_cochabamba": "Es la innovación agroecológica más potente para erradicar el suelo desnudo en el Valle Alto y Zona Andina. Sembrada a salida de lluvias (febrero-marzo), aprovecha la humedad de suelo detectada por SMAP para prosperar durante el estiaje."
+    },
+    {
+      "crop_id": "alfalfa",
+      "name_es": "Alfalfa (Criolla boliviana / Ranger)",
+      "name_qu": "Alfalfa (Q'omer qhura)",
+      "botanical_family": "Fabaceae",
+      "cycle_days": {
+        "min": 720,
+        "max": 1800,
+        "mean": 1095
+      },
+      "altitude_range_msnm": {
+        "min": 2000,
+        "max": 3200
+      },
+      "water_demand": "medium",
+      "frost_tolerance": "medium",
+      "drought_tolerance": "high",
+      "nitrogen_fixing": {
+        "is_fixing": true,
+        "description": "Máxima campeona en fijación biológica de nitrógeno (180 a 320 kg N/ha/año en simbiosis con Sinorhizobium meliloti); enriquece todo el perfil del suelo hasta horizontes profundos."
+      },
+      "erosion_protection": "high",
+      "forage_value": "high",
+      "market_suitability": "Muy alta con venta semanal garantizada. Atados de pasto verde se comercializan diariamente en ferias ganaderas de Punata, Cliza y Quillacollo con pago al contado.",
+      "soil_health_role": "Descompactación biológica profunda mediante raíces que descienden 3 a 5 metros perforando estratos arcillosos compactados. Proporciona cobertura vegetal densa y continua los 365 días del año, erradicando el bare soil.",
+      "typical_planting_months": [9, 10, 2, 3],
+      "typical_harvest_months": [1, 2, 3, 4, 5, 9, 10, 11, 12],
+      "local_notes_cochabamba": "Base de la cuenca lechera de Cochabamba. Una rotación de 3 años de alfalfa seguida de papa o maíz devuelve a parcelas sobreexplotadas una fertilidad y estructura equivalentes a suelo virgen descansado."
+    }
+  ]
+}
+
