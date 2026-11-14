@@ -8,6 +8,7 @@ import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
+import PaginaTemporalFase1 from "./components/ui/PaginaTemporalFase1.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
 import {
   fetchZones,
@@ -51,6 +52,7 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [activeProcess, setActiveProcess] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showFase1Preview, setShowFase1Preview] = useState(true);
   const processTimersRef = useRef([]);
   const calcTimerRef = useRef(null);
 
@@ -110,7 +112,7 @@ export default function App() {
       );
       setRecData(data);
       if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline]);
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
@@ -310,8 +312,19 @@ export default function App() {
     );
   };
 
+  if (showFase1Preview) {
+    return <PaginaTemporalFase1 onClosePreview={() => setShowFase1Preview(false)} />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
+    <div className="min-h-screen tarpuy-page-surface flex flex-col lg:flex-row">
+      <button
+        type="button"
+        onClick={() => setShowFase1Preview(true)}
+        className="fixed bottom-4 right-4 z-50 tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 cursor-pointer"
+      >
+        Ver prueba Fase 1
+      </button>
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}

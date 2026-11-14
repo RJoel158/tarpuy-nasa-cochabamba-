@@ -1,0 +1,250 @@
+/**
+ * TARPUY NASA COCHABAMBA — ARCHIVO ÚNICO DE TOKENS DE DISEÑO (FASE 1)
+ * =====================================================================
+ * REGLA ESTRICTA: Todos los colores, tipografías, tamaños, bordes y relieves
+ * viven únicamente aquí como variables CSS. Ningún componente debe usar
+ * códigos hexadecimales sueltos. En la Fase 1B se actualizarán los valores
+ * de esta paleta en este único lugar.
+ */
+
+:root {
+  /* -------------------------------------------------------------------
+   * 1. SUPERFICIES Y PAPEL CÁLIDO (Almanaque campesino andino)
+   * ------------------------------------------------------------------- */
+  --color-bg-page: #F6EFE2;            /* Papel cálido de almanaque (nunca blanco puro) */
+  --color-bg-card: #FBF7EE;            /* Superficie principal de tarjeta */
+  --color-bg-card-alt: #EFE5D2;        /* Superficie secundaria / recuadro interior */
+  --color-bg-logo-tag: #FAF6EC;        /* Etiqueta de papel claro para logotipos originales */
+  --color-bg-disabled: #E2D9C8;        /* Fondo de control deshabilitado */
+
+  /* -------------------------------------------------------------------
+   * 2. TINTA, TEXTOS Y TRAZOS DE DIBUJO (Alto contraste WCAG AA / AAA)
+   * ------------------------------------------------------------------- */
+  --color-text-primary: #231811;       /* Tinta sepia carbón muy oscura (AAA) */
+  --color-text-secondary: #4E3B2D;     /* Tinta tierra secundaria (AA+) */
+  --color-text-muted: #756252;         /* Texto auxiliar o deshabilitado */
+  --color-text-on-primary: #FFFDF9;    /* Texto claro sobre botón primario */
+  --color-ink-stroke: #2A1C12;         /* Trazo irregular hecho a mano para ilustraciones */
+  --color-ink-highlight: #FFFDF7;      /* Luz / brillo en dibujos */
+
+  /* -------------------------------------------------------------------
+   * 3. BORDES GRUESOS Y RELIEVE FÍSICO (Sin sombras difusas)
+   * ------------------------------------------------------------------- */
+  --color-border-strong: #3B281B;      /* Borde grueso de tarjetas y botones (2-3 px) */
+  --color-border-subtle: #C9B99F;      /* Borde interior y divisores suaves */
+  --color-btn-bevel-dark: #1F3D24;     /* Borde inferior físico del botón primario */
+  --color-btn-bevel-secondary: #5C4430;/* Borde inferior físico del botón secundario */
+  --color-btn-bevel-water: #184A5E;    /* Borde inferior físico del botón de voz/agua */
+  --color-focus-ring: #256B3E;         /* Contorno visible de accesibilidad */
+
+  /* -------------------------------------------------------------------
+   * 4. ACCIONES Y COLORES DE CHACRA / AGUAYO (Temporales hasta Fase 1B)
+   * ------------------------------------------------------------------- */
+  --color-primary: #2D6A3E;            /* Verde hoja de chacra (acción principal) */
+  --color-primary-hover: #245832;      /* Hover botón principal */
+  --color-primary-pressed: #1D4728;    /* Hundido / presionado */
+
+  --color-secondary: #F3E9D6;          /* Botón secundario cálido */
+  --color-secondary-hover: #E7D9BF;    /* Hover botón secundario */
+  --color-secondary-pressed: #D9C7A7;  /* Hundido botón secundario */
+
+  /* Paleta limitada para ilustraciones hechas a mano */
+  --color-illus-sun: #E09F24;          /* Sol andino y maíz maduro */
+  --color-illus-sun-soft: #F9E6B3;     /* Halo cálido de sol / grano */
+  --color-illus-water: #28708C;        /* Agua de acequia, lluvia y voz */
+  --color-illus-water-soft: #D7ECF2;   /* Cielo / nube de agua / escarcha */
+  --color-illus-leaf: #387D49;         /* Planta sana, brote, monte */
+  --color-illus-leaf-soft: #DCEFE0;    /* Fondo suave de planta */
+  --color-illus-earth-wet: #6E472B;    /* Tierra húmeda fértil y papa */
+  --color-illus-earth-dry: #B88B58;    /* Tierra seca, paja y barbecho */
+  --color-illus-andean-clay: #9E3B33;  /* Quinua roja, detalle textil aguayo y teja */
+  --color-illus-wood: #8A5229;         /* Yunta, arado, herramientas y tronco */
+  --color-illus-cloud: #EDE4D3;        /* Cuerpo de nube cálida */
+
+  /* -------------------------------------------------------------------
+   * 5. SEMÁFORO RESERVADO EXCLUSIVAMENTE PARA AVISOS DE CLIMA
+   * (Ámbar / Naranja / Rojo NO se usan fuera de alertas meteorológicas)
+   * ------------------------------------------------------------------- */
+  --color-weather-ok-bg: #DFEFE2;
+  --color-weather-ok-border: #2D6A3E;
+  --color-weather-ok-ink: #1C4A29;
+
+  --color-weather-warn-bg: #FDEBC8;    /* Ámbar / Naranja: solo aviso de clima */
+  --color-weather-warn-border: #B8560F;
+  --color-weather-warn-ink: #7C3506;
+
+  --color-weather-danger-bg: #FADCD9;  /* Rojo: solo peligro de clima (helada / sequía) */
+  --color-weather-danger-border: #B42318;
+  --color-weather-danger-ink: #7A140C;
+
+  /* -------------------------------------------------------------------
+   * 6. TIPOGRAFÍA REDONDEADA Y ESCALA DE LECTURA CLARA
+   * ------------------------------------------------------------------- */
+  --font-family-base: "Atkinson Hyperlegible", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-family-display: "Nunito", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+  --font-size-body-min: 1.125rem;      /* 18 px (mínimo estricto en Modo Fácil) */
+  --font-size-body: 1.25rem;           /* 20 px (texto principal de lectura cómoda) */
+  --font-size-subtitle: 1.5rem;        /* 24 px (subtítulos y encabezados de tarjeta) */
+  --font-size-title: clamp(1.875rem, 3.5vw, 2.25rem); /* 30 px - 36 px (títulos principales) */
+
+  --line-height-body: 1.55;
+  --line-height-title: 1.2;
+
+  /* -------------------------------------------------------------------
+   * 7. DIMENSIONES TÁCTILES, BORDES Y RELIEVE FÍSICO DE BOTONES
+   * ------------------------------------------------------------------- */
+  --border-width-thick: 3px;
+  --border-width-medium: 2px;
+
+  --radius-btn: 22px;
+  --radius-card: 28px;
+  --radius-pill: 9999px;
+
+  --size-btn-min-h: 68px;              /* Mínimo > 64 px para tocar con una mano */
+  --size-speaker-btn: 72px;            /* Botón redondo grande de altavoz */
+  --space-btn-gap: 16px;               /* Espacio amplio entre botones */
+
+  --btn-bevel-height: 5px;             /* Altura del borde físico antes de presionar */
+  --btn-bevel-pressed: 1px;            /* Altura cuando el botón se hunde al tocarlo */
+  --btn-translate-pressed: 4px;        /* Desplazamiento vertical al hundirse */
+}
+
+/* Clases utilitarias del Sistema Visual Fase 1 basadas 100% en tokens */
+.tarpuy-page-surface {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-min);
+  line-height: var(--line-height-body);
+}
+
+.tarpuy-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-title);
+  color: var(--color-text-primary);
+  font-weight: 800;
+}
+
+.tarpuy-subtitle {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-subtitle);
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  font-weight: 800;
+}
+
+.tarpuy-body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-primary);
+}
+
+/* Botón físico que se hunde al tocarlo */
+.tarpuy-btn-physical {
+  min-height: var(--size-btn-min-h);
+  border-width: var(--border-width-thick);
+  border-style: solid;
+  border-color: var(--color-border-strong);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: 800;
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tarpuy-btn-physical--primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  box-shadow: 0 var(--btn-bevel-height) 0 var(--color-btn-bevel-dark);
+}
+
+.tarpuy-btn-physical--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.tarpuy-btn-physical--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-text-primary);
+  box-shadow: 0 var(--btn-bevel-height) 0 var(--color-btn-bevel-secondary);
+}
+
+.tarpuy-btn-physical--secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary-hover);
+}
+
+.tarpuy-btn-physical--water {
+  background-color: var(--color-illus-water);
+  color: var(--color-text-on-primary);
+  box-shadow: 0 var(--btn-bevel-height) 0 var(--color-btn-bevel-water);
+}
+
+/* Estado presionado (táctil o mediante prop isPressed) */
+.tarpuy-btn-physical:active:not(:disabled),
+.tarpuy-btn-physical--pressed:not(:disabled) {
+  transform: translateY(var(--btn-translate-pressed));
+  box-shadow: 0 var(--btn-bevel-pressed) 0 var(--color-border-strong);
+}
+
+.tarpuy-btn-physical--primary:active:not(:disabled),
+.tarpuy-btn-physical--primary.tarpuy-btn-physical--pressed:not(:disabled) {
+  background-color: var(--color-primary-pressed);
+}
+
+.tarpuy-btn-physical--secondary:active:not(:disabled),
+.tarpuy-btn-physical--secondary.tarpuy-btn-physical--pressed:not(:disabled) {
+  background-color: var(--color-secondary-pressed);
+}
+
+/* Estado deshabilitado */
+.tarpuy-btn-physical:disabled,
+.tarpuy-btn-physical--disabled {
+  background-color: var(--color-bg-disabled);
+  color: var(--color-text-muted);
+  border-color: var(--color-border-subtle);
+  box-shadow: none;
+  transform: translateY(var(--btn-translate-pressed));
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Tarjeta grande de cartilla campesina (borde grueso, sin sombra difusa) */
+.tarpuy-card-physical {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-card);
+}
+
+/* Etiqueta de papel claro para conservar los logotipos intactos */
+.tarpuy-logo-paper-tag {
+  background-color: var(--color-bg-logo-tag);
+  border: var(--border-width-medium) solid var(--color-border-subtle);
+  border-radius: var(--radius-btn);
+}
+
+/* Ondas animadas del botón de altavoz cuando suena */
+@keyframes tarpuySpeakerWave {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.45;
+  }
+}
+
+.tarpuy-speaker-wave-1 {
+  animation: tarpuySpeakerWave 1.1s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.tarpuy-speaker-wave-2 {
+  animation: tarpuySpeakerWave 1.1s ease-in-out 0.35s infinite;
+  transform-origin: center;
+}
