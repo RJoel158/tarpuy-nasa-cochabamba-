@@ -18,6 +18,7 @@ export default function App() {
   const [zones, setZones] = useState([]);
   const [crops, setCrops] = useState([]);
   const [zoneId, setZoneId] = useState("punata_valle_alto");
+  const [communityName, setCommunityName] = useState("Punata");
   const [cropId, setCropId] = useState("maiz_valle");
   const [priorities, setPriorities] = useState(["water_conservation", "nitrogen_fixation", "erosion_control"]);
   const [irrigation, setIrrigation] = useState("deficit_auxiliary");
@@ -165,6 +166,7 @@ export default function App() {
   const handleSelectZone = (newZoneId) => {
     applyZoneChange(newZoneId);
     const geo = ZONE_GEO_CATALOG.find((z) => z.id === newZoneId);
+    if (geo?.name) setCommunityName(geo.name);
     if (calcTimerRef.current) clearTimeout(calcTimerRef.current);
     setIsCalculating(true);
     simulateProcess("Cargando clima y siembra...", 480, () => {
@@ -173,8 +175,18 @@ export default function App() {
     calcTimerRef.current = setTimeout(() => setIsCalculating(false), 520);
   };
 
+  const handleSelectCommunity = (comm) => {
+    setCommunityName(comm.name);
+    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name });
+    applyZoneChange(comm.zoneId);
+    simulateProcess(`Ubicando comunidad: ${comm.name}...`, 460, () => {
+      pushToast(`Comunidad: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
+    });
+  };
+
   const handlePickMapPoint = (lat, lon, source = "mapa") => {
     const nearest = findNearestZone(lat, lon);
+    setCommunityName(nearest.zone.name);
     setUserPoint({ lat, lon, source });
     applyZoneChange(nearest.zone.id);
     simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
@@ -253,6 +265,8 @@ export default function App() {
         onChangeAppMode={handleChangeAppMode}
         zoneId={zoneId}
         onSelectZone={handleSelectZone}
+        selectedCommunityName={communityName}
+        onSelectCommunity={handleSelectCommunity}
         onDetectGps={handleDetectGps}
         voiceLang={voiceLang}
         onChangeVoiceLang={setVoiceLang}
@@ -275,7 +289,7 @@ export default function App() {
             <div className="space-y-6">
               <EarlyWarningBanner
                 bulletin={alertBulletin}
-                zoneName={currentZone?.name}
+                zoneName={communityName || currentZone?.name}
                 onSpeak={handleSpeak}
                 activeAudioKey={activeAudioKey}
                 voiceLang={voiceLang}
@@ -321,6 +335,8 @@ export default function App() {
                 zones={zones}
                 activeZoneId={zoneId}
                 onSelectZone={handleSelectZone}
+                selectedCommunityName={communityName}
+                onSelectCommunity={handleSelectCommunity}
                 userPoint={userPoint}
                 onPickMapPoint={handlePickMapPoint}
                 onDetectGps={handleDetectGps}

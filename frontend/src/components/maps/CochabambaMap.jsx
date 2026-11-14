@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
 import { LocateFixed, MapPin, Check } from "lucide-react";
 import { ZONE_GEO_CATALOG } from "../../utils/geoUtils.js";
+import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 
 export default function CochabambaMap({
   zones = [],
   activeZoneId,
   onSelectZone,
+  selectedCommunityName = "Punata",
+  onSelectCommunity,
   userPoint = null,
   onPickMapPoint,
   onDetectGps,
@@ -147,13 +150,18 @@ export default function CochabambaMap({
   }, [canUseLeaflet]);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
       {/* Top Map Action Bar */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-[#0B2545] flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
-          <span>Toca tu zona en el mapa</span>
-        </p>
+      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] sm:max-w-xs">
+          <MapPin className="w-4 h-4 text-[#0284C7] shrink-0" />
+          <CommunitySearchCombobox
+            selectedZoneId={activeZoneId}
+            selectedCommunityName={selectedCommunityName}
+            onSelectCommunity={onSelectCommunity}
+            variant="light"
+          />
+        </div>
         <button
           type="button"
           onClick={onDetectGps}

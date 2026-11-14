@@ -1,5 +1,6 @@
 import React from "react";
 import { CloudSun, Sprout, MapPin, Database, BarChart3, Volume2, Square, Download, Wifi, WifiOff, LocateFixed } from "lucide-react";
+import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 
 const NAV_ITEMS = [
   { id: "clima", label: "Clima hoy", Icon: CloudSun },
@@ -26,6 +27,8 @@ export default function Navbar({
   onChangeAppMode,
   zoneId = "punata_valle_alto",
   onSelectZone,
+  selectedCommunityName = "Punata",
+  onSelectCommunity,
   onDetectGps,
   voiceLang = "qu",
   onChangeVoiceLang,
@@ -82,8 +85,14 @@ export default function Navbar({
           </div>
 
           {/* Single Community Switcher */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Comunidad</span>
+            <CommunitySearchCombobox
+              selectedZoneId={zoneId}
+              selectedCommunityName={selectedCommunityName}
+              onSelectCommunity={onSelectCommunity}
+              variant="sidebar"
+            />
             <div className="space-y-1">
               {SHORT_ZONES.map((z) => (
                 <button
@@ -211,6 +220,13 @@ export default function Navbar({
             </button>
           </div>
         </div>
+
+        <CommunitySearchCombobox
+          selectedZoneId={zoneId}
+          selectedCommunityName={selectedCommunityName}
+          onSelectCommunity={onSelectCommunity}
+          variant="sidebar"
+        />
 
         <div className="grid grid-cols-3 gap-1.5">
           {SHORT_ZONES.map((z) => (
