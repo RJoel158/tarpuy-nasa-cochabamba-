@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @layer base {
   html {
@@ -8,8 +9,23 @@
 }
 
 :focus-visible {
-  outline: 3px solid #16a34a;
+  outline: 3px solid #0284c7;
   outline-offset: 2px;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  z-index: 10;
+}
+
+@keyframes voiceBar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.voice-bar {
+  animation: voiceBar 0.8s ease-in-out infinite;
+  transform-origin: bottom;
 }
 
 @media print {
