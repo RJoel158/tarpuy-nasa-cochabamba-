@@ -45,6 +45,7 @@ export default function App() {
     initialSnap?.sizeKb ? `Base local (${initialSnap.sizeKb} KB)` : "Sincronizando base local..."
   );
   const [voiceLang, setVoiceLang] = useState("es");
+  const [audioLoading, setAudioLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
@@ -157,7 +158,7 @@ export default function App() {
     }
   };
 
-  const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
+  const handleStopAudio = () => { stopSpeaking(); setAudioLoading(false); setIsSpeaking(false); setActiveAudioKey(null); };
 
   const handleSpeakGuide = () => {
     handleStopAudio();
@@ -166,9 +167,9 @@ export default function App() {
       return;
     }
     setIsSpeaking(true);
-    pushToast(`Voz (${voiceLang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo guía de siembra", "info");
     speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
-      onStart: () => setIsSpeaking(true),
+      onLoading: setAudioLoading,
+      onStart: () => { setIsSpeaking(true); },
       onEnd: () => setIsSpeaking(false),
       onError: () => {
         setIsSpeaking(false);
@@ -186,14 +187,17 @@ export default function App() {
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
-    pushToast(`Voz (${lang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo aviso", "info");
     const cb = {
+      onLoading: setAudioLoading,
       clipKey,
+      onEngine: (engine) => {
+        if (engine === "browser_fallback") pushToast("Voz básica del equipo", "La voz natural no está disponible en este momento", "info");
+      },
       onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); },
       onError: () => {
         setActiveAudioKey(null);
         setIsSpeaking(false);
-        pushToast("Audio no disponible", "Intenta de nuevo", "warning");
+        pushToast("Audio no disponible", lang === "qu" ? "No se pudo cargar una voz quechua. Revisa la conexión con el backend." : "Revisa la conexión con el backend.", "warning");
       },
     };
     if (lang === "qu") speakQuechua(text, cb);
@@ -424,11 +428,21 @@ export default function App() {
           <InstitutionalBrandBar variant="footer" />
         </footer>
       </div>
-      <FeedbackHost
+      {audioLoading && (
+        <div className="fixed bottom-20 lg:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 rounded-xl bg-[#0B2545] text-white p-4 shadow-lg flex items-center gap-3">
+          <span aria-hidden="true" className="h-5 w-5 shrink-0 rounded-full border-2 border-white/30 border-t-white animate-spin motion-reduce:animate-none" />
+          <div role="status" aria-live="polite" className="flex-1 text-sm">
+            <p className="font-bold">Preparando audio completo…</p>
+            <p className="text-xs text-slate-200">Se reproducirá cuando esté listo. Puede tardar según la conexión.</p>
+          </div>
+          <button type="button" onClick={handleStopAudio} className="min-h-11 px-3 rounded-lg border border-white/40 text-sm">Cancelar</button>
+        </div>
+      )}
+      {!audioLoading && <FeedbackHost
         activeProcess={activeProcess}
         toasts={toasts}
         onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
-      />
+      />}
     </div>
   );
 }

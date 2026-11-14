@@ -1,6 +1,7 @@
 """Native Bolivian Quechua & Spanish TTS generator (Meta AI MMS-TTS VITS)."""
 
 import json
+from functools import lru_cache
 from pathlib import Path
 import re
 from typing import Any, Callable
@@ -51,10 +52,15 @@ class QuechuaTtsClient:
         cleaned = self.cleaner(text)
         if not cleaned:
             raise ValueError("Empty text cannot be synthesized.")
+        return self._synthesize_cached(self.predict_url, self.lang_label, self.timeout, cleaned)
+
+    @staticmethod
+    @lru_cache(maxsize=32)
+    def _synthesize_cached(predict_url: str, lang_label: str, timeout: int, cleaned: str) -> bytes:
         resp = requests.post(
-            validate_nasa_url(self.predict_url),
-            json={"data": [cleaned, self.lang_label]},
-            timeout=self.timeout,
+            validate_nasa_url(predict_url),
+            json={"data": [cleaned, lang_label]},
+            timeout=timeout,
             allow_redirects=False,
         )
         if resp.status_code != 200:
@@ -63,7 +69,7 @@ class QuechuaTtsClient:
         if not SAFE_GRADIO_PATH_RE.match(fname) or ".." in fname:
             raise ValueError("Unexpected upstream Gradio audio path rejected by OWASP check.")
         file_url = validate_nasa_url(f"{MMS_SPACE_BASE}/file={fname}")
-        audio_resp = requests.get(file_url, timeout=self.timeout, allow_redirects=False)
+        audio_resp = requests.get(file_url, timeout=timeout, allow_redirects=False)
         if audio_resp.status_code != 200 or not audio_resp.content.startswith(b"RIFF"):
             raise RuntimeError("Invalid WAV stream returned by MMS-TTS upstream.")
         return audio_resp.content
