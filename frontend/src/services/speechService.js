@@ -1,18 +1,30 @@
 let activeAudio = null;
 let activeBlobUrl = null;
-let cachedManifestPromise = null;
+const manifestPromises = new Map();
 
-function cleanTextForKey(t = "") {
-  return String(t).replace(/->/g, ", chanta ").replace(/—/g, ", ").replace(/[¡!]/g, ".").replace(/\s+/g, " ").trim().toLowerCase();
+function cleanTextForKey(t = "", isSpanish = false) {
+  let s = String(t);
+  if (isSpanish) s = s.replace(/\([^)]*\)/g, "");
+  return s
+    .replace(/->/g, isSpanish ? ", luego " : ", chanta ")
+    .replace(/\+/g, isSpanish ? " y " : "+")
+    .replace(/—/g, ", ")
+    .replace(/[¡!¿?]/g, isSpanish ? "" : ".")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
-async function loadQuechuaManifest() {
-  if (!cachedManifestPromise) {
-    cachedManifestPromise = fetch("/audio/quh/manifest.json")
-      .then((r) => (r.ok ? r.json() : { clips: {} }))
-      .catch(() => ({ clips: {} }));
+async function loadAudioManifest(url) {
+  if (!manifestPromises.has(url)) {
+    manifestPromises.set(
+      url,
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : { clips: {} }))
+        .catch(() => ({ clips: {} }))
+    );
   }
-  return cachedManifestPromise;
+  return manifestPromises.get(url);
 }
 
 export function isSpeechSupported() {
@@ -59,7 +71,7 @@ export function speakText(text, options = {}) {
     return false;
   }
   stopSpeaking();
-  const { lang = "es-BO", rate = 0.88, pitch = 1.0, onStart, onSubtitle, onEnd, onError } = options;
+  const { lang = "es-BO", rate = 0.98, pitch = 1.0, onStart, onSubtitle, onEnd, onError } = options;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
   utterance.rate = rate;
@@ -88,33 +100,33 @@ export function speakText(text, options = {}) {
   }
 }
 
-export async function speakQuechua(text, callbacks = {}) {
+async function speakNeuralVoice(text, cfg, callbacks = {}) {
   stopSpeaking();
   const { clipKey, onSubtitle, onEngine, onEnd } = callbacks;
   if (onSubtitle && text) onSubtitle(text);
 
   try {
-    const manifest = await loadQuechuaManifest();
+    const manifest = await loadAudioManifest(cfg.manifestUrl);
     const clips = manifest?.clips || {};
-    const targetNorm = cleanTextForKey(text);
+    const targetNorm = cleanTextForKey(text, cfg.isSpanish);
     const clip = (clipKey && clips[clipKey])
-      || Object.values(clips).find((c) => cleanTextForKey(c.text) === targetNorm);
+      || Object.values(clips).find((c) => cleanTextForKey(c.text, cfg.isSpanish) === targetNorm);
 
     if (clip?.url) {
-      onEngine?.("native_quh_offline");
+      onEngine?.(cfg.offlineEngine);
       const ok = await playAudioUrl(clip.url, callbacks, false);
       if (ok) return true;
     }
 
     if (typeof navigator === "undefined" || navigator.onLine) {
-      const resp = await fetch("/api/tts/quechua", {
+      const resp = await fetch(cfg.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: String(text).slice(0, 480) }),
       });
       if (resp.ok) {
         const blobUrl = URL.createObjectURL(await resp.blob());
-        onEngine?.("native_quh_live");
+        onEngine?.(cfg.liveEngine);
         const ok = await playAudioUrl(blobUrl, callbacks, true);
         if (ok) return true;
       }
@@ -122,16 +134,35 @@ export async function speakQuechua(text, callbacks = {}) {
   } catch {}
 
   onEngine?.("browser_fallback");
-  return speakText(text, { lang: "es-BO", rate: 0.82, pitch: 0.96, ...callbacks, onEnd });
+  return speakText(text, { lang: "es-BO", rate: cfg.fallbackRate, pitch: cfg.fallbackPitch, ...callbacks, onEnd });
 }
 
-export function speakSpanish(text, callbacks = {}) {
-  callbacks.onEngine?.("spanish_local");
-  return speakText(text, { lang: "es-419", rate: 0.88, pitch: 1.0, ...callbacks });
+export async function speakQuechua(text, callbacks = {}) {
+  return speakNeuralVoice(text, {
+    manifestUrl: "/audio/quh/manifest.json",
+    endpoint: "/api/tts/quechua",
+    offlineEngine: "native_quh_offline",
+    liveEngine: "native_quh_live",
+    isSpanish: false,
+    fallbackRate: 0.82,
+    fallbackPitch: 0.96,
+  }, callbacks);
+}
+
+export async function speakSpanish(text, callbacks = {}) {
+  return speakNeuralVoice(text, {
+    manifestUrl: "/audio/es/manifest.json",
+    endpoint: "/api/tts/spanish",
+    offlineEngine: "native_es_offline",
+    liveEngine: "native_es_live",
+    isSpanish: true,
+    fallbackRate: 0.98,
+    fallbackPitch: 1.0,
+  }, callbacks);
 }
 
 export function speakStepByStepGuide(zone, strategies = [], lang = "qu", callbacks = {}) {
-  const { onStart, onSubtitle, onEnd, onEngine } = callbacks;
+  const { onStart, onSubtitle, onEnd } = callbacks;
   const zId = zone?.zone_id || "punata_valle_alto";
   const zName = zone?.quechua_name || zone?.name || "Cochabamba";
   const alt = strategies.find((s) => s.strategy_type !== "current_baseline") || strategies[0] || {};
@@ -143,9 +174,8 @@ export function speakStepByStepGuide(zone, strategies = [], lang = "qu", callbac
     return true;
   }
 
-  const spokenEs = `Guía para tu parcela en ${zone?.name || "Cochabamba"}. Hoy conviene cuidar la humedad de la tierra. Recomendación principal: ${alt.title_es || "Rotación de descanso"}. ${alt.spanish_summary || ""}`;
+  const spokenEs = `Hola compañero productor de ${zone?.name || "Cochabamba"}. Recomendación principal: ${alt.title_es || "Rotación de descanso"}. ${alt.spanish_summary || ""}`;
   onStart?.();
-  onEngine?.("spanish_local");
-  speakSpanish(spokenEs, { ...callbacks, onSubtitle, onEnd });
+  speakSpanish(spokenEs, { ...callbacks, clipKey: `guide_${zId}`, onSubtitle, onEnd });
   return true;
 }

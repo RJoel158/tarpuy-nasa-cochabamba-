@@ -14,7 +14,7 @@ from backend.security import RequestGuardMiddleware, SecurityHeadersMiddleware, 
 from engine.alerts import AgroclimaticAlertEvaluator
 from engine.recommender import RotationRecommendationService
 from engine.scoring import MultiCriteriaRotationScorer
-from etl.quechua_tts_client import QuechuaTtsClient
+from etl.quechua_tts_client import QuechuaTtsClient, SpanishTtsClient
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -120,6 +120,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return Response(content=wav_bytes, media_type="audio/wav")
         except Exception:
             raise HTTPException(status_code=503, detail="Native Quechua TTS service unavailable")
+
+    @app.post("/api/tts/spanish")
+    def synthesize_spanish_audio(req: QuechuaTtsRequest) -> Response:
+        try:
+            wav_bytes = SpanishTtsClient().synthesize_wav_bytes(req.text)
+            return Response(content=wav_bytes, media_type="audio/wav")
+        except Exception:
+            raise HTTPException(status_code=503, detail="Native Spanish TTS service unavailable")
 
     @app.post("/api/recommend")
     def recommend(req: RecommendationRequest) -> dict[str, Any]:

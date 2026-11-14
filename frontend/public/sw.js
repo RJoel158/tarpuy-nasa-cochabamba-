@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v5";
+const CACHE_NAME = "tarpuy-nasa-v6";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   "/audio/quh/guide_punata_valle_alto.wav",
   "/audio/quh/guide_tapacari_zona_andina.wav",
   "/audio/quh/guide_mizque_cono_sur.wav",
+  "/audio/es/manifest.json",
 ];
 
 self.addEventListener("install", (event) => {

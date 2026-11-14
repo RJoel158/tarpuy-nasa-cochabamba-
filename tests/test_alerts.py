@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from backend.main import app
 from engine.alerts import AgroclimaticAlertEvaluator
-from etl.quechua_tts_client import QuechuaTtsClient, clean_quechua_for_tts
+from etl.quechua_tts_client import QuechuaTtsClient, SpanishTtsClient, clean_quechua_for_tts, clean_spanish_for_tts
 from etl.realtime_weather_client import RealtimeWeatherClient
 
 
@@ -70,6 +70,7 @@ def test_api_alerts_endpoint_and_security():
     assert len(data["seven_day_forecast"]) == 7
     assert len(data["active_alerts"]) >= 1
     assert len(data["veracity_manifest"]) == 4
+    assert "alerts_spoken_es" in data
     assert "media-src 'self'" in res.headers["content-security-policy"]
     assert client.get("/api/alerts/bad$zone").status_code == 400
     assert client.get("/api/alerts/unknown_zone_xyz").status_code == 404
@@ -77,10 +78,16 @@ def test_api_alerts_endpoint_and_security():
 
 def test_quechua_tts_clean_and_api_endpoint():
     assert clean_quechua_for_tts("Sara -> Avena!") == "Sara , chanta Avena."
+    assert clean_spanish_for_tts("Maíz -> Avena (forraje)!") == "Maíz , luego Avena"
     client = TestClient(app)
     with patch.object(QuechuaTtsClient, "synthesize_wav_bytes", return_value=b"RIFF\x24\x00\x00\x00WAVEfmt "):
         res = client.post("/api/tts/quechua", json={"text": "Allillanchu Cochabamba"})
     assert res.status_code == 200
     assert res.headers["content-type"].startswith("audio/wav")
     assert res.content.startswith(b"RIFF")
+    with patch.object(SpanishTtsClient, "synthesize_wav_bytes", return_value=b"RIFF\x24\x00\x00\x00WAVEfmt "):
+        res_es = client.post("/api/tts/spanish", json={"text": "Hola productor de Punata"})
+    assert res_es.status_code == 200
+    assert res_es.headers["content-type"].startswith("audio/wav")
+    assert res_es.content.startswith(b"RIFF")
     assert client.post("/api/tts/quechua", json={"text": "a", "extra": "hack"}).status_code == 422
