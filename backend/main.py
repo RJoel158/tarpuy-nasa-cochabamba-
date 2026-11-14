@@ -1,12 +1,15 @@
 """FastAPI application entrypoint for Tarpuy NASA Cochabamba (OWASP Top 10 & SOLID)."""
 
 from typing import Any
+
+import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from backend.config import Settings
+from backend.gamc import GamcWmsProxy
 from backend.poster import render_zone_poster_html
 from backend.repositories import HarmonizedJsonZoneRepository, SafeJsonCropRepository
 from backend.schemas import HealthResponse, QuechuaTtsRequest, RecommendationRequest
@@ -17,7 +20,10 @@ from engine.scoring import MultiCriteriaRotationScorer
 from etl.quechua_tts_client import QuechuaTtsClient, SpanishTtsClient
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    gamc_http_client: httpx.Client | None = None,
+) -> FastAPI:
     """Create and configure FastAPI application instance with security middlewares."""
     cfg = settings or Settings()
     app = FastAPI(
@@ -35,12 +41,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     service = RotationRecommendationService(
         zone_repo=zone_repo, crop_repo=crop_repo, scorer=scorer, alert_evaluator=alert_evaluator
     )
+    gamc_proxy = GamcWmsProxy(settings=cfg, http_client=gamc_http_client)
 
     app.state.settings = cfg
     app.state.zone_repo = zone_repo
     app.state.crop_repo = crop_repo
     app.state.alert_evaluator = alert_evaluator
     app.state.service = service
+    app.state.gamc_proxy = gamc_proxy
 
     app.add_middleware(
         RequestGuardMiddleware,
@@ -140,6 +148,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         except ValueError as err:
             raise HTTPException(status_code=404, detail=str(err))
+
+    @app.get("/api/gamc/services")
+    def gamc_services() -> dict[str, Any]:
+        return gamc_proxy.list_services()
+
+    @app.get("/api/gamc/wms")
+    def gamc_wms(request: Request) -> Response:
+        query = dict(request.query_params)
+        body, media_type, status = gamc_proxy.proxy(query)
+        return Response(content=body, media_type=media_type, status_code=status)
 
     @app.get("/api/offline-bundle/{zone_id}")
     def offline_bundle(zone_id: str) -> dict[str, Any]:

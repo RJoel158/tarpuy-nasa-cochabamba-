@@ -1,7 +1,26 @@
 """Application runtime configuration with immutable settings dataclass."""
 
 from dataclasses import dataclass, field
+import os
 from pathlib import Path
+
+
+def _load_dotenv(path: Path) -> None:
+    """Load KEY=VALUE pairs from .env without overriding existing process env."""
+    if not path.is_file():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip("'").strip('"')
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 @dataclass(frozen=True)
@@ -24,6 +43,12 @@ class Settings:
     )
     RATE_LIMIT_PER_MINUTE: int = 120
     MAX_BODY_BYTES: int = 32768  # 32 KB
+    GAMC_WMS_BASE_URL: str = field(
+        default_factory=lambda: os.getenv(
+            "GAMC_WMS_BASE_URL", "https://serviciosgamc.cochabamba.bo/api/gs/wms"
+        )
+    )
+    GAMC_API_KEY: str = field(default_factory=lambda: os.getenv("GAMC_API_KEY", ""))
 
     @property
     def app_title(self) -> str:
