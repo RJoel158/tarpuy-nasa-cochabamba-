@@ -120,3 +120,4 @@ export default function MunicipalAlertModal({ alert, open, onClose, lang = "es" 
     </div>
   );
 }
+
