@@ -40,6 +40,7 @@ export default function Navbar({
   onToggleOffline,
   onDownloadBundle,
   cachedCount = 0,
+  dbStats = null,
   syncStatus = "",
 }) {
   const onlineActive = !forceOffline && isOnline;
@@ -175,10 +176,18 @@ export default function Navbar({
             </button>
             <button type="button" onClick={onDownloadBundle} className="inline-flex items-center gap-1 hover:text-white font-semibold cursor-pointer">
               <Download className="w-3.5 h-3.5 text-amber-300" />
-              <span>Guardar ({cachedCount})</span>
+              <span>Actualizar ({dbStats?.sizeKb ? `${dbStats.sizeKb} KB` : cachedCount})</span>
             </button>
           </div>
-          {syncStatus ? <p className="text-[11px] text-sky-300 leading-snug">{syncStatus}</p> : null}
+          <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5 flex items-center gap-2 text-[11px]">
+            <Database className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <div className="min-w-0 leading-tight">
+              <p className="font-semibold text-emerald-300 truncate">
+                Autoguardado · {dbStats?.records ? "1 registro" : "en espera"}
+              </p>
+              <p className="text-slate-300 truncate">{syncStatus || "Base local automática"}</p>
+            </div>
+          </div>
         </div>
       </aside>
 
