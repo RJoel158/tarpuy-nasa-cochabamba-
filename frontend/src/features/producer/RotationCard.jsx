@@ -1,6 +1,7 @@
 import React from "react";
-import { Volume2, ArrowRight } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import CropCalendarBar from "./CropCalendarBar.jsx";
+import { CropIllustration, CheckIllustration } from "./FarmPictograms.jsx";
 
 const PLAIN_TITLES = {
   punata_strat_baseline: "Seguir solo con maíz y dejar la tierra pelada",
@@ -15,9 +16,9 @@ const PLAIN_TITLES = {
 };
 
 const LIGHT_LABELS = {
-  green: { dot: "bg-emerald-600", text: "text-emerald-900", word: "Bien" },
-  yellow: { dot: "bg-amber-500", text: "text-amber-900", word: "Cuidado" },
-  red: { dot: "bg-rose-600", text: "text-rose-900", word: "Riesgo" },
+  green: { pill: "bg-emerald-100 text-emerald-800", word: "Bien" },
+  yellow: { pill: "bg-amber-100 text-amber-900", word: "Cuidado" },
+  red: { pill: "bg-rose-100 text-rose-800", word: "Riesgo" },
 };
 
 function firstSentence(text = "") {
@@ -36,10 +37,10 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
   const tl = strategy.visual_traffic_light || {};
 
   const checks = [
-    { name: "Agua", val: tl.water || "yellow" },
-    { name: "Tierra viva", val: tl.soil || "yellow" },
-    { name: "Helada", val: tl.frost || "yellow" },
-    { name: "Lluvia/Viento", val: tl.erosion || "yellow" },
+    { key: "water", name: "Agua", val: tl.water || "yellow" },
+    { key: "soil", name: "Tierra viva", val: tl.soil || "yellow" },
+    { key: "frost", name: "Helada", val: tl.frost || "yellow" },
+    { key: "erosion", name: "Lluvia/Viento", val: tl.erosion || "yellow" },
   ];
 
   return (
@@ -54,15 +55,25 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         </div>
       </div>
 
-      {/* Crop Sequence */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Illustrated Crop Sequence */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {(strategy.crop_sequence || []).map((crop, idx) => (
-          <React.Fragment key={idx}>
-            <span className="px-3 py-1.5 bg-stone-100 text-stone-900 rounded-lg text-sm font-semibold border border-stone-200">
-              {idx + 1}. {crop.crop_name}
-            </span>
-            {idx < (strategy.crop_sequence || []).length - 1 ? <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" /> : null}
-          </React.Fragment>
+          <div
+            key={idx}
+            className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/70 min-w-0"
+          >
+            <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+              <CropIllustration name={crop.crop_name} className="w-10 h-10" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block">
+                Paso {idx + 1}
+              </span>
+              <span className="text-sm font-bold text-[#0B2545] leading-tight block break-words">
+                {crop.crop_name}
+              </span>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -75,17 +86,19 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         <p className="italic text-[#0B2545] leading-relaxed pt-1 border-t border-slate-200/80">“{firstSentence(strategy.quechua_summary)}”</p>
       </div>
 
-      {/* 4 Compact Status Checks */}
+      {/* Illustrated 4 Status Checks */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {checks.map((c) => {
           const st = LIGHT_LABELS[c.val] || LIGHT_LABELS.yellow;
           return (
-            <div key={c.name} className="p-2.5 rounded-lg border border-stone-200 bg-white flex items-center justify-between gap-2 text-xs">
-              <span className="font-medium text-stone-600">{c.name}</span>
-              <span className={`inline-flex items-center gap-1.5 font-bold ${st.text}`}>
-                <span className={`w-2 h-2 rounded-full ${st.dot}`} />
-                {st.word}
-              </span>
+            <div key={c.name} className="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center gap-2.5 min-w-0">
+              <CheckIllustration kind={c.key} className="w-8 h-8 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[11px] font-medium text-slate-500 block truncate">{c.name}</span>
+                <span className={`inline-block mt-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full ${st.pill}`}>
+                  {st.word}
+                </span>
+              </div>
             </div>
           );
         })}

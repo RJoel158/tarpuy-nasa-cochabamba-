@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 
 const CROP_LABELS = {
   papa_huaycha: { title: "Papa", sub: "Akshu" },
@@ -13,9 +14,9 @@ const CROP_LABELS = {
 };
 
 const IRRIGATIONS = [
-  { id: "none_secano", label: "Solo lluvia" },
-  { id: "deficit_auxiliary", label: "Riego por turnos" },
-  { id: "full_canal_well", label: "Canal o pozo" },
+  { id: "none_secano", label: "Solo lluvia", cue: "Agua de lluvia" },
+  { id: "deficit_auxiliary", label: "Riego por turnos", cue: "Agua por mitas" },
+  { id: "full_canal_well", label: "Canal o pozo", cue: "Riego frecuente" },
 ];
 
 const PRIORITY_PRESETS = [
@@ -66,18 +67,23 @@ export default function PrioritySelectorGrid({
                 type="button"
                 onClick={() => onChangeCrop(c.crop_id)}
                 aria-pressed={active}
-                className={`px-3 py-2.5 rounded-xl border text-left transition cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2.5 min-w-0 ${
                   active
                     ? "bg-[#0284C7] text-white border-[#0369A1] shadow-xs"
                     : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <span className="block text-sm font-bold leading-tight">{label.title}</span>
-                {label.sub ? (
-                  <span className={`block text-[11px] mt-0.5 ${active ? "text-sky-100" : "text-slate-500"}`}>
-                    {label.sub}
-                  </span>
-                ) : null}
+                <span className="w-11 h-11 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <CropIllustration cropId={c.crop_id} className="w-9 h-9" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold leading-tight truncate">{label.title}</span>
+                  {label.sub ? (
+                    <span className={`block text-[11px] mt-0.5 truncate ${active ? "text-sky-100" : "text-slate-500"}`}>
+                      {label.sub}
+                    </span>
+                  ) : null}
+                </span>
               </button>
             );
           })}
@@ -96,13 +102,19 @@ export default function PrioritySelectorGrid({
                 type="button"
                 onClick={() => onChangeIrrigation(opt.id)}
                 aria-pressed={active}
-                className={`py-2.5 px-3 rounded-xl text-sm font-bold border transition cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2.5 ${
                   active
                     ? "bg-[#0B2545] text-white border-[#081B33]"
                     : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                {opt.label}
+                <span className="w-11 h-11 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <WaterIllustration id={opt.id} className="w-10 h-10" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold leading-tight">{opt.label}</span>
+                  <span className={`block text-[11px] mt-0.5 ${active ? "text-sky-200" : "text-slate-500"}`}>{opt.cue}</span>
+                </span>
               </button>
             );
           })}
@@ -157,13 +169,16 @@ export default function PrioritySelectorGrid({
                       type="button"
                       onClick={() => onChangeEquipment(opt.id)}
                       aria-pressed={active}
-                      className={`py-2 px-3 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                      className={`p-2.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-2.5 text-left ${
                         active
                           ? "bg-[#0B2545] text-white border-[#081B33]"
                           : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      {opt.label}
+                      <span className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                        <ToolIllustration id={opt.id} className="w-8 h-8" />
+                      </span>
+                      <span>{opt.label}</span>
                     </button>
                   );
                 })}
