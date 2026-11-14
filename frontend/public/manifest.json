@@ -1,0 +1,18 @@
+{
+  "name": "Tarpuy NASA Cochabamba — Rotación Agrícola Offline",
+  "short_name": "Tarpuy NASA",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#14532d",
+  "background_color": "#f8fafc",
+  "orientation": "portrait-primary",
+  "description": "Planificador de rotación de cultivos con datos satelitales NASA y soporte offline.",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
