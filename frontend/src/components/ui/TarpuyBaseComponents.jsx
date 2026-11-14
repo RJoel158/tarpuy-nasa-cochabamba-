@@ -2,15 +2,15 @@ import React from "react";
 import { IlustracionTarpuy, DibujoAltavoz } from "../illustrations/TarpuyIllustrations.jsx";
 
 /**
- * TARPUY NASA COCHABAMBA — COMPONENTES BASE REUTILIZABLES (FASE 1)
- * ================================================================
- * - BotonGrande (ícono dibujado + texto corto, >= 64px, estados: normal, presionado, deshabilitado)
- * - TarjetaGrande (borde grueso, esquinas redondeadas, ilustración arriba, texto abajo)
- * - BotonAltavoz (grande, redondo, con ondas animadas cuando suena)
- * - SeparadorAndino (patrón de textil andino / aguayo y chakana muy sutil)
- * - EtiquetaLogo (etiqueta de papel claro para conservar los logotipos tal cual)
- *
- * REGLA ESTRICTA: Cero colores hexadecimales sueltos; 100% variables CSS de tokens.css.
+ * TARPUY NASA COCHABAMBA — COMPONENTES BASE REUTILIZABLES (FASE 1 + 1B)
+ * =====================================================================
+ * Usa exclusivamente los tokens con nombre definidos en tokens.css:
+ * --papel, --tarjeta, --arena, --tinta, --tinta-suave,
+ * --hoja, --hoja-suave, --hoja-oscura,
+ * --dorado, --dorado-suave, --dorado-oscuro,
+ * --cielo, --cielo-suave, --cielo-oscuro,
+ * --tierra, --tierra-suave, --tierra-oscura,
+ * --ladrillo, --piedra, --acento-zona y los 4 niveles de alerta de clima.
  */
 
 /* 1. BOTÓN GRANDE FÍSICO */
@@ -19,7 +19,7 @@ export function BotonGrande({
   texto,
   dibujo = null,
   ilustracionId = null,
-  variante = "primario", // 'primario' | 'secundario' | 'agua'
+  variante = "primario", // 'primario' (hoja) | 'secundario' (arena) | 'agua' (cielo) | 'tierra'
   estado = "normal",     // 'normal' | 'presionado' | 'deshabilitado'
   disabled = false,
   onClick,
@@ -35,6 +35,8 @@ export function BotonGrande({
       ? "tarpuy-btn-physical--secondary"
       : variante === "agua"
       ? "tarpuy-btn-physical--water"
+      : variante === "tierra"
+      ? "tarpuy-btn-physical--earth"
       : "tarpuy-btn-physical--primary";
 
   const pressedClass = isPressed ? "tarpuy-btn-physical--pressed" : "";
@@ -56,7 +58,10 @@ export function BotonGrande({
       ) : ilustracionId ? (
         <span
           className="shrink-0 flex items-center justify-center rounded-xl p-1"
-          style={{ backgroundColor: "var(--color-bg-card)" }}
+          style={{
+            backgroundColor: "var(--tarjeta)",
+            border: "var(--border-width-medium) solid var(--tinta)",
+          }}
         >
           <IlustracionTarpuy id={ilustracionId} size={42} />
         </span>
@@ -66,7 +71,7 @@ export function BotonGrande({
   );
 }
 
-/* 2. TARJETA GRANDE (Ilustración arriba, texto abajo, borde grueso) */
+/* 2. TARJETA GRANDE (Ilustración arriba, texto abajo, 4 niveles de alerta y acento por zona) */
 export function TarjetaGrande({
   titulo,
   texto,
@@ -74,29 +79,56 @@ export function TarjetaGrande({
   dibujo = null,
   ilustracionId = null,
   ilustracionSize = 84,
-  semaforo = null, // null | 'favorable' | 'aviso' | 'peligro' (solo para avisos de clima)
+  semaforo = null, // null | 'tranquilo'/'favorable' | 'cuidado'/'aviso' | 'peligro_cercano' | 'critico'/'peligro'
   etiquetaSemaforo = null,
+  zona = null,     // null | 'tapacari' | 'punata' | 'chapare'
+  nombreZona = null,
+  recomendado = false,
   accion = null,
   className = "",
 }) {
   const semaforoStyles = {
+    tranquilo: {
+      bg: "var(--alerta-tranquilo-suave)",
+      accent: "var(--alerta-tranquilo)",
+      ink: "var(--alerta-tranquilo-oscuro)",
+      defaultLabel: "Tranquilo · Buen tiempo",
+    },
     favorable: {
-      bg: "var(--color-weather-ok-bg)",
-      border: "var(--color-weather-ok-border)",
-      ink: "var(--color-weather-ok-ink)",
-      defaultLabel: "Buen tiempo",
+      bg: "var(--alerta-tranquilo-suave)",
+      accent: "var(--alerta-tranquilo)",
+      ink: "var(--alerta-tranquilo-oscuro)",
+      defaultLabel: "Tranquilo · Buen tiempo",
+    },
+    cuidado: {
+      bg: "var(--alerta-cuidado-suave)",
+      accent: "var(--alerta-cuidado)",
+      ink: "var(--alerta-cuidado-oscuro)",
+      defaultLabel: "Cuidado · Atención",
     },
     aviso: {
-      bg: "var(--color-weather-warn-bg)",
-      border: "var(--color-weather-warn-border)",
-      ink: "var(--color-weather-warn-ink)",
-      defaultLabel: "Cuidado hoy",
+      bg: "var(--alerta-cuidado-suave)",
+      accent: "var(--alerta-cuidado)",
+      ink: "var(--alerta-cuidado-oscuro)",
+      defaultLabel: "Cuidado · Atención",
+    },
+    peligro_cercano: {
+      bg: "var(--alerta-peligro-suave)",
+      accent: "var(--alerta-peligro)",
+      ink: "var(--alerta-peligro-oscuro)",
+      defaultLabel: "Peligro cercano",
+    },
+    critico: {
+      bg: "var(--alerta-critico-suave)",
+      accent: "var(--alerta-critico)",
+      ink: "var(--alerta-critico-oscuro)",
+      defaultLabel: "Alerta crítica · Helada o sequía",
     },
     peligro: {
-      bg: "var(--color-weather-danger-bg)",
-      border: "var(--color-weather-danger-border)",
-      ink: "var(--color-weather-danger-ink)",
-      defaultLabel: "Peligro de clima",
+      bg: "var(--alerta-critico-suave)",
+      accent: "var(--alerta-critico)",
+      ink: "var(--alerta-critico-oscuro)",
+      defaultLabel: "Alerta crítica · Helada o sequía",
     },
   };
 
@@ -104,59 +136,140 @@ export function TarjetaGrande({
 
   return (
     <article
-      className={`tarpuy-card-physical p-6 sm:p-7 flex flex-col items-center text-center gap-4 ${className}`}
+      data-zona={zona || undefined}
+      className={`tarpuy-card-physical overflow-hidden flex flex-col justify-between ${className}`}
       style={
         activeSemaforo
           ? {
               backgroundColor: activeSemaforo.bg,
-              borderColor: activeSemaforo.border,
+              borderColor: "var(--tinta)",
+            }
+          : recomendado
+          ? {
+              backgroundColor: "var(--dorado-suave)",
+              borderColor: "var(--tinta)",
             }
           : undefined
       }
     >
-      {/* Etiqueta acompañada de palabra cuando es semáforo (nunca solo color) */}
+      {/* Franja superior de acento por zona cuando se indica */}
+      {zona && (
+        <div
+          className="w-full px-5 py-2.5 flex items-center justify-between gap-2 font-extrabold"
+          style={{
+            backgroundColor: "var(--acento-zona-suave)",
+            borderBottom: "var(--border-width-medium) solid var(--tinta)",
+            color: "var(--tinta)",
+          }}
+        >
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-4 h-4 rounded-full inline-block"
+              style={{
+                backgroundColor: "var(--acento-zona)",
+                border: "var(--border-width-medium) solid var(--tinta)",
+              }}
+              aria-hidden="true"
+            />
+            <span>{nombreZona || zona}</span>
+          </span>
+          <span
+            className="text-sm px-2.5 py-0.5 rounded-full"
+            style={{
+              backgroundColor: "var(--tarjeta)",
+              border: "1.5px solid var(--tinta)",
+              color: "var(--acento-zona-oscuro)",
+            }}
+          >
+            Zona activa
+          </span>
+        </div>
+      )}
+
+      {/* Franja superior de color de alerta cuando es un aviso de clima */}
       {activeSemaforo && (
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 font-extrabold uppercase tracking-wide"
+          className="w-full h-3"
           style={{
-            backgroundColor: "var(--color-bg-card)",
-            color: activeSemaforo.ink,
-            border: "var(--border-width-medium) solid var(--color-border-strong)",
-            borderRadius: "var(--radius-pill)",
-            fontSize: "var(--font-size-body-min)",
+            backgroundColor: activeSemaforo.accent,
+            borderBottom: "var(--border-width-medium) solid var(--tinta)",
           }}
-        >
-          <span
-            className="w-3.5 h-3.5 rounded-full inline-block"
-            style={{ backgroundColor: activeSemaforo.border }}
-            aria-hidden="true"
-          />
-          <span>{etiquetaSemaforo || activeSemaforo.defaultLabel}</span>
-        </div>
+          aria-hidden="true"
+        />
       )}
 
-      {/* Ilustración grande arriba */}
-      {(dibujo || ilustracionId) && (
-        <div
-          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center shrink-0"
-          style={{
-            backgroundColor: "var(--color-bg-card-alt)",
-            border: "var(--border-width-medium) solid var(--color-border-strong)",
-          }}
-        >
-          {dibujo || <IlustracionTarpuy id={ilustracionId} size={ilustracionSize} />}
-        </div>
-      )}
+      <div className="p-6 sm:p-7 flex flex-col items-center text-center gap-4 flex-1">
+        {/* Sello de alerta con dibujo/símbolo + palabra (nunca solo color) */}
+        {activeSemaforo && (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 font-extrabold uppercase tracking-wide"
+            style={{
+              backgroundColor: "var(--tarjeta)",
+              color: activeSemaforo.ink,
+              border: "var(--border-width-medium) solid var(--tinta)",
+              borderRadius: "var(--radius-pill)",
+              fontSize: "var(--font-size-body-min)",
+            }}
+          >
+            <span
+              className="w-4 h-4 rounded-full inline-block"
+              style={{
+                backgroundColor: activeSemaforo.accent,
+                border: "1.5px solid var(--tinta)",
+              }}
+              aria-hidden="true"
+            />
+            <span>{etiquetaSemaforo || activeSemaforo.defaultLabel}</span>
+          </div>
+        )}
 
-      {/* Texto abajo: título grande y explicación clara sin jerga */}
-      <div className="space-y-2 max-w-xl">
-        {titulo && <h3 className="tarpuy-subtitle">{titulo}</h3>}
-        {texto && <p className="tarpuy-body">{texto}</p>}
-        {children}
+        {/* Sello de recomendado en --dorado */}
+        {recomendado && !activeSemaforo && (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 font-extrabold uppercase tracking-wide"
+            style={{
+              backgroundColor: "var(--tarjeta)",
+              color: "var(--dorado-oscuro)",
+              border: "var(--border-width-medium) solid var(--tinta)",
+              borderRadius: "var(--radius-pill)",
+              fontSize: "var(--font-size-body-min)",
+            }}
+          >
+            <span
+              className="w-4 h-4 rounded-full inline-block"
+              style={{
+                backgroundColor: "var(--dorado)",
+                border: "1.5px solid var(--tinta)",
+              }}
+              aria-hidden="true"
+            />
+            <span>Recomendado hoy</span>
+          </div>
+        )}
+
+        {/* Ilustración grande arriba */}
+        {(dibujo || ilustracionId) && (
+          <div
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center shrink-0"
+            style={{
+              backgroundColor: "var(--tarjeta)",
+              border: "var(--border-width-medium) solid var(--tinta)",
+            }}
+          >
+            {dibujo || <IlustracionTarpuy id={ilustracionId} size={ilustracionSize} />}
+          </div>
+        )}
+
+        {/* Texto abajo */}
+        <div className="space-y-2 max-w-xl">
+          {titulo && <h3 className="tarpuy-subtitle">{titulo}</h3>}
+          {texto && <p className="tarpuy-body">{texto}</p>}
+          {children}
+        </div>
+
+        {/* Acción opcional al pie */}
+        {accion && <div className="w-full pt-2 flex justify-center">{accion}</div>}
       </div>
-
-      {/* Acción opcional al pie de la tarjeta */}
-      {accion && <div className="w-full pt-2 flex justify-center">{accion}</div>}
     </article>
   );
 }
@@ -173,21 +286,20 @@ export function BotonAltavoz({
 }) {
   return (
     <div className={`relative inline-flex items-center justify-center ${className}`}>
-      {/* Anillos exteriores animados cuando está sonando */}
       {sonando && (
         <>
           <span
             aria-hidden="true"
             className="absolute inset-0 rounded-full pointer-events-none tarpuy-speaker-wave-1"
             style={{
-              border: "var(--border-width-thick) solid var(--color-illus-water)",
+              border: "var(--border-width-thick) solid var(--cielo-oscuro)",
             }}
           />
           <span
             aria-hidden="true"
             className="absolute -inset-2.5 rounded-full pointer-events-none tarpuy-speaker-wave-2"
             style={{
-              border: "var(--border-width-medium) solid var(--color-illus-sun)",
+              border: "var(--border-width-medium) solid var(--dorado)",
             }}
           />
         </>
@@ -212,7 +324,10 @@ export function BotonAltavoz({
       >
         <span
           className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: "var(--color-bg-card)" }}
+          style={{
+            backgroundColor: "var(--tarjeta)",
+            border: "1.5px solid var(--tinta)",
+          }}
         >
           <DibujoAltavoz size={42} animated={sonando} />
         </span>
@@ -226,7 +341,7 @@ export function BotonAltavoz({
   );
 }
 
-/* 4. SEPARADOR DECORATIVO CON PATRÓN DE TEXTIL ANDINO MUY SUTIL (Aguayo / Chakana) */
+/* 4. SEPARADOR DECORATIVO CON PATRÓN DE TEXTIL ANDINO (--dorado, --hoja, --ladrillo) */
 export function SeparadorAndino({ className = "" }) {
   return (
     <div
@@ -240,56 +355,57 @@ export function SeparadorAndino({ className = "" }) {
         fill="none"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Líneas laterales de terraza */}
         <path
           d="M4 12H205M395 12H596"
-          stroke="var(--color-border-subtle)"
+          stroke="var(--piedra)"
           strokeWidth="2.2"
           strokeLinecap="round"
         />
         <path
           d="M40 16H195M405 16H560"
-          stroke="var(--color-border-subtle)"
+          stroke="var(--piedra)"
           strokeWidth="1.2"
           strokeLinecap="round"
           strokeDasharray="6 6"
         />
 
-        {/* Rombos laterales de aguayo */}
+        {/* Rombo dorado */}
         <polygon
           points="225,12 235,5 245,12 235,19"
-          fill="var(--color-illus-sun)"
-          stroke="var(--color-ink-stroke)"
+          fill="var(--dorado)"
+          stroke="var(--tinta)"
           strokeWidth="1.6"
         />
+        {/* Rombo hoja */}
         <polygon
           points="255,12 263,6 271,12 263,18"
-          fill="var(--color-illus-leaf)"
-          stroke="var(--color-ink-stroke)"
+          fill="var(--hoja)"
+          stroke="var(--tinta)"
           strokeWidth="1.5"
         />
 
-        {/* Chakana / Cruz Andina central escalonada */}
+        {/* Chakana central en ladrillo */}
         <path
           d="M296 4H304V8H308V16H304V20H296V16H292V8H296V4Z"
-          fill="var(--color-illus-andean-clay)"
-          stroke="var(--color-ink-stroke)"
+          fill="var(--ladrillo)"
+          stroke="var(--tinta)"
           strokeWidth="1.8"
           strokeLinejoin="round"
         />
-        <circle cx="300" cy="12" r="2.2" fill="var(--color-bg-card)" />
+        <circle cx="300" cy="12" r="2.2" fill="var(--tarjeta)" />
 
-        {/* Rombos simétricos derechos */}
+        {/* Rombo hoja */}
         <polygon
           points="329,12 337,6 345,12 337,18"
-          fill="var(--color-illus-leaf)"
-          stroke="var(--color-ink-stroke)"
+          fill="var(--hoja)"
+          stroke="var(--tinta)"
           strokeWidth="1.5"
         />
+        {/* Rombo dorado */}
         <polygon
           points="355,12 365,5 375,12 365,19"
-          fill="var(--color-illus-sun)"
-          stroke="var(--color-ink-stroke)"
+          fill="var(--dorado)"
+          stroke="var(--tinta)"
           strokeWidth="1.6"
         />
       </svg>
@@ -297,7 +413,7 @@ export function SeparadorAndino({ className = "" }) {
   );
 }
 
-/* 5. ETIQUETA DE PAPEL CLARO PARA LOGOTIPOS ORIGINALES */
+/* 5. ETIQUETA CREMA CON BORDE DE TINTA PARA LOGOTIPOS EN CUALQUIER FONDO */
 export function EtiquetaLogo({ children, className = "" }) {
   return (
     <div className={`tarpuy-logo-paper-tag inline-flex items-center gap-3 px-3.5 py-2 ${className}`}>

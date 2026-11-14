@@ -59,8 +59,9 @@ export function VisualMeter3({ level = 2, tone = "sky", labels = ["Bajo", "Medio
         {labels.slice(0, 3).map((lbl, idx) => (
           <span
             key={lbl}
-            className={`truncate ${idx === 1 ? "text-center" : idx === 2 ? "text-right" : "text-left"} ${idx + 1 === level ? `font-bold ${cfg.text}` : "text-stone-500"
-              }`}
+            className={`truncate ${idx === 1 ? "text-center" : idx === 2 ? "text-right" : "text-left"} ${
+              idx + 1 === level ? `font-bold ${cfg.text}` : "text-stone-500"
+            }`}
           >
             {lbl}
           </span>
@@ -189,7 +190,7 @@ export function cleanAlertForFarmer(alert, lang = "es") {
   const style = sev === "critical"
     ? { badgeText: qu ? "MANCHAY" : "PELIGRO", bannerPill: qu ? "CHAKRAPI MANCHAY" : "PELIGRO EN TU CHACRA", badgeClass: "bg-rose-100 text-rose-800", borderClass: "border-rose-300 border-l-rose-600", bgClass: "bg-rose-50/70" }
     : sev === "warning"
-      ? { badgeText: qu ? "QHAWAY" : "CUIDADO", bannerPill: qu ? "CHAKRAPI QHAWAY" : "CUIDADO EN TU CHACRA", badgeClass: "bg-amber-100 text-amber-900", borderClass: "border-amber-300 border-l-amber-500", bgClass: "bg-amber-50/70" }
-      : { badgeText: qu ? "ALLIN WILLAY" : "BUENA NOTICIA", bannerPill: qu ? "ALLIN PACHA" : "BUEN TIEMPO", badgeClass: "bg-emerald-100 text-emerald-800", borderClass: "border-emerald-300 border-l-emerald-600", bgClass: "bg-emerald-50/60" };
+    ? { badgeText: qu ? "QHAWAY" : "CUIDADO", bannerPill: qu ? "CHAKRAPI QHAWAY" : "CUIDADO EN TU CHACRA", badgeClass: "bg-amber-100 text-amber-900", borderClass: "border-amber-300 border-l-amber-500", bgClass: "bg-amber-50/70" }
+    : { badgeText: qu ? "ALLIN WILLAY" : "BUENA NOTICIA", bannerPill: qu ? "ALLIN PACHA" : "BUEN TIEMPO", badgeClass: "bg-emerald-100 text-emerald-800", borderClass: "border-emerald-300 border-l-emerald-600", bgClass: "bg-emerald-50/60" };
   return { ...style, kind: ALERT_KIND[alert.id] || "stable", cleanTitle: trAlert.title, category: trAlert.category, action: trAlert.action };
 }
