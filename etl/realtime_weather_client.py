@@ -67,8 +67,8 @@ class RealtimeWeatherClient:
         self.nasa_daily_url = validate_nasa_url(NASA_DAILY_ENDPOINT)
         self.timeout = timeout
 
-    def fetch_zone_realtime(self, lat: float, lon: float) -> dict[str, Any]:
-        """Fetch live current weather, 7-day daily forecast, and recent NASA POWER daily obs."""
+    def fetch_zone_realtime(self, lat: float, lon: float, forecast_days: int = 14) -> dict[str, Any]:
+        """Fetch live current weather, 14-day daily forecast, and recent NASA POWER daily obs."""
         v_lat, v_lon = validate_bolivia_coords(lat, lon)
         om_resp = requests.get(
             validate_nasa_url(self.open_meteo_url),
@@ -76,7 +76,7 @@ class RealtimeWeatherClient:
                 "latitude": v_lat, "longitude": v_lon,
                 "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,soil_moisture_0_to_7cm",
                 "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_speed_10m_max",
-                "timezone": "America/La_Paz", "forecast_days": 7,
+                "timezone": "America/La_Paz", "forecast_days": forecast_days,
             },
             timeout=self.timeout, allow_redirects=False,
         )
