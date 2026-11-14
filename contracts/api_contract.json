@@ -498,6 +498,21 @@
               "enum": ["es", "qu", "bilingual"]
             }
           }
+        },
+        "municipal_context": {
+          "type": "object",
+          "description": "Optional GAMC district / periurban / drainage signals (Phase 2).",
+          "properties": {
+            "district_code": { "type": "string" },
+            "comuna": { "type": "string" },
+            "periurban_class": { "type": "string" },
+            "periurban_pressure": { "type": "string", "enum": ["none", "growth", "consolidated"] },
+            "periurban_detail": { "type": "string" },
+            "near_drainage": { "type": "boolean" },
+            "drainage_tipo": { "type": "string" },
+            "drainage_clasificacion": { "type": "string" },
+            "wet_bulletin": { "type": "boolean" }
+          }
         }
       }
     },
@@ -532,6 +547,20 @@
             "nasa_datasets": { "type": "array", "items": { "type": "string" } },
             "soil_dataset": { "type": "string" },
             "etl_status": { "type": "string" }
+          }
+        },
+        "municipal_context": {
+          "type": "object",
+          "description": "Normalized municipal periurban context when provided in the request.",
+          "properties": {
+            "district_code": { "type": "string" },
+            "label_es": { "type": "string" },
+            "alias": { "type": "string" },
+            "periurban_pressure": { "type": "string" },
+            "flood_sensitive": { "type": "boolean" },
+            "near_drainage": { "type": "boolean" },
+            "wet_bulletin": { "type": "boolean" },
+            "tip_es": { "type": "string" }
           }
         }
       }

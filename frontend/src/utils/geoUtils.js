@@ -1,3 +1,5 @@
+import { resolvePeriurbanProfile } from "../services/periurbanProfiles.js";
+
 export const ZONE_GEO_CATALOG = [
   {
     id: "tapacari_zona_andina",
@@ -95,17 +97,21 @@ export function searchCommunities(query = "") {
 /** Adapt a GAMC district to the community shape used by the combobox and the app. */
 export function districtToCommunity(district) {
   const { lat, lon } = district.center;
+  const profile = resolvePeriurbanProfile(district.code);
+  const nearest = findNearestZone(lat, lon).zone.id;
+  const display = profile?.label_es || (profile?.alias ? `${district.name} · ${profile.alias}` : district.name);
   return {
-    id: `distrito_${district.code.toLowerCase()}`,
-    name: district.name,
+    id: `distrito_${String(district.code).toLowerCase()}`,
+    name: display,
     code: district.code,
     comuna: district.comuna,
-    region: "Cercado",
+    region: profile?.alias || "Cercado",
     alt: district.comuna,
-    zoneId: findNearestZone(lat, lon).zone.id,
+    zoneId: profile?.zone_id || nearest,
     coords: [lat, lon],
     bounds: district.bounds,
     isDistrict: true,
+    periurbanProfile: profile,
   };
 }
 

@@ -140,11 +140,13 @@ def create_app(
     @app.post("/api/recommend")
     def recommend(req: RecommendationRequest) -> dict[str, Any]:
         try:
+            muni = req.municipal_context.model_dump() if req.municipal_context else None
             return service.recommend(
                 zone_id=req.zone_id,
                 current_crop_id=req.current_crop_id,
                 farmer_priorities=req.farmer_priorities,
                 constraints=req.constraints.model_dump(),
+                municipal_context=muni,
             )
         except ValueError as err:
             raise HTTPException(status_code=404, detail=str(err))

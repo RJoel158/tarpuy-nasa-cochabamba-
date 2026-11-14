@@ -41,6 +41,7 @@ class RotationScorer(Protocol):
         priorities: list[str],
         constraints: dict[str, Any],
         current_crop_id: str,
+        municipal_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Score strategy and return a new enriched strategy dictionary."""
         ...

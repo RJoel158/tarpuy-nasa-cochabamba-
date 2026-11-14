@@ -278,7 +278,7 @@ export default function CochabambaMap({
                 Haz clic sobre el mapa para consultar atributos · GetFeatureInfo
               </p>
             ) : null}
-            {gamcServices.length > 0 ? (
+            {isAdvanced && gamcServices.length > 0 ? (
               <div className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[#0284C7]">Capas GAMC</p>
                 <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2">{gamcTheme}</p>

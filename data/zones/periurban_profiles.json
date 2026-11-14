@@ -1,0 +1,79 @@
+{
+  "strategy": "option_A_district_flags",
+  "description": "Maps GAMC municipal districts to existing agronomic zone_ids plus periurban flags for Field Shift Cochabamba (La Maica D9, Tunari D13).",
+  "default_zone_id": "punata_valle_alto",
+  "districts": {
+    "D9": {
+      "code": "D9",
+      "alias": "La Maica",
+      "label_es": "Distrito 9 · La Maica",
+      "label_qu": "Distrito 9 · La Maica",
+      "zone_id": "punata_valle_alto",
+      "periurban_pressure": "growth",
+      "flood_sensitive": true,
+      "slope_bias": "valle",
+      "tip_es": "Valle periurbano con canales: vigila anegamiento y turnos de riego.",
+      "tip_qu": "Qhichwa periurbano yakupuriywan: yaku junt'akuyta qhaway."
+    },
+    "D13": {
+      "code": "D13",
+      "alias": "Pie de Tunari",
+      "label_es": "Distrito 13 · Pie de Tunari",
+      "label_qu": "Distrito 13 · Tunari urin",
+      "zone_id": "tapacari_zona_andina",
+      "periurban_pressure": "growth",
+      "flood_sensitive": true,
+      "slope_bias": "ladera",
+      "tip_es": "Ladera periurbana: helada, escurrimiento y surcos en curva.",
+      "tip_qu": "Urqu periurbano: qasa, yaku phawaq, surk'ukuna muyurisqa."
+    },
+    "D1": {
+      "code": "D1",
+      "alias": "Tunari",
+      "label_es": "Distrito 1 · Tunari",
+      "label_qu": "Distrito 1 · Tunari",
+      "zone_id": "tapacari_zona_andina",
+      "periurban_pressure": "none",
+      "flood_sensitive": false,
+      "slope_bias": "ladera",
+      "tip_es": "Zona alta hacia Tunari: prioriza cobertura y cuidado de heladas.",
+      "tip_qu": "Tunari urqu: allpa qhatay, qasata qhaway."
+    },
+    "D8": {
+      "code": "D8",
+      "alias": "Sur periurbano",
+      "label_es": "Distrito 8",
+      "label_qu": "Distrito 8",
+      "zone_id": "punata_valle_alto",
+      "periurban_pressure": "consolidated",
+      "flood_sensitive": true,
+      "slope_bias": "valle",
+      "tip_es": "Periurbano consolidado: cubre la tierra pronto; la ciudad aprieta la chacra.",
+      "tip_qu": "Periurbano hatun: allpata usqhayta qhatay."
+    },
+    "D14": {
+      "code": "D14",
+      "alias": "Valle Hermoso",
+      "label_es": "Distrito 14",
+      "label_qu": "Distrito 14",
+      "zone_id": "punata_valle_alto",
+      "periurban_pressure": "consolidated",
+      "flood_sensitive": true,
+      "slope_bias": "valle",
+      "tip_es": "Valle urbano-rural: revisa drenaje antes de saturar el canal.",
+      "tip_qu": "Llaqta-qhichwa: yakupurinata ñawpaqta qhaway."
+    },
+    "D15": {
+      "code": "D15",
+      "alias": "Tamborada",
+      "label_es": "Distrito 15 · Tamborada",
+      "label_qu": "Distrito 15 · Tamborada",
+      "zone_id": "punata_valle_alto",
+      "periurban_pressure": "growth",
+      "flood_sensitive": true,
+      "slope_bias": "valle",
+      "tip_es": "Franja periurbana en crecimiento: ventana corta para rotaciones largas.",
+      "tip_qu": "Periurbano wiñariq: mana unay rotacionkuna."
+    }
+  }
+}

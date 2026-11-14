@@ -30,6 +30,20 @@ class ConstraintsInput(BaseStrictModel):
     language_preference: LanguageType = "bilingual"
 
 
+class MunicipalContextInput(BaseStrictModel):
+    """Optional GAMC municipal signals (district, periurban, drainage)."""
+
+    district_code: str | None = Field(default=None, max_length=8)
+    comuna: str | None = Field(default=None, max_length=80)
+    periurban_class: str | None = Field(default=None, max_length=64)
+    periurban_pressure: str | None = Field(default=None, max_length=32)
+    periurban_detail: str | None = Field(default=None, max_length=160)
+    near_drainage: bool = False
+    drainage_tipo: str | None = Field(default=None, max_length=32)
+    drainage_clasificacion: str | None = Field(default=None, max_length=80)
+    wet_bulletin: bool = False
+
+
 class RecommendationRequest(BaseStrictModel):
     """Request payload for multi-criteria rotation recommendation."""
 
@@ -37,6 +51,7 @@ class RecommendationRequest(BaseStrictModel):
     current_crop_id: str = Field(..., pattern=r"^[a-z0-9_]{3,40}$")
     farmer_priorities: list[FarmerPriority] = Field(..., min_length=1, max_length=6)
     constraints: ConstraintsInput
+    municipal_context: MunicipalContextInput | None = None
 
 
 class HealthResponse(BaseStrictModel):

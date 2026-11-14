@@ -1,6 +1,6 @@
 # Fase 2 — Periurbano, D9 / La Maica, D13 en el motor
 
-**Estado:** pendiente de ejecución (solo plan)  
+**Estado:** implementada (Opción A) — ver [fase-2-resultados.md](./fase-2-resultados.md)  
 **Prioridad:** alta para el enunciado municipal (“La Maica, Distrito 9 y Distrito 13”)  
 **Depende de:** Fase 1 recomendable (contexto GPS ya en estado de app)  
 **Verificación previa:** [00-verificacion-requisitos.md](./00-verificacion-requisitos.md)
@@ -78,11 +78,11 @@ En `engine/scoring.py` (o capa previa al score):
 
 ## Criterios de aceptación
 
-- [ ] Con GPS simulado en D9, la UI dice “Distrito 9 / La Maica” y la rotación/alertas reflejan periurbano + drenaje.
-- [ ] Con GPS en D13, mensajes enfatizan ladera/helada/escurrimiento.
-- [ ] Punata/Tapacarí/Mizque siguen funcionando sin regresión.
-- [ ] Modo fácil no obliga a interpretar el mapa WMS.
-- [ ] Tests de score: misma rotación con/sin `near_drainage` cambia el score o el traffic light de agua.
+- [x] Con GPS simulado en D9, la UI dice “Distrito 9 / La Maica” y la rotación/alertas reflejan periurbano + drenaje.
+- [x] Con GPS en D13, mensajes enfatizan ladera/helada/escurrimiento.
+- [x] Punata/Tapacarí/Mizque siguen funcionando sin regresión.
+- [x] Modo fácil no obliga a interpretar el mapa WMS.
+- [x] Tests de score: misma rotación con/sin `near_drainage` cambia el score o el traffic light de agua.
 
 ---
 

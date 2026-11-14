@@ -10,7 +10,13 @@ import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone, districtToCommunity } from "./utils/geoUtils.js";
-import { fetchDistrictAt, fetchGamcDistricts, fetchDrainageAt } from "./services/gamcClient.js";
+import { fetchDistrictAt, fetchGamcDistricts, fetchDrainageAt, fetchPeriurbanAt } from "./services/gamcClient.js";
+import {
+  buildMunicipalContextPayload,
+  chipLabel,
+  contextTip,
+  resolvePeriurbanProfile,
+} from "./services/periurbanProfiles.js";
 import {
   fetchZones,
   fetchCrops,
@@ -51,21 +57,33 @@ export default function App() {
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
   const [drainage, setDrainage] = useState(null);
+  const [periurban, setPeriurban] = useState(null);
+  const [districtMeta, setDistrictMeta] = useState(null);
   useEffect(() => {
     let cancelled = false;
     setDrainage(null);
+    setPeriurban(null);
     if (userPoint && !forceOffline && isOnline) {
       fetchDrainageAt(userPoint.lat, userPoint.lon)
         .then((value) => { if (!cancelled) setDrainage(value); })
-        .catch(() => {});
+        .catch(() => { if (!cancelled) setDrainage(null); });
+      fetchPeriurbanAt(userPoint.lat, userPoint.lon)
+        .then((value) => { if (!cancelled) setPeriurban(value); })
+        .catch(() => { if (!cancelled) setPeriurban(null); });
     }
     return () => { cancelled = true; };
   }, [userPoint, forceOffline, isOnline]);
+
+  const municipalProfile = resolvePeriurbanProfile(districtMeta?.code);
+  const municipalChip = chipLabel(municipalProfile, voiceLang) || userPoint?.district || null;
+  const municipalTip = contextTip(municipalProfile, drainage, voiceLang);
   const [toasts, setToasts] = useState([]);
   const [activeProcess, setActiveProcess] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const processTimersRef = useRef([]);
   const calcTimerRef = useRef(null);
+  const alertBulletinRef = useRef(alertBulletin);
+  alertBulletinRef.current = alertBulletin;
 
   const pushToast = useCallback((title, detail = "", type = "info") => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -117,14 +135,33 @@ export default function App() {
   const loadRecs = useCallback(async () => {
     setLoading(true);
     try {
+      const municipal_context = districtMeta?.code
+        ? buildMunicipalContextPayload({
+            districtCode: districtMeta.code,
+            comuna: districtMeta.comuna,
+            periurban,
+            drainage,
+            bulletin: alertBulletinRef.current,
+          })
+        : undefined;
       const data = await fetchRecommendations(
-        { zone_id: zoneId, current_crop_id: cropId, farmer_priorities: priorities, constraints: { irrigation_access: irrigation, equipment_level: equipment, language_preference: "bilingual" } },
+        {
+          zone_id: zoneId,
+          current_crop_id: cropId,
+          farmer_priorities: priorities,
+          constraints: {
+            irrigation_access: irrigation,
+            equipment_level: equipment,
+            language_preference: "bilingual",
+          },
+          ...(municipal_context ? { municipal_context } : {}),
+        },
         forceOffline
       );
       setRecData(data);
       if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
     } catch {} finally { setLoading(false); }
-  }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline]);
+  }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline, districtMeta, periurban, drainage]);
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
 
@@ -222,6 +259,9 @@ export default function App() {
 
   const handleSelectZone = (newZoneId) => {
     setUserPoint(null);
+    setDistrictMeta(null);
+    setDrainage(null);
+    setPeriurban(null);
     applyZoneChange(newZoneId);
     const geo = ZONE_GEO_CATALOG.find((z) => z.id === newZoneId);
     if (geo?.name) setCommunityName(geo.name);
@@ -235,7 +275,8 @@ export default function App() {
 
   const handleSelectCommunity = (comm) => {
     setCommunityName(comm.name);
-    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name, bounds: comm.bounds });
+    setDistrictMeta(comm.isDistrict ? { code: comm.code, comuna: comm.comuna } : null);
+    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name, bounds: comm.bounds, district: comm.name });
     applyZoneChange(comm.zoneId);
     simulateProcess(`Ubicando comunidad: ${comm.name}...`, 460, () => {
       pushToast(`${comm.isDistrict ? "Distrito" : "Comunidad"}: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
@@ -259,10 +300,18 @@ export default function App() {
     const district = await findDistrictAt(lat, lon);
     if (district) {
       const comm = districtToCommunity(district);
-      const label = `${comm.name} · ${comm.comuna}`;
-      setCommunityName(comm.name);
-      setUserPoint({ lat, lon, source, district: label, bounds: source === "GPS" ? comm.bounds : undefined });
-      applyZoneChange(comm.zoneId);
+      const profile = resolvePeriurbanProfile(district.code);
+      const label = profile?.label_es || `${comm.name} · ${comm.comuna}`;
+      setCommunityName(label);
+      setDistrictMeta({ code: district.code, comuna: district.comuna || comm.comuna });
+      setUserPoint({
+        lat,
+        lon,
+        source,
+        district: label,
+        bounds: source === "GPS" ? comm.bounds : undefined,
+      });
+      applyZoneChange(profile?.zone_id || comm.zoneId);
       simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
         pushToast(label, `Detectado por ${source}`, "success");
       });
@@ -270,10 +319,15 @@ export default function App() {
     }
     const nearest = findNearestZone(lat, lon);
     setCommunityName(nearest.zone.name);
+    setDistrictMeta(null);
     setUserPoint({ lat, lon, source });
     applyZoneChange(nearest.zone.id);
     simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
-      pushToast(`Zona: ${nearest.zone.name}`, `A ${nearest.distanceKm} km (${source})`, "success");
+      pushToast(
+        `Zona: ${nearest.zone.name}`,
+        `Fuera de distritos municipales · a ${nearest.distanceKm} km (${source})`,
+        "info"
+      );
     });
   };
 
@@ -380,9 +434,13 @@ export default function App() {
         <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
           {activeView === "clima" && <FarmerWaterActionCard
             bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
-            drainage={drainage} district={userPoint?.district} lang={voiceLang}
+            drainage={drainage}
+            district={municipalChip}
+            tip={municipalTip}
+            lang={voiceLang}
             onSpeak={handleSpeak} activeAudioKey={activeAudioKey}
             onPlant={() => setActiveView("siembra")} advanced={isAdvanced}
+            crop={crops.find((c) => c.crop_id === cropId) || null}
           />}
           {!isAdvanced && activeView === "clima" && <FarmerOverview
             community={communityName} zone={currentZone}
@@ -426,6 +484,9 @@ export default function App() {
               equipment={equipment}
               onChangeEquipment={handleChangeEquipment}
               strategies={recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : []}
+              municipalContext={recData?.municipal_context || null}
+              municipalChip={municipalChip}
+              municipalTip={municipalTip}
               onSpeak={handleSpeak}
               activeAudioKey={activeAudioKey}
               isCalculating={isCalculating}

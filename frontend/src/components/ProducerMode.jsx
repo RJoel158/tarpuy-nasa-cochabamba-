@@ -24,9 +24,14 @@ export default function ProducerMode({
   lang = "es",
   onDetectGps,
   onOpenMap,
+  municipalChip = null,
+  municipalTip = null,
+  municipalContext = null,
 }) {
   const currentZoneId = activeZoneId || zone?.zone_id || "punata_valle_alto";
   const indicators = zone?.monthly_harmonized_indicators || [];
+  const chip = municipalChip || municipalContext?.label_es;
+  const tip = municipalTip || municipalContext?.tip_es;
 
   // Reorder so best adaptive options come first in tabs, baseline is third for clear comparison
   const ordered = [
@@ -57,6 +62,14 @@ export default function ProducerMode({
             {tr(lang, "rotationSubtitle")} · {zone?.name || currentZoneId}
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">{tr(lang, "rotationTitle")}</h2>
+          {chip ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-[#7E57C2]/15 text-[#4A148C] border border-[#7E57C2]/40 px-3 py-1 text-xs font-bold">
+                {chip}
+              </span>
+              {tip ? <span className="text-xs text-slate-600 max-w-xl">{tip}</span> : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
