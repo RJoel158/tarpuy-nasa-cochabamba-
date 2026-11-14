@@ -56,6 +56,7 @@ export default function EarlyWarningBanner({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [mostrarMasDetalle, setMostrarMasDetalle] = useState(isAdvanced);
+  const [forecastHorizon, setForecastHorizon] = useState("7d");
 
   useEffect(() => {
     setMostrarMasDetalle(isAdvanced);
@@ -80,8 +81,10 @@ export default function EarlyWarningBanner({
 
   const cur = bulletin.current_conditions;
   const pred = bulletin.predictions_summary || {};
+  const pred14 = bulletin.predictions_summary_14d || {};
   const alerts = bulletin.active_alerts || [];
-  const days = bulletin.seven_day_forecast || [];
+  const days14 = bulletin.fourteen_day_forecast || bulletin.seven_day_forecast || [];
+  const days = forecastHorizon === "14d" ? days14 : (bulletin.seven_day_forecast || []);
   const zId = bulletin.zone_id || "punata_valle_alto";
   const aKey = `alert_${zId}_${voiceLang}`;
   const shortZone = (zoneName || zId).split("—")[0].split("-")[0].trim();
@@ -426,14 +429,32 @@ export default function EarlyWarningBanner({
        * 3. LA SEMANA (Tira de 7 casillas grandes: día + UN dibujo del clima)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="tarpuy-subtitle">
-            {isQu
-              ? "Qhipa 7 p'unchawkuna (La semana)"
-              : "La semana (toca un día para ver mañana, tarde y noche)"}
-          </h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="tarpuy-subtitle">
+              {forecastHorizon === "14d"
+                ? (isQu ? "14 p'unchawkuna (2 semanas)" : "Próximos 14 días (2 semanas)")
+                : (isQu ? "Qhipa 7 p'unchawkuna (La semana)" : "La semana")}
+            </h3>
+            <div className="inline-flex rounded-xl p-0.5 bg-slate-200/80 border border-slate-300 text-xs font-bold" role="group" aria-label="Horizonte de pronóstico">
+              <button
+                type="button"
+                onClick={() => setForecastHorizon("7d")}
+                className={`px-3 py-1 rounded-lg transition cursor-pointer ${forecastHorizon === "7d" ? "bg-white text-slate-900 shadow-xs font-extrabold" : "text-slate-600 hover:text-slate-900"}`}
+              >
+                7 días
+              </button>
+              <button
+                type="button"
+                onClick={() => setForecastHorizon("14d")}
+                className={`px-3 py-1 rounded-lg transition cursor-pointer ${forecastHorizon === "14d" ? "bg-white text-slate-900 shadow-xs font-extrabold" : "text-slate-600 hover:text-slate-900"}`}
+              >
+                14 días
+              </button>
+            </div>
+          </div>
           <span
-            className="px-3 py-1 rounded-full text-sm font-extrabold"
+            className="px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold"
             style={{
               backgroundColor: "var(--dorado-suave)",
               color: "var(--dorado-oscuro)",

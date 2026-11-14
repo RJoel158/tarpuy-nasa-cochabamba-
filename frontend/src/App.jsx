@@ -6,6 +6,7 @@ const LizComparison = React.lazy(() => import("./components/LizComparison.jsx"))
 import { IlustracionTarpuy } from "./components/illustrations/TarpuyIllustrations.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import FarmerWaterActionCard from "./components/alerts/FarmerWaterActionCard.jsx";
+import MunicipalAlertModal from "./components/alerts/MunicipalAlertModal.jsx";
 import FarmerOverview from "./features/producer/FarmerOverview.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
@@ -52,6 +53,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
   const [alertBulletin, setAlertBulletin] = useState(null);
+  const [municipalModalOpen, setMunicipalModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dbStats, setDbStats] = useState(() => getDeviceDbStats());
   const [syncStatus, setSyncStatus] = useState(
@@ -470,6 +472,11 @@ export default function App() {
                     Avisos ({alertBulletin?.active_alerts?.length || 0})
                   </button>
                 )}
+                {alertBulletin?.municipal_alert && (
+                  <button className="flow-link text-amber-700 font-bold" onClick={() => setMunicipalModalOpen(true)}>
+                    Canal / Regantes
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -485,6 +492,7 @@ export default function App() {
               onPlant={() => setActiveView("siembra")}
               advanced={isAdvanced}
               crop={crops.find((c) => c.crop_id === cropId) || null}
+              onOpenMunicipalAlert={() => setMunicipalModalOpen(true)}
             />
           )}
           {loading && !recData ? (
@@ -610,6 +618,12 @@ export default function App() {
         onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
       />}
       <AlertsModal open={notificationsOpen} onClose={()=>setNotificationsOpen(false)} alerts={alertBulletin?.zone_id === zoneId ? alertBulletin.active_alerts || [] : []} zoneName={communityName} lang={voiceLang}/>
+      <MunicipalAlertModal
+        open={municipalModalOpen}
+        onClose={() => setMunicipalModalOpen(false)}
+        alert={alertBulletin?.municipal_alert}
+        lang={voiceLang}
+      />
     </div>
   );
 }
