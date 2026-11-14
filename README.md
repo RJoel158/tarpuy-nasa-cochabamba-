@@ -50,21 +50,29 @@ python -m venv .venv
 # En Windows (PowerShell):
 .venv\Scripts\Activate.ps1
 
-# Instalar dependencias de backend/ETL (si aplica)
-pip install --upgrade pip fastapi uvicorn requests pydantic
+# Instalar dependencias de backend/ETL y pruebas
+pip install -r requirements.txt
 
-# Configurar frontend (si aplica)
+# 1) Sincronizar telemetría real desde NASA POWER API
+python -m etl.harmonizer
+
+# 2) Ejecutar suite de pruebas (ETL, Motor Agronómico, FastAPI y OWASP)
+pytest -v
+
+# 3) Levantar Backend FastAPI (puerto 8000)
+uvicorn backend.main:app --reload
+
+# 4) En otra terminal, levantar Frontend PWA (puerto 5173)
 cd frontend
 npm install
-cd ..
+npm run dev
 ```
 
-### 3. Conexión con el Repositorio Remoto en GitHub
-Una vez creado el repositorio vacío en GitHub por el líder del equipo, vincularlo localmente ejecutando:
+### 3. Conexión con el Repositorio Remoto en GitHub y Git Flow
+El repositorio sigue **Git Flow** (`main` ← `release/*` ← `develop` ← `feature/*`). Una vez creado el repositorio vacío en GitHub, vincularlo y subir ambas ramas y etiquetas:
 ```bash
 git remote add origin <URL_DEL_REPOSITORIO_GITHUB>
-git branch -M main
-git push -u origin main
+git push -u origin main develop --tags
 ```
 
-Para cada miembro del equipo, trabajar en su respectiva rama de características (`git checkout -b <rama-sugerida>`) y realizar pull requests hacia `main`.
+Para nuevas funcionalidades del equipo, crear ramas desde `develop` (`git checkout -b feature/<nombre> develop`), mantener commits modulares ($\le 250$ líneas) y fusionar hacia `develop`.
