@@ -43,7 +43,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; img-src 'self' data: https://*.tile.openstreetmap.org; "
-            "style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+            "media-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
         )
         return response
 
