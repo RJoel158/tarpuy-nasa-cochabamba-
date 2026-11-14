@@ -23,7 +23,7 @@ export default function RotationCard({
         {/* Top Header Badge & Affinity */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
           <Badge variant={isBase ? "danger" : "soil"}>
-            {isBase ? "Práctica Actual — Riesgo" : `Opción Recomendada #${index}`}
+            {isBase ? "Tu Siembra Actual — Cuidado" : `Mejor Opción #${index - 1}`}
           </Badge>
           <div className="flex items-center gap-2">
             <div className="w-16 bg-stone-100 rounded-full h-2 overflow-hidden border border-stone-200">
@@ -32,7 +32,7 @@ export default function RotationCard({
                 style={{ width: `${scorePct}%` }}
               />
             </div>
-            <span className="text-xs font-bold text-stone-700">{scorePct}% compatible</span>
+            <span className="text-xs font-bold text-stone-700">{scorePct}% ideal para tu tierra</span>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default function RotationCard({
         {/* Crop Sequence Flow */}
         <div className="space-y-1.5">
           <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
-            Secuencia de Cultivos:
+            Qué sembrar paso a paso:
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
             {(strategy.crop_sequence || []).map((crop, cIdx) => (
@@ -81,10 +81,10 @@ export default function RotationCard({
 
         {/* 4 Semantic Meters */}
         <div className="space-y-2 pt-1 border-t border-stone-100">
-          <SemanticMeter label="Agua / Riego" status={strategy.visual_traffic_light?.water || "yellow"} />
-          <SemanticMeter label="Suelo Vivo" status={strategy.visual_traffic_light?.soil || "yellow"} />
-          <SemanticMeter label="Riesgo Helada" status={strategy.visual_traffic_light?.frost || "yellow"} />
-          <SemanticMeter label="Control Ladera" status={strategy.visual_traffic_light?.erosion || "yellow"} />
+          <SemanticMeter label="Cuidado del Agua" status={strategy.visual_traffic_light?.water || "yellow"} />
+          <SemanticMeter label="Fuerza de la Tierra" status={strategy.visual_traffic_light?.soil || "yellow"} />
+          <SemanticMeter label="Defensa contra Helada" status={strategy.visual_traffic_light?.frost || "yellow"} />
+          <SemanticMeter label="Freno a la Lluvia / Viento" status={strategy.visual_traffic_light?.erosion || "yellow"} />
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export default function RotationCard({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-stone-100">
         <button
           type="button"
-          onClick={() => onSpeak(strategy.quechua_summary, "qu", qKey)}
+          onClick={() => onSpeak(strategy.quechua_summary, "qu", qKey, `strat_${strategy.strategy_id}`)}
           className={`py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
             activeAudioKey === qKey
               ? "bg-emerald-700 text-white animate-pulse"

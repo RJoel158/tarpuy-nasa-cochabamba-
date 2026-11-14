@@ -3,10 +3,11 @@ import { Satellite, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, Badge } from "./ui/Primitives.jsx";
 import CochabambaMap from "./maps/CochabambaMap.jsx";
 import ClimateChartsPanel from "./charts/ClimateChartsPanel.jsx";
+import DataVeracityCard from "./alerts/DataVeracityCard.jsx";
 
 export default function TechnicalMode({
   zones = [], activeZoneId, onSelectZone, zone, strategies = [],
-  provenance = {}, forceOffline = false, isOnline = true,
+  provenance = {}, bulletin = null, forceOffline = false, isOnline = true,
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const [showTable, setShowTable] = useState(false);
@@ -104,7 +105,9 @@ export default function TechnicalMode({
         </CardContent>
       </Card>
 
-      {/* Bottom Card: Cryptographic Data Provenance */}
+      {/* Bottom Cards: Multi-Layer Data Veracity & Cryptographic Provenance */}
+      {bulletin?.veracity_manifest ? <DataVeracityCard manifest={bulletin.veracity_manifest} /> : null}
+
       <Card className="bg-stone-900 text-stone-200 border-stone-800">
         <CardContent className="p-4 sm:p-5 space-y-2 font-mono text-xs">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-800 pb-2">
