@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Printer, Loader2, LocateFixed, MapPin, Award, Sprout, AlertTriangle } from "lucide-react";
 import PrioritySelectorGrid from "../features/producer/PrioritySelectorGrid.jsx";
 import RotationCard from "../features/producer/RotationCard.jsx";
@@ -34,14 +34,17 @@ export default function ProducerMode({
     ...strategies.filter((s) => s.strategy_type === "current_baseline"),
   ];
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const shownStrategy = isAdvanced ? (ordered[selectedIdx] || ordered[0]) : ordered[0];
+  const [showComparison, setShowComparison] = useState(false);
+  useEffect(() => { setSelectedIdx(0); }, [cropId, irrigation, priorities]);
+
+  const shownStrategy = ordered[selectedIdx] || ordered[0];
 
   const tabLabel = (s, idx) => {
     if (lang === "qu") {
-      if (s.strategy_type === "current_baseline") return "3. Q'ara allpa saqiy (manchay)";
+      if (s.strategy_type === "current_baseline") return "Qayna tarpuy";
       return idx === 0 ? "1. Aswan allin" : "2. Iskay ñiqin";
     }
-    if (s.strategy_type === "current_baseline") return "3. Dejar tierra pelada (riesgo)";
+    if (s.strategy_type === "current_baseline") return "Práctica actual";
     return idx === 0 ? "1. Mejor opción" : "2. Segunda opción";
   };
 
@@ -108,7 +111,14 @@ export default function ProducerMode({
         </div>
       ) : ordered.length > 0 && shownStrategy ? (
         <div className="space-y-4">
-          {isAdvanced ? (
+          {!isAdvanced && ordered.length > 1 && (
+            <button type="button" aria-expanded={showComparison}
+              onClick={() => setShowComparison((open) => !open)}
+              className="w-full rounded-2xl border-2 border-emerald-700 p-4 text-lg font-bold text-emerald-900">
+              {lang === "qu" ? "Tarpuykunata qhaway" : "Comparar opciones de siembra"}
+            </button>
+          )}
+          {isAdvanced || showComparison ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {ordered.map((s, idx) => {
                 const TabIcon = s.strategy_type === "current_baseline" ? AlertTriangle : idx === 0 ? Award : Sprout;
@@ -116,6 +126,7 @@ export default function ProducerMode({
                   <button
                     key={s.strategy_id || idx}
                     type="button"
+                    aria-pressed={shownStrategy === s}
                     onClick={() => setSelectedIdx(idx)}
                     className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold border text-left transition cursor-pointer inline-flex items-center gap-2 ${
                       selectedIdx === idx
@@ -135,7 +146,7 @@ export default function ProducerMode({
 
           <RotationCard
             strategy={shownStrategy}
-            index={isAdvanced ? selectedIdx + 1 : 1}
+            index={selectedIdx + 1}
             indicators={indicators}
             onSpeak={onSpeak}
             activeAudioKey={activeAudioKey}
@@ -143,7 +154,11 @@ export default function ProducerMode({
             lang={lang}
           />
         </div>
-      ) : null}
+      ) : (
+        <p role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          {lang === "qu" ? "Mana tarpuy yachay kanchu." : "Todavía no hay recomendaciones para esta zona. Conéctate y guarda sus datos para consultarlos después."}
+        </p>
+      )}
     </div>
   );
 }

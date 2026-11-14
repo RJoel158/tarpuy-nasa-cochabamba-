@@ -1,4 +1,5 @@
 import React from "react";
+import { CheckCircle2 } from "lucide-react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
@@ -57,7 +58,7 @@ export default function PrioritySelectorGrid({
     <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 space-y-5">
       {/* Step 1: Last Crop Harvested */}
       <div className="space-y-2">
-        <span className="text-sm font-bold text-[#0B2545] block">{tr(lang, "stepLastCrop")}</span>
+        <span className="text-lg font-bold text-[#0B2545] block">{tr(lang, "stepLastCrop")}</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {cropItems.map((c) => {
             const active = cropId === c.crop_id;
@@ -70,19 +71,20 @@ export default function PrioritySelectorGrid({
                 type="button"
                 onClick={() => onChangeCrop(c.crop_id)}
                 aria-pressed={active}
-                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2.5 min-w-0 ${
+                className={`relative min-h-28 p-3 rounded-2xl border-2 text-left transition cursor-pointer flex flex-col items-center justify-center gap-2 min-w-0 ${
                   active
                     ? "bg-[#0284C7] text-white border-[#0369A1] shadow-xs"
                     : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <span className="w-11 h-11 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                  <CropIllustration cropId={c.crop_id} className="w-9 h-9" />
+                {active && <CheckCircle2 aria-hidden="true" className="absolute right-2 top-2 w-5 h-5" />}
+                <span className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <CropIllustration cropId={c.crop_id} className="w-12 h-12" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold leading-tight truncate">{mainName}</span>
+                  <span className="block text-base font-bold leading-snug break-words">{mainName}</span>
                   {subName ? (
-                    <span className={`block text-[11px] mt-0.5 truncate ${active ? "text-sky-100" : "text-slate-500"}`}>
+                    <span className={`block text-sm mt-1 break-words ${active ? "text-sky-100" : "text-slate-500"}`}>
                       {subName}
                     </span>
                   ) : null}
@@ -95,7 +97,7 @@ export default function PrioritySelectorGrid({
 
       {/* Step 2: Water Availability */}
       <div className="space-y-2 pt-4 border-t border-slate-100">
-        <span className="text-sm font-bold text-[#0B2545] block">{tr(lang, "stepWater")}</span>
+        <span className="text-lg font-bold text-[#0B2545] block">{tr(lang, "stepWater")}</span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {IRRIGATIONS.map((opt) => {
             const active = irrigation === opt.id;
@@ -105,18 +107,19 @@ export default function PrioritySelectorGrid({
                 type="button"
                 onClick={() => onChangeIrrigation(opt.id)}
                 aria-pressed={active}
-                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2.5 ${
+                className={`relative min-h-24 p-3 rounded-2xl border-2 text-left transition cursor-pointer flex items-center gap-3 ${
                   active
                     ? "bg-[#0B2545] text-white border-[#081B33]"
                     : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <span className="w-11 h-11 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                  <WaterIllustration id={opt.id} className="w-10 h-10" />
+                {active && <CheckCircle2 aria-hidden="true" className="absolute right-2 top-2 w-5 h-5" />}
+                <span className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <WaterIllustration id={opt.id} className="w-12 h-12" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold leading-tight">{qu ? opt.qu : opt.es}</span>
-                  <span className={`block text-[11px] mt-0.5 ${active ? "text-sky-200" : "text-slate-500"}`}>{qu ? opt.quCue : opt.esCue}</span>
+                  <span className="block text-base font-bold leading-snug">{qu ? opt.qu : opt.es}</span>
+                  <span className={`block text-sm mt-1 ${active ? "text-sky-200" : "text-slate-500"}`}>{qu ? opt.quCue : opt.esCue}</span>
                 </span>
               </button>
             );

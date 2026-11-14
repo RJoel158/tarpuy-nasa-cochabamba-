@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import Navbar from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
+import FarmerOverview from "./features/producer/FarmerOverview.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
-import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
+import { ZONE_GEO_CATALOG, findNearestZone, districtToCommunity } from "./utils/geoUtils.js";
+import { fetchDistrictAt, fetchGamcDistricts } from "./services/gamcClient.js";
 import {
   fetchZones,
   fetchCrops,
@@ -160,6 +162,10 @@ export default function App() {
 
   const handleSpeakGuide = () => {
     handleStopAudio();
+    if (recData?.zone_id !== zoneId || recData?.current_crop_id !== cropId) {
+      pushToast("Guía aún no disponible", "Espera a que se actualice la recomendación de tu cultivo y zona", "info");
+      return;
+    }
     setIsSpeaking(true);
     pushToast(`Voz (${voiceLang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo guía de siembra", "info");
     speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
@@ -196,6 +202,7 @@ export default function App() {
   };
 
   const applyZoneChange = (newZoneId) => {
+    handleStopAudio();
     setZoneId(newZoneId);
     setCropId(newZoneId === "tapacari_zona_andina" ? "papa_huaycha" : "maiz_valle");
   };
@@ -214,14 +221,39 @@ export default function App() {
 
   const handleSelectCommunity = (comm) => {
     setCommunityName(comm.name);
-    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name });
+    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name, bounds: comm.bounds });
     applyZoneChange(comm.zoneId);
     simulateProcess(`Ubicando comunidad: ${comm.name}...`, 460, () => {
-      pushToast(`Comunidad: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
+      pushToast(`${comm.isDistrict ? "Distrito" : "Comunidad"}: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
     });
   };
 
-  const handlePickMapPoint = (lat, lon, source = "mapa") => {
+  // Municipal district (GAMC "Límite Distritos") that contains a point, or null.
+  const findDistrictAt = async (lat, lon) => {
+    if (forceOffline || !isOnline) return null;
+    try {
+      const hit = await fetchDistrictAt(lat, lon);
+      if (!hit) return null;
+      const catalog = await fetchGamcDistricts();
+      return catalog.find((d) => d.code === hit.code) || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handlePickMapPoint = async (lat, lon, source = "mapa") => {
+    const district = await findDistrictAt(lat, lon);
+    if (district) {
+      const comm = districtToCommunity(district);
+      const label = `${comm.name} · ${comm.comuna}`;
+      setCommunityName(comm.name);
+      setUserPoint({ lat, lon, source, district: label, bounds: source === "GPS" ? comm.bounds : undefined });
+      applyZoneChange(comm.zoneId);
+      simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
+        pushToast(label, `Detectado por ${source}`, "success");
+      });
+      return;
+    }
     const nearest = findNearestZone(lat, lon);
     setCommunityName(nearest.zone.name);
     setUserPoint({ lat, lon, source });
@@ -330,14 +362,21 @@ export default function App() {
         syncStatus={syncStatus}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col justify-between pb-20 lg:pb-8">
-        <main className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+      <div className="flex-1 min-w-0 flex flex-col justify-between pb-28 lg:pb-8">
+        <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+          {!isAdvanced && activeView === "clima" && <FarmerOverview
+            community={communityName} zone={currentZone}
+            crop={crops.find((crop) => crop.crop_id === cropId)} cropId={cropId}
+            lang={voiceLang} offline={forceOffline || !isOnline} saved={dbStats}
+            onPlant={() => setActiveView("siembra")} onMap={() => setActiveView("mapa")}
+            speaking={isSpeaking} onSave={handleDownloadBundle} onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
+          />}
           {loading && !recData ? (
             <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
           ) : activeView === "clima" ? (
             <div className="space-y-6">
               <EarlyWarningBanner
-                bulletin={alertBulletin}
+                bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
                 zoneName={communityName || currentZone?.name}
                 onSpeak={handleSpeak}
                 activeAudioKey={activeAudioKey}
@@ -347,14 +386,14 @@ export default function App() {
                 onDetectGps={handleDetectGps}
               />
               <div className="flex justify-end">
-                <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
+                <button type="button" onClick={() => setActiveView("siembra")} className="w-full sm:w-auto min-h-16 inline-flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
                   <span>{tr(voiceLang, "seeWhatToPlantIn")} {communityName || currentZone?.name || ""}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ) : activeView === "siembra" ? (
-            <ProducerMode
+            <ProducerMode key={zoneId}
               zone={currentZone}
               activeZoneId={zoneId}
               crops={crops}
@@ -366,7 +405,7 @@ export default function App() {
               onChangeIrrigation={handleChangeIrrigation}
               equipment={equipment}
               onChangeEquipment={handleChangeEquipment}
-              strategies={recData?.strategies || []}
+              strategies={recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : []}
               onSpeak={handleSpeak}
               activeAudioKey={activeAudioKey}
               isCalculating={isCalculating}

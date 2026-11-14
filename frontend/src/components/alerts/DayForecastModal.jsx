@@ -12,7 +12,7 @@ export default function DayForecastModal({ day, dv, zoneName = "", lang = "es", 
     { Icon: Sun, color: "text-amber-500", label: tr(lang, "dayTempLabel"), val: `${day.temp_max_c}°C`, sub: day.temp_max_c >= 23 ? (lang === "qu" ? "Rupha" : "Caluroso") : (lang === "qu" ? "Q'uñi" : "Templado") },
     { Icon: Moon, color: "text-indigo-600", label: tr(lang, "nightTempLabel"), val: `${day.temp_min_c}°C`, sub: dv.nightText },
     { Icon: CloudRain, color: "text-[#0284C7]", label: tr(lang, "rainLabel"), val: `${day.precip_mm} mm`, sub: `${dv.rainText} (${day.precip_prob_pct ?? 0}%)` },
-    { Icon: Wind, color: "text-emerald-600", label: tr(lang, "windEvapLabel"), val: `${day.wind_max_kmh ?? 12} km/h`, sub: `ET0: ${day.et0_mm ?? 3.5} mm` },
+    { Icon: Wind, color: "text-emerald-600", label: tr(lang, "windEvapLabel"), val: `${day.wind_kmh ?? "—"} km/h`, sub: `ET0: ${day.et0_mm ?? "—"} mm` },
   ];
 
   return (

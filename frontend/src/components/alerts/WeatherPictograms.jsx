@@ -156,15 +156,19 @@ export function describeTempCard(tempNow, min7d, lang = "es") {
   const qu = lang === "qu";
   if (m <= 2) return { kind: "frost", badge: qu ? "Manchay" : "Peligro", tone: "rose", level: 3, title: qu ? "Qasa manchay" : "Riesgo de Helada", advice: qu ? "Tuta yurakunata qhatay" : "Tapa tus plantas de noche", levels: qu ? ["Chiri", "Qasa", "Manchay"] : ["Frío", "Helada", "Peligro"] };
   if (m <= 5) return { kind: "chill", badge: qu ? "Qhaway" : "Cuidado", tone: "amber", level: 2, title: qu ? "Tuta chirinqapuni" : "Noches Frías", advice: qu ? "Llullu brotekunata waqaychay" : "Cuida brotes tiernos", levels: qu ? ["Llanthu", "Chiri", "Qasa"] : ["Fresco", "Frío", "Mucho frío"] };
-  return { kind: "stable", badge: qu ? "Allin" : "Seguro", tone: "emerald", level: 2, title: qu ? "Q'uñi pacha" : "Clima Templado", advice: qu ? "Mana qasa kanchu" : "Sin peligro de helada", levels: qu ? ["Chiri", "Q'uñi", "Rupha"] : ["Frío", "Templado", "Calor"] };
+  return { kind: "stable", badge: qu ? "Allin" : "Revisar", tone: "emerald", level: 2, title: qu ? "Q'uñi pacha" : "Mínimas por encima de 5 °C", advice: qu ? "Mana qasa kanchu" : "La temperatura puede variar dentro de tu parcela", levels: qu ? ["Chiri", "Q'uñi", "Rupha"] : ["Frío", "Templado", "Calor"] };
 }
 
 export function describeSoilCard(soilPct, lang = "es") {
-  const s = Number(soilPct ?? 0);
-  const qu = lang === "qu";
-  if (s < 20) return { kind: "sun_dry", badge: qu ? "Ch'aki" : "Seca", tone: "rose", level: 1, title: qu ? "Ch'aki allpa" : "Tierra Seca", advice: qu ? "Yakuta icha parata munan" : "Necesita riego o lluvia", levels: qu ? ["Ch'aki", "Uqhu", "Jiq'i"] : ["Seca", "Húmeda", "Mojada"] };
-  if (s < 32) return { kind: "soil_moisture", badge: qu ? "Chawpi" : "Media", tone: "amber", level: 2, title: qu ? "Pisi uqhu allpa" : "Tierra Poco Húmeda", advice: qu ? "Ichuwan allpata qhatay" : "Tapa el suelo con paja", levels: qu ? ["Ch'aki", "Chawpi", "Uqhu"] : ["Seca", "Media", "Mojada"] };
-  return { kind: "soil_moisture", badge: qu ? "Allin" : "Buena", tone: "emerald", level: 3, title: qu ? "Allin uqhu allpa" : "Tierra Húmeda", advice: qu ? "Tarpunapaq wakichisqa" : "Lista para sembrar", levels: qu ? ["Ch'aki", "Chawpi", "Uqhu"] : ["Seca", "Media", "Mojada"] };
+  if (soilPct === null || soilPct === undefined || soilPct === "" || !Number.isFinite(Number(soilPct)) || Number(soilPct) < 0 || Number(soilPct) > 100) {
+    return { kind: "soil_moisture", badge: "—", tone: "sky", level: 0,
+      title: lang === "qu" ? "Mana yachay kanchu" : "Humedad sin dato",
+      advice: lang === "qu" ? "Allpata qhaway" : "Revisa la tierra antes de decidir el riego", levels: [] };
+  }
+
+  return { kind: "soil_moisture", badge: lang === "qu" ? "Qhaway" : "Estimación", tone: "sky", level: 0,
+    title: lang === "qu" ? "Allpa uqhu" : "Humedad superficial estimada",
+    advice: lang === "qu" ? "Allpata qhaway" : "Comprueba la tierra a la profundidad de las raíces", levels: [] };
 }
 
 export function describeRainCard(rain7d, lang = "es") {
@@ -172,15 +176,15 @@ export function describeRainCard(rain7d, lang = "es") {
   const qu = lang === "qu";
   if (r < 5) return { kind: "sun_dry", drops: 0, badge: qu ? "Ch'aki" : "Seco", tone: "amber", level: 1, title: qu ? "Mana anchata paranchu" : "Casi Sin Lluvia", advice: qu ? "Yaku parqoyta wakichiy" : "No confíes solo en lluvia", levels: qu ? ["Ch'aki", "Pisi", "Allin"] : ["Nada", "Regular", "Bastante"] };
   if (r < 20) return { kind: "rain_good", drops: 2, badge: qu ? "Yanapa" : "Ayuda", tone: "sky", level: 2, title: qu ? "Pisi para jamunqa" : "Lluvia Moderada", advice: qu ? "Chakrata pisi uqhuchanqa" : "Mojará un poco la chacra", levels: qu ? ["Pisi", "Chawpi", "Sinchi"] : ["Poca", "Moderada", "Fuerte"] };
-  return { kind: "rain_good", drops: 3, badge: qu ? "Allin" : "Buena", tone: "emerald", level: 3, title: qu ? "Allin para jamunqa" : "Buena Lluvia", advice: qu ? "Allin pacha tarpunapaq" : "Buen momento para sembrar", levels: qu ? ["Pisi", "Chawpi", "Allin"] : ["Poca", "Moderada", "Buena"] };
+  return { kind: "rain_good", drops: 3, badge: qu ? "Qhaway" : "Revisar", tone: "emerald", level: 3, title: qu ? "Allin para jamunqa" : "Mayor acumulado de lluvia", advice: qu ? "Allin pacha tarpunapaq" : "Revisa la humedad y el drenaje antes de sembrar", levels: qu ? ["Pisi", "Chawpi", "Allin"] : ["Poca", "Moderada", "Buena"] };
 }
 
 export function describeSunCard(netWater, lang = "es") {
   const w = Number(netWater ?? 0);
   const qu = lang === "qu";
-  if (w <= -12) return { kind: "sun_dry", badge: qu ? "Qhaway" : "Cuidado", tone: "amber", level: 3, title: qu ? "Inti usqhayta ch'akichin" : "El Sol Seca Rápido", advice: qu ? "Chhallawan allpata qhatay" : "Deja chala o paja encima", levels: qu ? ["Llanthu", "Chawpi", "Ch'akichin"] : ["Suave", "Medio", "Seca mucho"] };
-  if (w < 0) return { kind: "stable", badge: qu ? "Allillan" : "Normal", tone: "sky", level: 2, title: qu ? "Allin inti pacha" : "Sol Moderado", advice: qu ? "Tutamanta parqoy" : "Riega temprano o tarde", levels: qu ? ["Llanthu", "Allillan", "Rupha"] : ["Suave", "Normal", "Fuerte"] };
-  return { kind: "rain_good", badge: qu ? "Llanthu" : "Fresco", tone: "emerald", level: 1, title: qu ? "Allpa yakuta waqaychan" : "Tierra Conserva Agua", advice: qu ? "Paraqa intita atipan" : "La lluvia gana al sol", levels: qu ? ["Waqaychan", "Allillan", "Ch'aki"] : ["Conserva", "Normal", "Seca"] };
+  if (w <= -12) return { kind: "sun_dry", badge: qu ? "Qhaway" : "Cuidado", tone: "amber", level: 3, title: qu ? "Inti usqhayta ch'akichin" : "Lluvia menor que la demanda de referencia", advice: qu ? "Chhallawan allpata qhatay" : "Deja chala o paja encima", levels: qu ? ["Llanthu", "Chawpi", "Ch'akichin"] : ["Suave", "Medio", "Seca mucho"] };
+  if (w < 0) return { kind: "stable", badge: qu ? "Allillan" : "Normal", tone: "sky", level: 2, title: qu ? "Allin inti pacha" : "Lluvia por debajo de la referencia", advice: qu ? "Tutamanta parqoy" : "Comprueba si tu cultivo necesita riego", levels: qu ? ["Llanthu", "Allillan", "Rupha"] : ["Suave", "Normal", "Fuerte"] };
+  return { kind: "rain_good", badge: qu ? "Llanthu" : "Fresco", tone: "emerald", level: 1, title: qu ? "Allpa yakuta waqaychan" : "Lluvia igual o mayor que la referencia", advice: qu ? "Paraqa intita atipan" : "Comprueba la humedad y el drenaje", levels: qu ? ["Waqaychan", "Allillan", "Ch'aki"] : ["Conserva", "Normal", "Seca"] };
 }
 
 export function describeDayVisual(day, lang = "es") {
