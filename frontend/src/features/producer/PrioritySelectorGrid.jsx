@@ -1,5 +1,6 @@
 import React from "react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
+import { tr } from "../../utils/quechuaI18n.js";
 
 const CROP_LABELS = {
   papa_huaycha: { title: "Papa", sub: "Akshu" },
@@ -8,27 +9,27 @@ const CROP_LABELS = {
   cebada: { title: "Cebada", sub: "Siwara" },
   quinua: { title: "Quinua", sub: "Kinwa" },
   tarwi: { title: "Tarwi", sub: "Tarwi" },
-  avena_vicia: { title: "Avena / Vicia", sub: "Forraje" },
+  avena_vicia: { title: "Avena / Vicia", sub: "Uywa mikhuna" },
   alfalfa: { title: "Alfalfa", sub: "Alfalfa" },
 };
 
 const IRRIGATIONS = [
-  { id: "none_secano", label: "Solo lluvia", cue: "Agua de lluvia" },
-  { id: "deficit_auxiliary", label: "Riego por turnos", cue: "Agua por mitas" },
-  { id: "full_canal_well", label: "Canal o pozo", cue: "Riego frecuente" },
+  { id: "none_secano", es: "Solo lluvia", esCue: "Agua de lluvia", qu: "Para yakulla", quCue: "Pachamanta yaku" },
+  { id: "deficit_auxiliary", es: "Riego por turnos", esCue: "Agua por mitas", qu: "Mit'awan parqoy", quCue: "Tanda yaku" },
+  { id: "full_canal_well", es: "Canal o pozo", esCue: "Riego frecuente", qu: "Larq'amanta / Poso", quCue: "Sapa kuti parqoy" },
 ];
 
 const PRIORITY_PRESETS = [
-  { id: "cuidar_todo", label: "Cuidar agua y tierra", ids: ["water_conservation", "nitrogen_fixation", "erosion_control"] },
-  { id: "agua", label: "Guardar humedad", ids: ["water_conservation", "organic_matter"] },
-  { id: "abono", label: "Abonar tierra", ids: ["nitrogen_fixation", "organic_matter"] },
-  { id: "pasto_venta", label: "Pasto y venta", ids: ["forage_value", "market_income"] },
+  { id: "cuidar_todo", es: "Cuidar agua y tierra", qu: "Yakuta allpata jark'ay", ids: ["water_conservation", "nitrogen_fixation", "erosion_control"] },
+  { id: "agua", es: "Guardar humedad", qu: "Uqhu allpa waqaychay", ids: ["water_conservation", "organic_matter"] },
+  { id: "abono", es: "Abonar tierra", qu: "Allpata wanuchay", ids: ["nitrogen_fixation", "organic_matter"] },
+  { id: "pasto_venta", es: "Pasto y venta", qu: "Uywa q'achu, qhatu", ids: ["forage_value", "market_income"] },
 ];
 
 const EQUIPMENTS = [
-  { id: "manual_yunta", label: "Yunta o a mano" },
-  { id: "mixed_tractor_service", label: "Yunta y tractor" },
-  { id: "mechanized", label: "Solo tractor" },
+  { id: "manual_yunta", es: "Yunta o a mano", qu: "Yunta icha makiwan" },
+  { id: "mixed_tractor_service", es: "Yunta y tractor", qu: "Yuntawan tractorwan" },
+  { id: "mechanized", es: "Solo tractor", qu: "Tractorllawan" },
 ];
 
 export default function PrioritySelectorGrid({
@@ -42,7 +43,9 @@ export default function PrioritySelectorGrid({
   equipment,
   onChangeEquipment,
   isAdvanced = false,
+  lang = "es",
 }) {
+  const qu = lang === "qu";
   const cropItems = crops.length > 0
     ? crops
     : Object.keys(CROP_LABELS).map((id) => ({ crop_id: id }));
@@ -54,11 +57,13 @@ export default function PrioritySelectorGrid({
     <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 space-y-5">
       {/* Step 1: Last Crop Harvested */}
       <div className="space-y-2">
-        <span className="text-sm font-bold text-[#0B2545] block">1. ¿Qué cosechaste último?</span>
+        <span className="text-sm font-bold text-[#0B2545] block">{tr(lang, "stepLastCrop")}</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {cropItems.map((c) => {
             const active = cropId === c.crop_id;
-            const label = CROP_LABELS[c.crop_id] || { title: c.name_es || c.crop_id, sub: c.name_qu || "" };
+            const meta = CROP_LABELS[c.crop_id] || { title: c.name_es || c.crop_id, sub: c.name_qu || "" };
+            const mainName = qu ? (meta.sub || meta.title) : meta.title;
+            const subName = qu ? meta.title : meta.sub;
             return (
               <button
                 key={c.crop_id}
@@ -75,10 +80,10 @@ export default function PrioritySelectorGrid({
                   <CropIllustration cropId={c.crop_id} className="w-9 h-9" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold leading-tight truncate">{label.title}</span>
-                  {label.sub ? (
+                  <span className="block text-sm font-bold leading-tight truncate">{mainName}</span>
+                  {subName ? (
                     <span className={`block text-[11px] mt-0.5 truncate ${active ? "text-sky-100" : "text-slate-500"}`}>
-                      {label.sub}
+                      {subName}
                     </span>
                   ) : null}
                 </span>
@@ -90,7 +95,7 @@ export default function PrioritySelectorGrid({
 
       {/* Step 2: Water Availability */}
       <div className="space-y-2 pt-4 border-t border-slate-100">
-        <span className="text-sm font-bold text-[#0B2545] block">2. ¿Con qué agua cuentas?</span>
+        <span className="text-sm font-bold text-[#0B2545] block">{tr(lang, "stepWater")}</span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {IRRIGATIONS.map((opt) => {
             const active = irrigation === opt.id;
@@ -110,8 +115,8 @@ export default function PrioritySelectorGrid({
                   <WaterIllustration id={opt.id} className="w-10 h-10" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold leading-tight">{opt.label}</span>
-                  <span className={`block text-[11px] mt-0.5 ${active ? "text-sky-200" : "text-slate-500"}`}>{opt.cue}</span>
+                  <span className="block text-sm font-bold leading-tight">{qu ? opt.qu : opt.es}</span>
+                  <span className={`block text-[11px] mt-0.5 ${active ? "text-sky-200" : "text-slate-500"}`}>{qu ? opt.quCue : opt.esCue}</span>
                 </span>
               </button>
             );
@@ -123,7 +128,7 @@ export default function PrioritySelectorGrid({
       {isAdvanced ? (
         <div className="pt-4 border-t border-slate-100 space-y-4">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-700 block">¿Qué buscas más?</span>
+            <span className="text-xs font-bold text-slate-700 block">{tr(lang, "stepPriorities")}</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {PRIORITY_PRESETS.map((preset) => {
                 const active = isPresetActive(preset.ids);
@@ -139,7 +144,7 @@ export default function PrioritySelectorGrid({
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    {preset.label}
+                    {qu ? preset.qu : preset.es}
                   </button>
                 );
               })}
@@ -147,7 +152,7 @@ export default function PrioritySelectorGrid({
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-700 block">¿Con qué trabajas?</span>
+            <span className="text-xs font-bold text-slate-700 block">{tr(lang, "stepTools")}</span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {EQUIPMENTS.map((opt) => {
                 const active = equipment === opt.id;
@@ -166,7 +171,7 @@ export default function PrioritySelectorGrid({
                     <span className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
                       <ToolIllustration id={opt.id} className="w-8 h-8" />
                     </span>
-                    <span>{opt.label}</span>
+                    <span>{qu ? opt.qu : opt.es}</span>
                   </button>
                 );
               })}
