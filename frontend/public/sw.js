@@ -1,5 +1,12 @@
-const CACHE_NAME = "tarpuy-nasa-v1";
-const STATIC_ASSETS = ["/", "/index.html", "/manifest.json", "/vite.svg"];
+const CACHE_NAME = "tarpuy-nasa-v2";
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/vite.svg",
+  "/logos/nasa-logo.svg",
+  "/logos/gamc-cochabamba-logo.svg",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
