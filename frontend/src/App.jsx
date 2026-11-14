@@ -4,7 +4,7 @@ import VoiceAssistantDock from "./components/audio/VoiceAssistantDock.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
-import { fetchZones, fetchCrops, fetchRecommendations, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
+import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
 
 export default function App() {
@@ -19,9 +19,11 @@ export default function App() {
   const [forceOffline, setForceOffline] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
+  const [alertBulletin, setAlertBulletin] = useState(null);
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [voiceLang, setVoiceLang] = useState("qu");
+  const [voiceEngine, setVoiceEngine] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [subtitle, setSubtitle] = useState("");
   const [activeAudioKey, setActiveAudioKey] = useState(null);
@@ -39,6 +41,10 @@ export default function App() {
     fetchCrops(forceOffline).then((cs) => cs?.length && setCrops(cs));
   }, [forceOffline]);
 
+  useEffect(() => {
+    fetchAlerts(zoneId, forceOffline).then((b) => b && setAlertBulletin(b));
+  }, [zoneId, forceOffline]);
+
   const loadRecs = useCallback(async () => {
     setLoading(true);
     try {
@@ -47,6 +53,7 @@ export default function App() {
         forceOffline
       );
       setRecData(data);
+      if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
     } catch (err) { console.warn("Recs load error:", err); } finally { setLoading(false); }
   }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline]);
 
@@ -74,16 +81,22 @@ export default function App() {
       onEnd: () => { setIsSpeaking(false); setSubtitle(""); },
       onError: () => { setIsSpeaking(false); setSubtitle(""); },
       onSubtitle: (text) => setSubtitle(text),
+      onEngine: (eng) => setVoiceEngine(eng),
     });
   };
 
-  const handleSpeak = (text, lang, key) => {
+  const handleSpeak = (text, lang, key, clipKey = null) => {
     if (activeAudioKey === key) { handleStopAudio(); return; }
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
     setSubtitle(text);
-    const cb = { onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); }, onError: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); } };
+    const cb = {
+      clipKey,
+      onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); },
+      onError: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); },
+      onEngine: (eng) => setVoiceEngine(eng),
+    };
     if (lang === "qu") speakQuechua(text, cb);
     else speakSpanish(text, cb);
   };
@@ -93,17 +106,17 @@ export default function App() {
       <div className="space-y-4">
         <Navbar mode={mode} onChangeMode={setMode} isOnline={isOnline} forceOffline={forceOffline} onToggleOffline={() => setForceOffline((p) => !p)} onDownloadBundle={handleDownloadBundle} cachedCount={cachedCount} syncStatus={syncStatus} />
         <main className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4">
-          <VoiceAssistantDock voiceLang={voiceLang} onChangeVoiceLang={setVoiceLang} isSpeaking={isSpeaking} subtitle={subtitle} onSpeakGuide={handleSpeakGuide} onStop={handleStopAudio} />
+          <VoiceAssistantDock voiceLang={voiceLang} onChangeVoiceLang={setVoiceLang} isSpeaking={isSpeaking} subtitle={subtitle} voiceEngine={voiceEngine} onSpeakGuide={handleSpeakGuide} onStop={handleStopAudio} />
           <section className="bg-white p-3.5 sm:p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4 text-xs">
               <div>
-                <label htmlFor="zone-select" className="font-bold text-stone-700 block mb-1">Zona Piloto Agroecológica:</label>
+                <label htmlFor="zone-select" className="font-bold text-stone-700 block mb-1">Elige tu Municipio o Comunidad:</label>
                 <select id="zone-select" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className="p-2 border border-stone-300 rounded-xl font-semibold bg-stone-50 text-stone-800">
                   {zones.map((z) => (<option key={z.zone_id} value={z.zone_id}>{z.name} ({z.elevation_msnm} msnm)</option>))}
                 </select>
               </div>
               <div>
-                <label htmlFor="crop-select" className="font-bold text-stone-700 block mb-1">Cultivo Precedente en Parcela:</label>
+                <label htmlFor="crop-select" className="font-bold text-stone-700 block mb-1">¿Qué sembraste la última vez en tu chacra?</label>
                 <select id="crop-select" value={cropId} onChange={(e) => setCropId(e.target.value)} className="p-2 border border-stone-300 rounded-xl font-semibold bg-stone-50 text-stone-800">
                   {crops.map((c) => (<option key={c.crop_id} value={c.crop_id}>{c.name_es} ({c.name_qu})</option>))}
                 </select>
@@ -111,11 +124,11 @@ export default function App() {
             </div>
           </section>
           {loading ? (
-            <div className="p-12 text-center text-stone-500 font-medium">Cargando recomendaciones satelitales NASA...</div>
+            <div className="p-12 text-center text-stone-500 font-medium">Buscando el clima de hoy y mejores siembras para tu tierra...</div>
           ) : mode === "producer" ? (
-            <ProducerMode zones={zones} zone={currentZone} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} priorities={priorities} onTogglePriority={(id) => setPriorities((prev) => prev.includes(id) ? (prev.length > 1 ? prev.filter((p) => p !== id) : prev) : [...prev, id])} irrigation={irrigation} onChangeIrrigation={setIrrigation} equipment={equipment} onChangeEquipment={setEquipment} strategies={recData?.strategies || []} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} />
+            <ProducerMode zones={zones} zone={currentZone} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} priorities={priorities} onTogglePriority={(id) => setPriorities((prev) => prev.includes(id) ? (prev.length > 1 ? prev.filter((p) => p !== id) : prev) : [...prev, id])} irrigation={irrigation} onChangeIrrigation={setIrrigation} equipment={equipment} onChangeEquipment={setEquipment} strategies={recData?.strategies || []} bulletin={alertBulletin} voiceLang={voiceLang} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} />
           ) : (
-            <TechnicalMode zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} forceOffline={forceOffline} isOnline={isOnline} />
+            <TechnicalMode zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} forceOffline={forceOffline} isOnline={isOnline} />
           )}
         </main>
       </div>
