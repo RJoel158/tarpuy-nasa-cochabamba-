@@ -39,10 +39,10 @@ export default function ProducerMode({
   return (
     <div className="space-y-6">
       {/* Header + Previous Crop Selector */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Plan de rotación · {zone?.name || currentZoneId}</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">¿Qué conviene sembrar?</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Plan de rotación · {zone?.name || currentZoneId}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">¿Qué conviene sembrar?</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -97,8 +97,8 @@ export default function ProducerMode({
                   selectedIdx === idx
                     ? s.strategy_type === "current_baseline"
                       ? "bg-amber-600 text-white border-amber-700"
-                      : "bg-emerald-800 text-white border-emerald-900"
-                    : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                      : "bg-[#0B2545] text-white border-[#081B33]"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                 }`}
               >
                 {tabLabel(s, idx)}

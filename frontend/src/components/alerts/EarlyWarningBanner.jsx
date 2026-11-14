@@ -45,21 +45,21 @@ export default function EarlyWarningBanner({ bulletin, zoneName = "", onSpeak, a
   return (
     <div className="space-y-6">
       {/* Screen Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Reporte en vivo · 7 días</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Clima hoy en {zoneName || zId}</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Reporte en vivo · 7 días</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">Clima hoy en {zoneName || zId}</h2>
         </div>
         <button
           type="button"
           onClick={handleListen}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition cursor-pointer ${
             activeAudioKey === aKey
-              ? "bg-emerald-800 text-white border-emerald-900"
-              : "bg-white hover:bg-stone-100 text-stone-900 border-stone-300"
+              ? "bg-[#0B2545] text-white border-[#081B33]"
+              : "bg-white hover:bg-slate-100 text-slate-900 border-slate-300"
           }`}
         >
-          <Volume2 className="w-4 h-4 text-emerald-700" />
+          <Volume2 className={`w-4 h-4 ${activeAudioKey === aKey ? "text-sky-300" : "text-[#0284C7]"}`} />
           <span>{voiceLang === "qu" ? "Escuchar en Qhichwa" : "Escuchar avisos"}</span>
         </button>
       </div>
@@ -72,14 +72,14 @@ export default function EarlyWarningBanner({ bulletin, zoneName = "", onSpeak, a
           <span className="text-xs text-stone-500">Mín. semana: {pred.min_temp_7d_c}°C</span>
         </div>
         <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-stone-500">Humedad en tierra</span>
-          <p className="text-3xl font-bold text-sky-700 mt-1">{cur.soil_moisture_top_pct}%</p>
-          <span className="text-xs text-stone-500">Aire: {cur.humidity_pct}%</span>
+          <span className="text-xs font-medium text-slate-500">Humedad en tierra</span>
+          <p className="text-3xl font-bold text-[#0B2545] mt-1">{cur.soil_moisture_top_pct}%</p>
+          <span className="text-xs text-slate-500">Aire: {cur.humidity_pct}%</span>
         </div>
         <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-stone-500">Lluvia esperada</span>
-          <p className="text-3xl font-bold text-emerald-700 mt-1">{pred.total_precip_7d_mm} mm</p>
-          <span className="text-xs text-stone-500">En los próximos 7 días</span>
+          <span className="text-xs font-medium text-slate-500">Lluvia esperada</span>
+          <p className="text-3xl font-bold text-[#0284C7] mt-1">{pred.total_precip_7d_mm} mm</p>
+          <span className="text-xs text-slate-500">En los próximos 7 días</span>
         </div>
         <div className="p-4 sm:p-5">
           <span className="text-xs font-medium text-stone-500">Sol que seca</span>

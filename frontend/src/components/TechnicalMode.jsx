@@ -12,9 +12,9 @@ export default function TechnicalMode({ zone, strategies = [], provenance = {}, 
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-stone-200 pb-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#0B3D91]">Transparencia y evidencia satelital</p>
-        <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Datos NASA · {zone?.name || "Cochabamba"}</h2>
+      <div className="border-b border-slate-200 pb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Transparencia y evidencia satelital</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">Datos NASA · {zone?.name || "Cochabamba"}</h2>
       </div>
 
       <ClimateChartsPanel indicators={indicators} zoneName={zone?.name} />
@@ -36,14 +36,14 @@ export default function TechnicalMode({ zone, strategies = [], provenance = {}, 
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="flex border-b border-stone-200 gap-2 overflow-x-auto">
+          <div className="flex border-b border-slate-200 gap-2 overflow-x-auto">
             {strategies.map((s, idx) => (
               <button
                 key={s.strategy_id || idx}
                 type="button"
                 onClick={() => setActiveTab(idx)}
                 className={`py-2 px-3 text-xs font-bold border-b-2 -mb-px transition whitespace-nowrap cursor-pointer ${
-                  activeTab === idx ? "border-emerald-700 text-emerald-950" : "border-transparent text-stone-500 hover:text-stone-900"
+                  activeTab === idx ? "border-[#0284C7] text-[#0B2545]" : "border-transparent text-slate-500 hover:text-slate-900"
                 }`}
               >
                 {s.strategy_type === "current_baseline" ? "Práctica tradicional" : `Alternativa #${idx}`}
@@ -53,12 +53,12 @@ export default function TechnicalMode({ zone, strategies = [], provenance = {}, 
 
           {strat ? (
             <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-stone-50 rounded-lg border border-stone-200 space-y-1">
-                <span className="font-bold text-[#0B3D91] flex items-center gap-1.5">
-                  <Satellite className="w-4 h-4" />
+              <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
+                <span className="font-bold text-[#0B2545] flex items-center gap-1.5">
+                  <Satellite className="w-4 h-4 text-[#0284C7]" />
                   <span>Evidencia NASA (POWER & SMAP L4)</span>
                 </span>
-                <p className="text-stone-700 leading-relaxed">{strat.nasa_evidence}</p>
+                <p className="text-slate-700 leading-relaxed">{strat.nasa_evidence}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-3 bg-white rounded-lg border border-stone-200">
@@ -106,13 +106,13 @@ export default function TechnicalMode({ zone, strategies = [], provenance = {}, 
 
       {bulletin?.veracity_manifest ? <DataVeracityCard manifest={bulletin.veracity_manifest} /> : null}
 
-      <div className="bg-stone-900 text-stone-200 rounded-xl p-4 font-mono text-xs space-y-1.5">
+      <div className="bg-[#0B2545] text-slate-200 rounded-xl p-4 font-mono text-xs space-y-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-bold flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-emerald-400" />Integridad de datos SHA-256</span>
-          <Badge variant="soil" className="bg-emerald-950 text-emerald-300 border-emerald-700 text-[10px]">VERIFICADO</Badge>
+          <span className="font-bold flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-sky-300" />Integridad de datos SHA-256</span>
+          <Badge variant="soil" className="bg-sky-950 text-sky-300 border-sky-700 text-[10px]">VERIFICADO</Badge>
         </div>
-        <p className="text-stone-400 text-[11px]">Fuentes: {(provenance?.nasa_datasets || ["NASA POWER", "SMAP L4", "Sentinel/MODIS"]).join(" · ")}</p>
-        <p className="text-[11px] text-emerald-400 break-all">{provenance?.integrity_sha256 || ""}</p>
+        <p className="text-slate-400 text-[11px]">Fuentes: {(provenance?.nasa_datasets || ["NASA POWER", "SMAP L4", "Sentinel/MODIS"]).join(" · ")}</p>
+        <p className="text-[11px] text-sky-300 break-all">{provenance?.integrity_sha256 || ""}</p>
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-100 pb-4">
         <div>
-          <span className={`text-xs font-bold uppercase tracking-wider ${isBase ? "text-amber-800" : "text-emerald-800"}`}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${isBase ? "text-amber-700" : "text-[#0284C7]"}`}>
             {isBase ? "Práctica actual · Riesgo para el suelo" : `Opción recomendada · ${scorePct}% ideal`}
           </span>
           <h3 className="text-xl font-bold text-stone-900 mt-1">{title}</h3>
@@ -64,9 +64,9 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       <CropCalendarBar cropSequence={strategy.crop_sequence} indicators={indicators} />
 
       {/* Plain Explanation */}
-      <div className="space-y-2 text-sm text-stone-800 bg-stone-50 rounded-xl p-4 border border-stone-200">
+      <div className="space-y-2 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
         <p className="leading-relaxed">{strategy.spanish_summary}</p>
-        <p className="italic text-emerald-950 leading-relaxed pt-1 border-t border-stone-200/80">“{strategy.quechua_summary}”</p>
+        <p className="italic text-[#0B2545] leading-relaxed pt-1 border-t border-slate-200/80">“{strategy.quechua_summary}”</p>
       </div>
 
       {/* 4 Compact Status Checks */}
@@ -91,7 +91,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
           type="button"
           onClick={() => onSpeak(strategy.quechua_summary, "qu", qKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-            activeAudioKey === qKey ? "bg-emerald-800 text-white border-emerald-900" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300"
+            activeAudioKey === qKey ? "bg-[#0B2545] text-white border-[#081B33]" : "bg-sky-50 hover:bg-sky-100 text-[#0B2545] border-sky-300"
           }`}
         >
           <Volume2 className="w-4 h-4 shrink-0" />

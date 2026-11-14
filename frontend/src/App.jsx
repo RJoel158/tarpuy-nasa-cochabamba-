@@ -93,7 +93,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-stone-900 font-sans flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}
@@ -120,7 +120,7 @@ export default function App() {
             <div className="space-y-6">
               <EarlyWarningBanner bulletin={alertBulletin} zoneName={currentZone?.name} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} voiceLang={voiceLang} />
               <div className="flex justify-end">
-                <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-bold cursor-pointer">
+                <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
                   <span>Ver qué sembrar en {currentZone?.name || "tu zona"}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -146,7 +146,7 @@ export default function App() {
           ) : activeView === "mapa" ? (
             <div className="space-y-6">
               <div className="border-b border-stone-200 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Ubicación y suelo</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Ubicación y suelo</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Mapa de comunidades · {currentZone?.name || ""}</h2>
               </div>
               <CochabambaMap zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} tall={true} />

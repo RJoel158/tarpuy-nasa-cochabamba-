@@ -45,8 +45,8 @@ export default function PrioritySelectorGrid({
                 aria-pressed={active}
                 className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition cursor-pointer ${
                   active
-                    ? "bg-emerald-800 text-white border-emerald-900"
-                    : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
+                    ? "bg-[#0284C7] text-white border-[#0369A1]"
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />

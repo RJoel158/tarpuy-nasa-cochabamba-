@@ -98,7 +98,7 @@ export default function CochabambaMap({ zones = [], activeZoneId, onSelectZone, 
               type="button"
               onClick={() => onSelectZone(z.id)}
               className={`p-3.5 text-left transition cursor-pointer ${
-                active ? "bg-emerald-50/80 border-l-4 sm:border-l-0 sm:border-t-2 border-emerald-700" : "hover:bg-white"
+                active ? "bg-sky-50/80 border-l-4 sm:border-l-0 sm:border-t-2 border-[#0284C7]" : "hover:bg-white"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
