@@ -62,6 +62,7 @@ export function featureInfoRows(geojson) {
 }
 
 export const GAMC_DISTRICTS_SERVICE_ID = "7eb13092-bf0e-493b-aae6-03c43eedda2c";
+export const GAMC_DRAINAGE_SERVICE_ID = "d4cea6e3-fc7f-482a-94ad-bd377df78886";
 const PROBE_HALF_DEG = 0.0005;
 
 let districtsPromise = null;
@@ -107,4 +108,32 @@ export async function fetchDistrictAt(lat, lon) {
   const props = (await res.json())?.features?.[0]?.properties;
   const code = String(props?.Distrito || "").trim().toUpperCase();
   return code ? { code, comuna: String(props?.Comuna || "").trim() } : null;
+}
+
+/** Drainage feature ({ tipo, clasificacion }) at a WGS84 point, or null when none. */
+export async function fetchDrainageAt(lat, lon) {
+  const d = PROBE_HALF_DEG * 4;
+  const params = new URLSearchParams({
+    service_id: GAMC_DRAINAGE_SERVICE_ID,
+    SERVICE: "WMS",
+    VERSION: "1.1.1",
+    REQUEST: "GetFeatureInfo",
+    SRS: "EPSG:4326",
+    LAYERS: "",
+    QUERY_LAYERS: "",
+    BBOX: `${lon - d},${lat - d},${lon + d},${lat + d}`,
+    WIDTH: "101",
+    HEIGHT: "101",
+    X: "50",
+    Y: "50",
+    INFO_FORMAT: "application/json",
+    FEATURE_COUNT: "3",
+  });
+  const res = await fetch(`${GAMC_WMS_PATH}?${params.toString()}`);
+  if (!res.ok) throw new Error("Consulta de drenaje no disponible");
+  const props = (await res.json())?.features?.[0]?.properties;
+  if (!props) return null;
+  const clasificacion = String(props.Clasificación || props.Clasificacion || "").trim();
+  const tipo = String(props.Tipo || "").trim();
+  return clasificacion || tipo ? { tipo, clasificacion } : null;
 }
