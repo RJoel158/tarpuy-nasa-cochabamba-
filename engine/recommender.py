@@ -21,6 +21,7 @@ def _normalize_json_numbers(obj: Any) -> Any:
     return obj
 
 from etl.security import compute_sha256
+from engine.alerts import AgroclimaticAlertEvaluator
 from engine.interfaces import CropRepository, RotationScorer, ZoneRepository
 from engine.scoring import MultiCriteriaRotationScorer
 
@@ -63,10 +64,12 @@ class RotationRecommendationService:
         zone_repo: ZoneRepository | None = None,
         crop_repo: CropRepository | None = None,
         scorer: RotationScorer | None = None,
+        alert_evaluator: AgroclimaticAlertEvaluator | None = None,
     ):
         self.zone_repo: ZoneRepository = zone_repo or JsonZoneRepository()
         self.crop_repo: CropRepository = crop_repo or JsonCropRepository()
         self.scorer: RotationScorer = scorer or MultiCriteriaRotationScorer()
+        self.alert_evaluator: AgroclimaticAlertEvaluator = alert_evaluator or AgroclimaticAlertEvaluator()
 
     def recommend(
         self,
@@ -116,6 +119,8 @@ class RotationRecommendationService:
             ),
         }
 
+        bulletin = _normalize_json_numbers(self.alert_evaluator.evaluate_zone(zone_id, zone))
+
         return {
             "zone_id": zone_id,
             "evaluated_at": datetime.now(timezone.utc).isoformat(),
@@ -123,6 +128,7 @@ class RotationRecommendationService:
             "priorities_considered": list(farmer_priorities),
             "strategies": strategies,
             "data_provenance": provenance,
+            "realtime_bulletin": bulletin,
         }
 
     def build_offline_bundle(self, zone_id: str) -> dict[str, Any]:
@@ -152,6 +158,7 @@ class RotationRecommendationService:
             "zone_profile": copy.deepcopy(zone),
             "crops_catalog": copy.deepcopy(crops),
             "precomputed_recommendations": scored,
+            "realtime_bulletin": self.alert_evaluator.evaluate_zone(zone_id, zone),
         })
         canonical = json.dumps(bundle_content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         bundle_content["integrity_sha256"] = compute_sha256(canonical)
