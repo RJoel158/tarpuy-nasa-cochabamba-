@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import React from "react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 
 const CROP_LABELS = {
@@ -42,9 +41,8 @@ export default function PrioritySelectorGrid({
   onChangeIrrigation,
   equipment,
   onChangeEquipment,
+  isAdvanced = false,
 }) {
-  const [showMore, setShowMore] = useState(false);
-
   const cropItems = crops.length > 0
     ? crops
     : Object.keys(CROP_LABELS).map((id) => ({ crop_id: id }));
@@ -121,72 +119,61 @@ export default function PrioritySelectorGrid({
         </div>
       </div>
 
-      {/* Optional Collapsible Details */}
-      <div className="pt-3 border-t border-slate-100">
-        <button
-          type="button"
-          onClick={() => setShowMore((p) => !p)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0284C7] hover:text-[#0369A1] cursor-pointer"
-        >
-          {showMore ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          <span>Más detalles de tu terreno (opcional)</span>
-        </button>
-
-        {showMore ? (
-          <div className="mt-4 space-y-4">
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">¿Qué buscas más?</span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {PRIORITY_PRESETS.map((preset) => {
-                  const active = isPresetActive(preset.ids);
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => onChangePriorities(preset.ids)}
-                      aria-pressed={active}
-                      className={`py-2 px-3 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-                        active
-                          ? "bg-[#0284C7] text-white border-[#0369A1]"
-                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">¿Con qué trabajas?</span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {EQUIPMENTS.map((opt) => {
-                  const active = equipment === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => onChangeEquipment(opt.id)}
-                      aria-pressed={active}
-                      className={`p-2.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-2.5 text-left ${
-                        active
-                          ? "bg-[#0B2545] text-white border-[#081B33]"
-                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      <span className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                        <ToolIllustration id={opt.id} className="w-8 h-8" />
-                      </span>
-                      <span>{opt.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+      {/* Advanced Controls: Priorities & Tools */}
+      {isAdvanced ? (
+        <div className="pt-4 border-t border-slate-100 space-y-4">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-slate-700 block">¿Qué buscas más?</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {PRIORITY_PRESETS.map((preset) => {
+                const active = isPresetActive(preset.ids);
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => onChangePriorities(preset.ids)}
+                    aria-pressed={active}
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                      active
+                        ? "bg-[#0284C7] text-white border-[#0369A1]"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
-        ) : null}
-      </div>
+
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-slate-700 block">¿Con qué trabajas?</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {EQUIPMENTS.map((opt) => {
+                const active = equipment === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onChangeEquipment(opt.id)}
+                    aria-pressed={active}
+                    className={`p-2.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-2.5 text-left ${
+                      active
+                        ? "bg-[#0B2545] text-white border-[#081B33]"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <ToolIllustration id={opt.id} className="w-8 h-8" />
+                    </span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

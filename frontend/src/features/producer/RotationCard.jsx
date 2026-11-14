@@ -28,7 +28,7 @@ function firstSentence(text = "") {
   return first.length > 140 ? `${first.slice(0, 137).trim()}...` : first;
 }
 
-export default function RotationCard({ strategy = {}, index = 1, indicators = [], onSpeak, activeAudioKey }) {
+export default function RotationCard({ strategy = {}, index = 1, indicators = [], onSpeak, activeAudioKey, isAdvanced = false }) {
   const isBase = strategy.strategy_type === "current_baseline";
   const scorePct = Math.round((strategy.priority_alignment_score || 0.45) * 100);
   const title = PLAIN_TITLES[strategy.strategy_id] || strategy.title_es;
@@ -49,7 +49,11 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-100 pb-4">
         <div>
           <span className={`text-xs font-bold uppercase tracking-wider ${isBase ? "text-amber-700" : "text-[#0284C7]"}`}>
-            {isBase ? "Práctica actual · Riesgo para el suelo" : `Opción recomendada · ${scorePct}% ideal`}
+            {isBase
+              ? "Práctica actual · Riesgo para el suelo"
+              : isAdvanced
+              ? `Opción recomendada · ${scorePct}% adecuación algorítmica`
+              : "Recomendado para tu chacra"}
           </span>
           <h3 className="text-xl font-bold text-[#0B2545] mt-1">{title}</h3>
         </div>
@@ -103,6 +107,12 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
           );
         })}
       </div>
+
+      {isAdvanced && strategy.nasa_evidence ? (
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
+          <strong className="text-[#0B2545]">Evidencia NASA:</strong> {strategy.nasa_evidence}
+        </div>
+      ) : null}
 
       {/* Clean Audio Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
