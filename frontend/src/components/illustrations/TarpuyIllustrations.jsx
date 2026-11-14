@@ -856,6 +856,72 @@ export function DibujoAntenaOndas({ size = 64, className = "" }) {
   );
 }
 
+/* 32. TERMÓMETRO DE CALOR (--tierra para calor y sol) */
+export function DibujoTermometroCalor({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Temperatura cálida">
+      {/* Sol pequeño de apoyo */}
+      <circle cx="46" cy="18" r="7" fill={SUN} stroke={INK} strokeWidth="2.5" />
+      {/* Tubo y bulbo del termómetro */}
+      <path
+        d="M20 14C20 10.7 22.7 8 26 8C29.3 8 32 10.7 32 14V35.5C35.2 37.5 37 41 37 45C37 51.1 32.1 56 26 56C19.9 56 15 51.1 15 45C15 41 16.8 37.5 20 35.5V14Z"
+        fill={HIGHLIGHT}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      {/* Columna en --tierra para calor */}
+      <circle cx="26" cy="45" r="6.5" fill={EARTH_DRY} stroke={INK} strokeWidth="2" />
+      <rect x="23.5" y="18" width="5" height="24" rx="2.5" fill={EARTH_DRY} />
+      <path d="M35 16H39M35 23H38M35 30H39" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 33. TERMÓMETRO DE FRÍO (--cielo para frío y escarcha) */
+export function DibujoTermometroFrio({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Temperatura fría">
+      {/* Cristal de frío al lado */}
+      <path
+        d="M46 14V26M40 20H52M42 16L50 24M50 16L42 24"
+        stroke={WATER}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      {/* Tubo y bulbo del termómetro */}
+      <path
+        d="M20 14C20 10.7 22.7 8 26 8C29.3 8 32 10.7 32 14V35.5C35.2 37.5 37 41 37 45C37 51.1 32.1 56 26 56C19.9 56 15 51.1 15 45C15 41 16.8 37.5 20 35.5V14Z"
+        fill={HIGHLIGHT}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      {/* Columna baja en --cielo para frío */}
+      <circle cx="26" cy="45" r="6.5" fill={WATER} stroke={INK} strokeWidth="2" />
+      <rect x="23.5" y="30" width="5" height="12" rx="2.5" fill={WATER} />
+      <path d="M35 16H39M35 23H38M35 30H39" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 34. LUNA Y ESCARCHA DE NOCHE (Para previsión nocturna) */
+export function DibujoNocheLuna({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Noche y madrugada">
+      <path
+        d="M36 10C24 12 16 24 19 37C22 49 34 56 47 52C35 53 26 44 26 32C26 21 34 12 44 11C41 10 38.5 10 36 10Z"
+        fill={SUN}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      <circle cx="48" cy="22" r="2.8" fill={SUN} stroke={INK} strokeWidth="1.8" />
+      <path d="M14 18V26M10 22H18" stroke={WATER} strokeWidth="2.6" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
 /* Catálogo completo de las 24 ilustraciones de la Fase 1 */
 export const CATALOGO_ILUSTRACIONES = [
   { id: "sol", nombre: "Sol", Component: DibujoSol },
@@ -892,6 +958,9 @@ export const CATALOGO_ILUSTRACIONES_NAVEGACION = [
   { id: "lupa", nombre: "Modo Avanzado (Lupa)", Component: DibujoLupa },
   { id: "pin_ubicacion", nombre: "Ubicación (Pin)", Component: DibujoPinUbicacion },
   { id: "antena_ondas", nombre: "Señal (Antena con ondas)", Component: DibujoAntenaOndas },
+  { id: "termometro_calor", nombre: "Termómetro calor", Component: DibujoTermometroCalor },
+  { id: "termometro_frio", nombre: "Termómetro frío", Component: DibujoTermometroFrio },
+  { id: "noche_luna", nombre: "Noche y luna", Component: DibujoNocheLuna },
 ];
 
 const MAPA_POR_ID = Object.fromEntries(

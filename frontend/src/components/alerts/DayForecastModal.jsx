@@ -1,104 +1,295 @@
 import React from "react";
-import { X, Volume2, Sun, Moon, CloudRain, Wind } from "lucide-react";
-import { WeatherIllustration, RainDropsVisual, TONE_CLASSES } from "./WeatherPictograms.jsx";
+import { WeatherIllustration, RainDropsVisual } from "./WeatherPictograms.jsx";
+import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
+import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
 import { tr, buildDayInterpretation } from "../../utils/quechuaI18n.js";
 
-export default function DayForecastModal({ day, dv, zoneName = "", lang = "es", onClose, onSpeak }) {
+/**
+ * TARPUY NASA COCHABAMBA — MODAL DE DETALLE DEL DÍA (FASE 3)
+ * ==========================================================
+ * - Dibujos grandes y palabras simples.
+ * - Previsión por tramos del día como una franja dibujada de Mañana, Tarde y Noche
+ *   en lugar de tabla fría (usando exactamente los mismos datos del día).
+ * - Botón "Cerrar" enorme (mínimo 68 px) y botón de Altavoz grande.
+ * - Cero códigos hexadecimales sueltos.
+ */
+
+export default function DayForecastModal({
+  day,
+  dv,
+  zoneName = "",
+  lang = "es",
+  onClose,
+  onSpeak,
+}) {
   if (!day || !dv) return null;
-  const tone = TONE_CLASSES[dv.tone] || TONE_CLASSES.emerald;
+
+  const esQu = lang === "qu";
   const interp = buildDayInterpretation(day, dv, lang);
 
-  const metrics = [
-    { Icon: Sun, color: "text-amber-500", label: tr(lang, "dayTempLabel"), val: `${day.temp_max_c}°C`, sub: day.temp_max_c >= 23 ? (lang === "qu" ? "Rupha" : "Caluroso") : (lang === "qu" ? "Q'uñi" : "Templado") },
-    { Icon: Moon, color: "text-indigo-600", label: tr(lang, "nightTempLabel"), val: `${day.temp_min_c}°C`, sub: dv.nightText },
-    { Icon: CloudRain, color: "text-[#0284C7]", label: tr(lang, "rainLabel"), val: `${day.precip_mm} mm`, sub: `${dv.rainText} (${day.precip_prob_pct ?? 0}%)` },
-    { Icon: Wind, color: "text-emerald-600", label: tr(lang, "windEvapLabel"), val: `${day.wind_kmh ?? "—"} km/h`, sub: `ET0: ${day.et0_mm ?? "—"} mm` },
+  const tmin = Number(day.temp_min_c ?? 8);
+  const tmax = Number(day.temp_max_c ?? 20);
+  const rain = Number(day.precip_mm ?? 0);
+  const wind = Number(day.wind_kmh ?? 10);
+
+  /* Franja dibujada de Mañana, Tarde y Noche usando los mismos datos del día */
+  const franjaMomentos = [
+    {
+      id: "manana",
+      momento: esQu ? "1. Tutamanta (Mañana)" : "1. Mañana",
+      dibujoId: tmin <= 2 ? "helada" : "nube_con_sol",
+      palabra:
+        tmin <= 2
+          ? esQu
+            ? "Qasa paqarin"
+            : "Amanece con helada"
+          : tmin <= 6
+          ? esQu
+            ? "Chiri paqarin"
+            : "Amanece frío"
+          : esQu
+          ? "Llanthu paqarin"
+          : "Mañana fresca",
+      apoyoNumerico: `${esQu ? "Mín" : "Mínima"}: ${day.temp_min_c}°C`,
+      bg: tmin <= 2 ? "var(--alerta-critico-suave)" : "var(--dorado-suave)",
+    },
+    {
+      id: "tarde",
+      momento: esQu ? "2. Chawpi p'unchaw (Tarde)" : "2. Tarde",
+      dibujoId: rain >= 3 ? "lluvia" : wind >= 18 ? "viento" : "sol",
+      palabra:
+        rain >= 3
+          ? esQu
+            ? "Para chawpi p'unchaw"
+            : "Lluvia en la tarde"
+          : wind >= 18
+          ? esQu
+            ? "Sinchi wayra"
+            : "Viento fuerte"
+          : tmax >= 23
+          ? esQu
+            ? "Rupha inti"
+            : "Sol y calor"
+          : esQu
+          ? "Q'uñi pacha"
+          : "Tarde templada",
+      apoyoNumerico: `${esQu ? "Máx" : "Máxima"}: ${day.temp_max_c}°C · ${
+        day.wind_kmh ?? "—"
+      } km/h · ET0: ${day.et0_mm ?? "—"} mm`,
+      bg: rain >= 3 ? "var(--cielo-suave)" : "var(--tierra-suave)",
+    },
+    {
+      id: "noche",
+      momento: esQu ? "3. Tuta (Noche)" : "3. Noche",
+      dibujoId: tmin <= 2 ? "helada" : "noche_luna",
+      palabra: dv.nightText,
+      apoyoNumerico: `${tr(lang, "rainLabel")}: ${day.precip_mm} mm (${
+        day.precip_prob_pct ?? 0
+      }%)`,
+      bg: tmin <= 2 ? "var(--alerta-critico-suave)" : "var(--cielo-suave)",
+    },
   ];
+
+  const alertaBg =
+    dv.tone === "rose"
+      ? "var(--alerta-critico-suave)"
+      : dv.tone === "amber"
+      ? "var(--alerta-cuidado-suave)"
+      : dv.tone === "sky"
+      ? "var(--cielo-suave)"
+      : "var(--hoja-suave)";
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`${day.day_label} · ${dv.word}`}
-      className="fixed inset-0 z-50 bg-slate-900/55 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5"
+      style={{ backgroundColor: "rgba(35, 26, 20, 0.72)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full max-h-[88vh] flex flex-col shadow-xl overflow-hidden"
+        className="tarpuy-card-physical max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: "var(--tarjeta)",
+          boxShadow: "0 8px 0 var(--tinta)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
+        {/* Cabecera del modal */}
+        <div
+          className="px-6 py-4 flex flex-wrap items-center justify-between gap-4"
+          style={{
+            backgroundColor: "var(--arena)",
+            borderBottom: "var(--border-width-thick) solid var(--tinta)",
+          }}
+        >
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0284C7]">
-              {tr(lang, "dayDetailSub")} · {zoneName}
+            <p
+              className="text-sm font-extrabold uppercase tracking-wider"
+              style={{ color: "var(--tinta-suave)" }}
+            >
+              {tr(lang, "dayDetailSub")} · {zoneName} · {day.date}
             </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <h3 className="text-lg font-bold text-[#0B2545]">{day.day_label}</h3>
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${tone.badge}`}>{dv.word}</span>
+            <div className="flex flex-wrap items-center gap-3 mt-1">
+              <h3 className="tarpuy-title">{day.day_label}</h3>
+              <span
+                className="px-4 py-1 rounded-full font-extrabold text-lg"
+                style={{
+                  backgroundColor: alertaBg,
+                  color: "var(--tinta)",
+                  border: "var(--border-width-medium) solid var(--tinta)",
+                }}
+              >
+                {dv.word}
+              </span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={tr(lang, "closeBtn")}
-            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+
+          <BotonAltavoz
+            sonando={false}
+            mostrarTexto={true}
+            etiqueta={tr(lang, "listenBtn")}
+            onClick={() =>
+              onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)
+            }
+          />
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto">
-          <div className="rounded-2xl bg-gradient-to-br from-sky-50 to-slate-50 border border-sky-200/80 p-4 flex items-center gap-4">
-            <div className="w-24 h-24 rounded-2xl bg-white border border-sky-200 flex items-center justify-center shrink-0 shadow-xs">
-              <WeatherIllustration kind={dv.kind} animated={true} className="w-20 h-20" />
+        {/* Cuerpo del modal */}
+        <div className="p-6 space-y-6 overflow-y-auto">
+          {/* Resumen visual principal del día */}
+          <div
+            className="p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-5"
+            style={{
+              backgroundColor: alertaBg,
+              border: "var(--border-width-thick) solid var(--tinta)",
+            }}
+          >
+            <div
+              className="w-28 h-28 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: "var(--tarjeta)",
+                border: "var(--border-width-medium) solid var(--tinta)",
+              }}
+            >
+              <WeatherIllustration
+                kind={dv.kind}
+                animated={true}
+                className="w-20 h-20"
+              />
             </div>
-            <div className="min-w-0 space-y-1.5">
-              <RainDropsVisual count={dv.drops} text={dv.rainText} lang={lang} />
-              <p className="text-sm font-bold text-[#0B2545]">{dv.nightText}</p>
-              <p className="text-xs text-slate-600">{day.date}</p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            {metrics.map((m) => (
-              <div key={m.label} className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 space-y-1">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                  <m.Icon className={`w-3.5 h-3.5 ${m.color} shrink-0`} />
-                  <span>{m.label}</span>
-                </div>
-                <p className="text-base font-bold text-[#0B2545]">{m.val}</p>
-                <p className="text-[11px] text-slate-600">{m.sub}</p>
+            <div className="space-y-2 text-center sm:text-left">
+              <p className="tarpuy-subtitle">{interp.adviceText}</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                <RainDropsVisual count={dv.drops} text={dv.rainText} lang={lang} />
+                <span
+                  className="px-3 py-1 rounded-full text-base font-extrabold"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    border: "1.5px solid var(--tinta)",
+                  }}
+                >
+                  {dv.nightText}
+                </span>
               </div>
-            ))}
+            </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs text-slate-700 leading-relaxed">
-            <h4 className="text-sm font-bold text-[#0B2545]">{tr(lang, "farmMeaningTitle")}</h4>
-            <p>{interp.dayText}</p>
-            <p>{interp.nightText}</p>
-            <p>{interp.rainText}</p>
-            <p className="pt-1.5 border-t border-slate-200 font-semibold text-[#0B2545]">
+          {/* FRANJA DIBUJADA DE MAÑANA, TARDE Y NOCHE (en vez de tabla) */}
+          <div className="space-y-3">
+            <h4 className="tarpuy-subtitle">
+              {esQu
+                ? "¿Imayna pacha kanqa p'unchawpi?"
+                : "Así cambiará el tiempo en el día:"}
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {franjaMomentos.map((tramo) => (
+                <div
+                  key={tramo.id}
+                  className="p-4 rounded-3xl flex flex-col items-center text-center justify-between gap-3"
+                  style={{
+                    backgroundColor: tramo.bg,
+                    border: "var(--border-width-thick) solid var(--tinta)",
+                  }}
+                >
+                  <span
+                    className="px-3 py-0.5 rounded-full text-sm font-extrabold uppercase tracking-wide"
+                    style={{
+                      backgroundColor: "var(--tarjeta)",
+                      color: "var(--tinta)",
+                      border: "1.5px solid var(--tinta)",
+                    }}
+                  >
+                    {tramo.momento}
+                  </span>
+
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: "var(--tarjeta)",
+                      border: "var(--border-width-medium) solid var(--tinta)",
+                    }}
+                  >
+                    <IlustracionTarpuy id={tramo.dibujoId} size={56} />
+                  </div>
+
+                  <p className="font-extrabold text-xl leading-tight">
+                    {tramo.palabra}
+                  </p>
+
+                  {/* Números pequeños como apoyo */}
+                  <span
+                    className="text-xs font-bold px-2.5 py-1 rounded-xl"
+                    style={{
+                      backgroundColor: "var(--tarjeta)",
+                      color: "var(--tinta-suave)",
+                      border: "1px solid var(--tinta)",
+                    }}
+                  >
+                    {tramo.apoyoNumerico}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Explicación completa para la chacra (conservando todos los textos de interpretación) */}
+          <div
+            className="p-5 rounded-2xl space-y-2"
+            style={{
+              backgroundColor: "var(--arena)",
+              border: "var(--border-width-medium) solid var(--tinta)",
+            }}
+          >
+            <h4 className="font-extrabold text-lg">
+              {tr(lang, "farmMeaningTitle")}
+            </h4>
+            <p className="text-base font-bold" style={{ color: "var(--tinta-suave)" }}>
+              {interp.dayText} {interp.nightText} {interp.rainText}
+            </p>
+            <p className="pt-2 font-extrabold text-lg" style={{ color: "var(--tinta)" }}>
               {tr(lang, "doToday")} {interp.adviceText}
             </p>
           </div>
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold cursor-pointer"
-          >
-            <Volume2 className="w-3.5 h-3.5" />
-            <span>{tr(lang, "listenBtn")}</span>
-          </button>
-          <button
-            type="button"
+        {/* Pie del modal con botón "Cerrar" enorme */}
+        <div
+          className="px-6 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+          style={{
+            backgroundColor: "var(--arena)",
+            borderTop: "var(--border-width-thick) solid var(--tinta)",
+          }}
+        >
+          <BotonGrande
+            variante="primario"
+            texto={tr(lang, "closeBtn")}
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold cursor-pointer"
-          >
-            {tr(lang, "closeBtn")}
-          </button>
+            className="w-full text-xl justify-center"
+          />
         </div>
       </div>
     </div>

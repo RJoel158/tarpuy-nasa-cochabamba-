@@ -8,6 +8,8 @@ import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
+import { BotonGrande } from "./components/ui/TarpuyBaseComponents.jsx";
+import { TarjetaSaberDelDia } from "./components/personality/ElementosContextualesFase1C.jsx";
 import PaginaTemporalFase1 from "./components/ui/PaginaTemporalFase1.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
 import {
@@ -377,17 +379,13 @@ export default function App() {
             syncStatus={syncStatus}
           />
           <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
-          {!isAdvanced && activeView === "clima" && <FarmerOverview
-            community={communityName} zone={currentZone}
-            crop={crops.find((crop) => crop.crop_id === cropId)} cropId={cropId}
-            lang={voiceLang} offline={forceOffline || !isOnline} saved={dbStats}
-            onPlant={() => setActiveView("siembra")} onMap={() => setActiveView("mapa")}
-            speaking={isSpeaking} onSave={handleDownloadBundle} onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
-          />}
           {loading && !recData ? (
-            <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
+            <p className="py-12 text-center font-extrabold" style={{ color: "var(--tinta-suave)" }}>
+              Cargando datos...
+            </p>
           ) : activeView === "clima" ? (
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* 1. EL MENSAJE DEL DÍA + PAISAJE + 2. HOY + 3. LA SEMANA + 6. DETALLE PLEGADO */}
               <EarlyWarningBanner
                 bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
                 zoneName={communityName || currentZone?.name}
@@ -398,11 +396,34 @@ export default function App() {
                 onOpenMap={() => setActiveView("mapa")}
                 onDetectGps={handleDetectGps}
               />
+
+              {/* 4. LA PARCELA + MI CHACRA (Fase 1C) */}
+              <FarmerOverview
+                community={communityName}
+                zone={currentZone}
+                crop={crops.find((crop) => crop.crop_id === cropId)}
+                cropId={cropId}
+                lang={voiceLang}
+                offline={forceOffline || !isOnline}
+                saved={dbStats}
+                onPlant={() => setActiveView("siembra")}
+                onMap={() => setActiveView("mapa")}
+                speaking={isSpeaking}
+                onSave={handleDownloadBundle}
+                onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
+              />
+
+              {/* 5. SABER DEL DÍA (Fase 1C al final de la pantalla) */}
+              <TarjetaSaberDelDia mostrarQuechua={voiceLang === "qu"} />
+
               <div className="flex justify-end">
-                <button type="button" onClick={() => setActiveView("siembra")} className="w-full sm:w-auto min-h-16 inline-flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
-                  <span>{tr(voiceLang, "seeWhatToPlantIn")} {communityName || currentZone?.name || ""}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <BotonGrande
+                  variante="primario"
+                  ilustracionId="mano_siembra"
+                  texto={`${tr(voiceLang, "seeWhatToPlantIn")} ${communityName || currentZone?.name || ""}`}
+                  onClick={() => setActiveView("siembra")}
+                  className="w-full sm:w-auto"
+                />
               </div>
             </div>
           ) : activeView === "siembra" ? (

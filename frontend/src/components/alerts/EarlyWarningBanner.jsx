@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { buildWeatherNarration } from "../../services/narration.js";
-import { Volume2, LocateFixed, MapPin, Bell, ArrowRight } from "lucide-react";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
+import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
+import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
+import { PersonajeGuia, GloboHabla } from "../personality/PersonajeGuia.jsx";
+import { PatronPantalla } from "../personality/PatronesYSellos.jsx";
+import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 import {
   WeatherIllustration,
@@ -17,6 +21,26 @@ import {
   cleanAlertForFarmer,
 } from "./WeatherPictograms.jsx";
 
+/**
+ * TARPUY NASA COCHABAMBA — PANTALLA CLIMA: MENSAJE DEL DÍA, HOY, LA SEMANA Y DETALLE (FASE 3)
+ * ===========================================================================================
+ * Orden visual de arriba hacia abajo:
+ * 1. EL MENSAJE DEL DÍA: Tarjeta gigante con UN dibujo grande, UNA frase simple,
+ *    el personaje guía señalando y botón de altavoz grande (con el audio existente).
+ *    Debajo, PaisajePorHora (Fase 1C) y el separador fijo de ondas (Clima).
+ * 2. HOY: El clima de hoy en 3 dibujos grandes con una palabra cada uno:
+ *    - Frío o Calor (termómetro dibujado: --tierra para calor, --cielo para frío)
+ *    - Lluvia (nube con gotas en --cielo o sol en --dorado)
+ *    - Viento ("Viento suave" / "Viento fuerte")
+ *    Con los números pequeños abajo como apoyo.
+ * 3. LA SEMANA: Tira de 7 casillas grandes (día + UN dibujo del clima + palabra).
+ *    Al tocar un día abre el mismo DayForecastModal rediseñado.
+ * 6. MODO AVANZADO / PLEGADO: Conserva toda la información técnica actual debajo,
+ *    plegada con el botón grande "Ver más detalle". Nada se elimina.
+ *
+ * Cero códigos hexadecimales sueltos.
+ */
+
 export default function EarlyWarningBanner({
   bulletin,
   zoneName = "",
@@ -29,12 +53,29 @@ export default function EarlyWarningBanner({
 }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [mostrarMasDetalle, setMostrarMasDetalle] = useState(isAdvanced);
 
-  if (!bulletin || !bulletin.current_conditions) return (
-    <p role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-      {voiceLang === "qu" ? "Mana pacha yachay kanchu." : "No hay datos del clima disponibles para esta zona. Si tienes internet, vuelve a consultar."}
-    </p>
-  );
+  useEffect(() => {
+    setMostrarMasDetalle(isAdvanced);
+  }, [isAdvanced]);
+
+  if (!bulletin || !bulletin.current_conditions) {
+    return (
+      <div
+        role="status"
+        className="tarpuy-card-physical p-6 flex items-center gap-4"
+        style={{ backgroundColor: "var(--alerta-cuidado-suave)" }}
+      >
+        <IlustracionTarpuy id="nube_con_sol" size={56} />
+        <p className="tarpuy-body font-extrabold">
+          {voiceLang === "qu"
+            ? "Mana pacha yachay kanchu."
+            : "No hay datos del clima disponibles para esta zona. Si tienes internet, vuelve a consultar."}
+        </p>
+      </div>
+    );
+  }
+
   const cur = bulletin.current_conditions;
   const pred = bulletin.predictions_summary || {};
   const alerts = bulletin.active_alerts || [];
@@ -43,6 +84,7 @@ export default function EarlyWarningBanner({
   const aKey = `alert_${zId}_${voiceLang}`;
   const shortZone = (zoneName || zId).split("—")[0].split("-")[0].trim();
   const isQu = voiceLang === "qu";
+  const estaHablandoAlerta = activeAudioKey === aKey;
 
   const handleListen = () => {
     const message = buildWeatherNarration(bulletin, shortZone, voiceLang);
@@ -51,168 +93,563 @@ export default function EarlyWarningBanner({
 
   const primaryAlert = cleanAlertForFarmer(alerts[0], voiceLang) || {
     kind: "stable",
-    bannerPill: isQu ? "ALLIN PACHA" : "BUEN TIEMPO",
-    badgeClass: "bg-emerald-100 text-emerald-800",
-    borderClass: "border-emerald-300 border-l-emerald-600",
-    bgClass: "bg-emerald-50/60",
-    cleanTitle: isQu ? "Llaqtaykipi pachaqa allillan kachkan" : "Tiempo tranquilo en tu zona",
-    action: isQu ? "Allin pacha chakraykipi llamk'anapaq." : "Condiciones estables para tu chacra esta semana.",
+    severity: "info",
+    semaforo: "tranquilo",
+    bannerPill: isQu ? "ALLIN PACHA" : "TRANQUILO HOY",
+    cleanTitle: isQu
+      ? "Llaqtaykipi pachaqa allillan kachkan"
+      : "Tiempo tranquilo hoy en tu zona",
+    action: isQu
+      ? "Allin pacha chakraykipi llamk'anapaq."
+      : "Buen día para trabajar con calma en tu chacra.",
   };
 
-  const weatherCards = [
-    { key: "temp", category: isQu ? "CHIRI Q'UÑI" : "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c, voiceLang), techText: `${cur.temp_c}°C · Mín: ${pred.min_temp_7d_c}°C · Máx: ${pred.max_temp_7d_c}°C` },
-    { key: "soil", category: isQu ? "ALLPAYKI" : "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct, voiceLang), techText: `${cur.soil_moisture_top_pct}% · ${cur.humidity_pct}%` },
-    { key: "rain", category: isQu ? "PARA 7 P'UNCHAW" : "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm, voiceLang), isRain: true, techText: `${pred.total_precip_7d_mm} mm` },
-    { key: "sun", category: isQu ? "INTI WAN CH'AKI" : "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm, voiceLang), techText: `ET0: ${pred.total_et0_7d_mm} mm · Bal: ${pred.net_water_balance_7d_mm} mm` },
+  /* Colores semánticos de alerta (Tranquilo, Cuidado, Peligro/Crítico) */
+  const estiloMensajeDia =
+    primaryAlert.severity === "critical"
+      ? {
+          bg: "var(--alerta-critico-suave)",
+          franja: "var(--alerta-critico)",
+          ink: "var(--alerta-critico-oscuro)",
+          tonoGlobo: "critico",
+          poseGuia: "alerta",
+        }
+      : primaryAlert.severity === "warning"
+      ? {
+          bg: "var(--alerta-cuidado-suave)",
+          franja: "var(--alerta-cuidado)",
+          ink: "var(--alerta-cuidado-oscuro)",
+          tonoGlobo: "cuidado",
+          poseGuia: "alerta",
+        }
+      : {
+          bg: "var(--alerta-tranquilo-suave)",
+          franja: "var(--alerta-tranquilo)",
+          ink: "var(--alerta-tranquilo-oscuro)",
+          tonoGlobo: "tranquilo",
+          poseGuia: "saludo",
+        };
+
+  /* Datos para las 3 tarjetas grandes de HOY (Frío/Calor, Lluvia, Viento) */
+  const minTemp = Number(pred.min_temp_7d_c ?? cur.temp_c ?? 10);
+  const tempActual = Number(cur.temp_c ?? 16);
+  const lluvia7d = Number(pred.total_precip_7d_mm ?? 0);
+  const vientoHoy = Number(days[0]?.wind_kmh ?? 12);
+
+  const tempCard = describeTempCard(cur.temp_c, pred.min_temp_7d_c, voiceLang);
+  const soilCard = describeSoilCard(cur.soil_moisture_top_pct, voiceLang);
+  const rainCard = describeRainCard(pred.total_precip_7d_mm, voiceLang);
+  const sunCard = describeSunCard(pred.net_water_balance_7d_mm, voiceLang);
+
+  const hoyTresTarjetas = [
+    {
+      id: "temperatura",
+      etiqueta: isQu ? "1. Chiri icha Rupha" : "1. Frío o Calor",
+      dibujoId: minTemp <= 5 ? "termometro_frio" : "termometro_calor",
+      palabra:
+        minTemp <= 2
+          ? isQu
+            ? "Qasa"
+            : "Helada"
+          : minTemp <= 6
+          ? isQu
+            ? "Chiri"
+            : "Frío"
+          : tempActual >= 23
+          ? isQu
+            ? "Rupha"
+            : "Calor"
+          : isQu
+          ? "Q'uñi"
+          : "Templado",
+      explicacion: tempCard.advice,
+      apoyoNumerico: `${cur.temp_c}°C hoy · Mín ${pred.min_temp_7d_c}°C / Máx ${pred.max_temp_7d_c}°C`,
+      bg: minTemp <= 5 ? "var(--cielo-suave)" : "var(--tierra-suave)",
+    },
+    {
+      id: "lluvia",
+      etiqueta: isQu ? "2. Para" : "2. Lluvia",
+      dibujoId: lluvia7d >= 5 ? "lluvia" : "sol",
+      palabra:
+        lluvia7d < 5
+          ? isQu
+            ? "Mana para"
+            : "Sin lluvia"
+          : lluvia7d < 20
+          ? isQu
+            ? "Pisi para"
+            : "Poca lluvia"
+          : isQu
+          ? "Allin para"
+          : "Con lluvia",
+      explicacion: rainCard.advice,
+      apoyoNumerico: `${pred.total_precip_7d_mm} mm en 7 días · Humedad suelo: ${cur.soil_moisture_top_pct ?? "—"}%`,
+      bg: lluvia7d >= 5 ? "var(--cielo-suave)" : "var(--dorado-suave)",
+    },
+    {
+      id: "viento",
+      etiqueta: isQu ? "3. Wayra" : "3. Viento",
+      dibujoId: "viento",
+      palabra:
+        vientoHoy >= 18
+          ? isQu
+            ? "Sinchi wayra"
+            : "Viento fuerte"
+          : isQu
+          ? "Llanthu wayra"
+          : "Viento suave",
+      explicacion: sunCard.advice,
+      apoyoNumerico: `Viento: ${days[0]?.wind_kmh ?? "—"} km/h · Humedad aire: ${cur.humidity_pct ?? "—"}%`,
+      bg: vientoHoy >= 18 ? "var(--alerta-cuidado-suave)" : "var(--arena)",
+    },
   ];
 
+  /* Las 4 tarjetas detalladas originales (conservadas íntegras para Ver más detalle / Modo Avanzado) */
+  const weatherCards = [
+    {
+      key: "temp",
+      category: isQu ? "CHIRI Q'UÑI" : "TEMPERATURA",
+      ...tempCard,
+      techText: `${cur.temp_c}°C · Mín: ${pred.min_temp_7d_c}°C · Máx: ${pred.max_temp_7d_c}°C`,
+    },
+    {
+      key: "soil",
+      category: isQu ? "ALLPAYKI" : "TU TIERRA",
+      ...soilCard,
+      techText: `${cur.soil_moisture_top_pct}% · ${cur.humidity_pct}%`,
+    },
+    {
+      key: "rain",
+      category: isQu ? "PARA 7 P'UNCHAW" : "LLUVIA 7 DÍAS",
+      ...rainCard,
+      isRain: true,
+      techText: `${pred.total_precip_7d_mm} mm`,
+    },
+    {
+      key: "sun",
+      category: isQu ? "INTI WAN CH'AKI" : "SOL Y SEQUEDAD",
+      ...sunCard,
+      techText: `ET0: ${pred.total_et0_7d_mm} mm · Bal: ${pred.net_water_balance_7d_mm} mm`,
+    },
+  ];
+
+  // TODO-FUNCIONALIDAD: el equipo decide cómo se calcula el momento del día (amanecer, mediodia, atardecer, noche) según la hora local o el pronóstico nocturno.
+  const momentoEjemplo = minTemp <= 2 ? "noche" : "amanecer";
+
   return (
-    <div className="space-y-5">
-      {/* Screen Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">{tr(voiceLang, "next7Days")}</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">
-            {tr(voiceLang, "weatherToday")} · {shortZone}
-          </h2>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={onDetectGps} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer">
-            <LocateFixed className="w-3.5 h-3.5" />
-            <span>{tr(voiceLang, "myGps")}</span>
-          </button>
-          <button type="button" onClick={onOpenMap} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer">
-            <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span>{tr(voiceLang, "map")}</span>
-          </button>
-          <button type="button" onClick={() => setModalOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer">
-            <Bell className="w-3.5 h-3.5 text-amber-600" />
-            <span>{tr(voiceLang, "seeAlerts")}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleListen}
-            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition cursor-pointer ${
-              activeAudioKey === aKey
-                ? "bg-[#0B2545] text-white border-[#081B33]"
-                : "bg-white hover:bg-slate-100 text-slate-900 border-slate-300"
-            }`}
-          >
-            <Volume2 className={`w-3.5 h-3.5 ${activeAudioKey === aKey ? "text-sky-300" : "text-[#0284C7]"}`} />
-            <span>{tr(voiceLang, "listenBtn")}</span>
-          </button>
-        </div>
-      </div>
-
-      {!isQu && <p className="text-sm text-slate-600">
-        Pronóstico de la zona · {bulletin.fetched_at_utc && Number.isFinite(Date.parse(bulletin.fetched_at_utc))
-          ? new Date(bulletin.fetched_at_utc).toLocaleString("es-BO") : "Fecha de actualización no disponible"}
-      </p>}
-      <h3 className="text-xl font-bold text-[#0B2545]">{isQu ? tr(voiceLang, "doToday") : "Qué hago ahora"}</h3>
-      {/* Top Graphical Warning Banner (Semáforo del Campo) */}
-      <div className={`rounded-2xl border border-l-4 ${primaryAlert.borderClass} ${primaryAlert.bgClass} p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-            <WeatherIllustration kind={primaryAlert.kind} className="w-12 h-12" />
-          </div>
-          <div className="min-w-0 space-y-1">
-            <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${primaryAlert.badgeClass}`}>
-              {primaryAlert.bannerPill}
+    <div className="space-y-8">
+      {/* ===================================================================
+       * 1. EL MENSAJE DEL DÍA (Tarjeta gigante con UN dibujo grande, UNA frase
+       *    simple, el personaje guía señalando y botón de altavoz grande)
+       * =================================================================== */}
+      <section
+        aria-label={isQu ? "Kunan p'unchaw willay" : "El mensaje del día"}
+        className="tarpuy-card-physical overflow-hidden"
+        style={{
+          backgroundColor: estiloMensajeDia.bg,
+          boxShadow: "0 6px 0 var(--tinta)",
+        }}
+      >
+        {/* Franja superior de estado del clima */}
+        <div
+          className="px-6 py-3 flex flex-wrap items-center justify-between gap-3"
+          style={{
+            backgroundColor: estiloMensajeDia.franja,
+            borderBottom: "var(--border-width-thick) solid var(--tinta)",
+            color:
+              primaryAlert.severity === "warning"
+                ? "var(--tinta)"
+                : "var(--texto-sobre-fuerte)",
+          }}
+        >
+          <span className="inline-flex items-center gap-2.5 font-extrabold text-lg uppercase tracking-wider">
+            <span
+              className="w-4 h-4 rounded-full inline-block"
+              style={{
+                backgroundColor: "var(--tarjeta)",
+                border: "2px solid var(--tinta)",
+              }}
+              aria-hidden="true"
+            />
+            <span>
+              {primaryAlert.bannerPill} · {shortZone}
             </span>
-            <h3 className="text-base sm:text-lg font-bold text-[#0B2545] leading-snug">{primaryAlert.cleanTitle}</h3>
-            <p className="text-xs sm:text-sm text-slate-700 leading-snug">
-              <strong className="text-[#0B2545]">{tr(voiceLang, "doToday")}</strong> {primaryAlert.action}
-            </p>
-          </div>
-        </div>
-        {alerts.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-[#0284C7] cursor-pointer shrink-0 self-start sm:self-center"
-          >
-            <span>{tr(voiceLang, "seeAlerts")}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        ) : null}
-      </div>
+          </span>
 
-      <h3 className="text-xl font-bold text-[#0B2545]">{isQu ? "Allpayki" : "Cómo está mi tierra"}</h3>
-      {/* 4 Graphical Weather Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {weatherCards.map((c) => {
-          const tone = TONE_CLASSES[c.tone] || TONE_CLASSES.sky;
-          return (
-            <div key={c.key} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between gap-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <WeatherIllustration kind={c.kind} className="w-12 h-12 shrink-0" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">{c.category}</span>
-                </div>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tone.badge}`}>{c.badge}</span>
+          <span className="text-sm font-extrabold">
+            {isQu ? "¿Imata kunan ruwana?" : "¿Qué debo hacer hoy?"}
+          </span>
+        </div>
+
+        {/* Cuerpo gigante del Mensaje del Día */}
+        <div className="p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* UN dibujo grande del estado principal (y luna si es helada nocturna) */}
+            <div className="relative shrink-0">
+              <div
+                className="w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  border: "var(--border-width-thick) solid var(--tinta)",
+                }}
+              >
+                <WeatherIllustration
+                  kind={primaryAlert.kind}
+                  animated={true}
+                  className="w-24 h-24 sm:w-28 sm:h-28"
+                />
               </div>
-              <div>
-                <p className="text-lg font-bold text-[#0B2545] leading-tight">{c.title}</p>
-                <p className="text-xs text-slate-600 mt-0.5">{c.advice}</p>
-                {isAdvanced ? (
-                  <p className="mt-2 text-[11px] font-mono text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                    {c.techText}
-                  </p>
-                ) : null}
-              </div>
-              {c.isRain ? (
-                <div className="space-y-2">
-                  <RainDropsVisual count={c.drops} lang={voiceLang} />
-                  <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
-                </div>
-              ) : (
-                <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+
+              {primaryAlert.kind === "frost" && (
+                <span
+                  className="w-12 h-12 rounded-full flex items-center justify-center absolute -top-2 -right-2"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    border: "var(--border-width-medium) solid var(--tinta)",
+                  }}
+                >
+                  <IlustracionTarpuy id="noche_luna" size={34} />
+                </span>
               )}
             </div>
-          );
-        })}
-      </div>
 
-      {/* Interactive Graphical 7-Day Forecast Cards */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-base font-bold text-[#0B2545]">{tr(voiceLang, "dayByDay")}</h3>
-          <span className="text-xs text-[#0284C7] font-semibold">{tr(voiceLang, "tapForDetail")}</span>
+            {/* UNA frase simple y grande + acción inmediata */}
+            <div className="flex-1 text-center md:text-left space-y-2.5">
+              <h2 className="tarpuy-title">{primaryAlert.cleanTitle}</h2>
+              <p
+                className="font-extrabold leading-snug"
+                style={{
+                  fontSize: "var(--font-size-subtitle)",
+                  color: "var(--tinta)",
+                }}
+              >
+                {primaryAlert.action}
+              </p>
+            </div>
+
+            {/* Botón de altavoz grande dentro de la misma tarjeta */}
+            <div className="shrink-0 flex flex-col items-center gap-2">
+              <BotonAltavoz
+                sonando={estaHablandoAlerta}
+                mostrarTexto={true}
+                etiqueta={tr(voiceLang, "listenBtn")}
+                onClick={handleListen}
+              />
+              {alerts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  className="font-extrabold text-base underline cursor-pointer py-1"
+                  style={{ color: "var(--tinta)" }}
+                >
+                  {tr(voiceLang, "seeAlerts")} ({alerts.length})
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Personaje Guía señalando lo importante + Globo de Habla */}
+          <div
+            className="p-4 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
+            style={{
+              backgroundColor: "var(--tarjeta)",
+              border: "var(--border-width-medium) solid var(--tinta)",
+            }}
+          >
+            <PersonajeGuia
+              pose={estiloMensajeDia.poseGuia}
+              mostrarEtiquetaNombre={true}
+              size={92}
+            />
+            <GloboHabla
+              direccionCola="izquierda"
+              tono={estiloMensajeDia.tonoGlobo}
+              texto={`${tr(voiceLang, "doToday")} ${primaryAlert.action}`}
+              className="w-full"
+            />
+          </div>
+
+          {/* 5. PAISAJE POR HORA (Fase 1C, debajo del mensaje del día con TODO-FUNCIONALIDAD) */}
+          <PaisajePorHora momento={momentoEjemplo} zona={zId} />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+      </section>
+
+      {/* Separador fijo de Clima: Ondas de agua y viento */}
+      <PatronPantalla tipo="ondas" />
+
+      {/* ===================================================================
+       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno)
+       * =================================================================== */}
+      <section aria-label={tr(voiceLang, "weatherToday")} className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="tarpuy-subtitle">
+            {isQu ? "Kunan p'unchaw (Hoy)" : "El clima de hoy en 3 miradas"}
+          </h3>
+          <span className="text-base font-bold" style={{ color: "var(--tinta-suave)" }}>
+            {shortZone}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {hoyTresTarjetas.map((item) => (
+            <article
+              key={item.id}
+              className="tarpuy-card-physical p-6 flex flex-col items-center text-center justify-between gap-4"
+              style={{ backgroundColor: item.bg }}
+            >
+              <span
+                className="px-3.5 py-1 rounded-full text-sm font-extrabold uppercase tracking-wider"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  color: "var(--tinta)",
+                  border: "1.5px solid var(--tinta)",
+                }}
+              >
+                {item.etiqueta}
+              </span>
+
+              {/* Dibujo grande arriba */}
+              <div
+                className="w-28 h-28 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  border: "var(--border-width-thick) solid var(--tinta)",
+                }}
+              >
+                <IlustracionTarpuy id={item.dibujoId} size={76} />
+              </div>
+
+              {/* UNA palabra grande y clara */}
+              <div className="space-y-1.5">
+                <h4 className="tarpuy-title">{item.palabra}</h4>
+                <p className="tarpuy-body font-bold">{item.explicacion}</p>
+              </div>
+
+              {/* Los números pequeños abajo como apoyo */}
+              <span
+                className="px-3 py-1 rounded-xl text-xs font-extrabold"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  color: "var(--tinta-suave)",
+                  border: "1.5px solid var(--tinta)",
+                }}
+              >
+                {item.apoyoNumerico}
+              </span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* ===================================================================
+       * 3. LA SEMANA (Tira de 7 casillas grandes: día + UN dibujo del clima)
+       * =================================================================== */}
+      <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="tarpuy-subtitle">
+            {isQu
+              ? "Qhipa 7 p'unchawkuna (La semana)"
+              : "La semana (toca un día para ver mañana, tarde y noche)"}
+          </h3>
+          <span
+            className="px-3 py-1 rounded-full text-sm font-extrabold"
+            style={{
+              backgroundColor: "var(--dorado-suave)",
+              color: "var(--dorado-oscuro)",
+              border: "1.5px solid var(--tinta)",
+            }}
+          >
+            {tr(voiceLang, "tapForDetail")}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3.5">
           {days.map((d) => {
             const dv = describeDayVisual(d, voiceLang);
-            const tone = TONE_CLASSES[dv.tone] || TONE_CLASSES.emerald;
+            const bgCasilla =
+              dv.tone === "rose"
+                ? "var(--alerta-critico-suave)"
+                : dv.tone === "amber"
+                ? "var(--alerta-cuidado-suave)"
+                : dv.tone === "sky"
+                ? "var(--cielo-suave)"
+                : "var(--tarjeta)";
+
             return (
               <button
                 key={d.date}
                 type="button"
                 onClick={() => setSelectedDay(d)}
-                className="p-3 bg-white hover:bg-sky-50/70 hover:border-[#0284C7] border border-slate-200 rounded-2xl flex flex-col justify-between gap-2 text-left transition cursor-pointer group"
+                className="tarpuy-btn-physical p-4 flex flex-col items-center justify-between gap-3 text-center cursor-pointer"
+                style={{
+                  minHeight: "196px",
+                  backgroundColor: bgCasilla,
+                  color: "var(--tinta)",
+                }}
               >
-                <div className="flex items-center justify-between gap-1 w-full">
-                  <span className="text-xs font-bold text-[#0B2545]">{d.day_label}</span>
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${tone.badge}`}>{dv.word}</span>
+                {/* Día arriba */}
+                <span className="font-extrabold text-xl leading-tight">
+                  {d.day_label}
+                </span>
+
+                {/* UN dibujo grande del clima */}
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    border: "var(--border-width-medium) solid var(--tinta)",
+                  }}
+                >
+                  <WeatherIllustration kind={dv.kind} className="w-14 h-14" />
                 </div>
-                <WeatherIllustration kind={dv.kind} className="w-11 h-11 mx-auto my-0.5 group-hover:scale-105 transition-transform" />
+
+                {/* Palabra de estado + números pequeños como apoyo */}
                 <div className="space-y-1 w-full">
-                  <RainDropsVisual count={dv.drops} text={dv.rainText} lang={voiceLang} compact={true} />
-                  <p className="text-[11px] font-medium text-slate-600 leading-tight">{dv.nightText}</p>
-                  {isAdvanced ? (
-                    <p className="text-[10px] font-mono text-slate-500 leading-snug pt-0.5 border-t border-slate-100">
-                      {d.temp_min_c}°/{d.temp_max_c}° · {d.precip_mm}mm
-                    </p>
-                  ) : null}
-                  <span className="block text-[10px] font-bold text-[#0284C7] pt-0.5 group-hover:underline">
-                    {tr(voiceLang, "tapForDetail")} →
+                  <span
+                    className="inline-block px-3 py-0.5 rounded-full text-sm font-extrabold"
+                    style={{
+                      backgroundColor: "var(--tarjeta)",
+                      color: "var(--tinta)",
+                      border: "1.5px solid var(--tinta)",
+                    }}
+                  >
+                    {dv.word}
+                  </span>
+                  <span
+                    className="block text-xs font-bold"
+                    style={{ color: "var(--tinta-suave)" }}
+                  >
+                    {d.temp_min_c}° / {d.temp_max_c}°C
                   </span>
                 </div>
               </button>
             );
           })}
         </div>
-      </div>
+      </section>
+
+      {/* ===================================================================
+       * 6. MODO AVANZADO / DETALLE PLEGADO ("Ver más detalle")
+       *    Conserva toda la información técnica y tarjetas originales sin eliminar nada.
+       * =================================================================== */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <BotonGrande
+            variante="secundario"
+            ilustracionId="lupa"
+            estado={mostrarMasDetalle ? "presionado" : "normal"}
+            texto={
+              mostrarMasDetalle
+                ? isQu
+                  ? "Sut'inchayta pakay"
+                  : "Ocultar más detalle"
+                : isQu
+                ? "Astawan sut'inta qhaway"
+                : "Ver más detalle"
+            }
+            onClick={() => setMostrarMasDetalle((v) => !v)}
+          />
+
+          <div className="flex flex-wrap items-center gap-3">
+            <BotonGrande
+              variante="secundario"
+              ilustracionId="pin_ubicacion"
+              texto={tr(voiceLang, "myGps")}
+              onClick={onDetectGps}
+            />
+            <BotonGrande
+              variante="secundario"
+              ilustracionId="mapa_chacra"
+              texto={tr(voiceLang, "map")}
+              onClick={onOpenMap}
+            />
+            <BotonGrande
+              variante="secundario"
+              ilustracionId="altavoz"
+              texto={tr(voiceLang, "seeAlerts")}
+              onClick={() => setModalOpen(true)}
+            />
+          </div>
+        </div>
+
+        {mostrarMasDetalle && (
+          <div
+            className="tarpuy-card-physical p-6 space-y-5"
+            style={{ backgroundColor: "var(--arena)" }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h4 className="tarpuy-subtitle">
+                {isQu ? "Allpayki · Sut'inchasqa willay" : "Detalle técnico y estado del suelo"}
+              </h4>
+              <span className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                {bulletin.fetched_at_utc && Number.isFinite(Date.parse(bulletin.fetched_at_utc))
+                  ? `Actualizado: ${new Date(bulletin.fetched_at_utc).toLocaleString("es-BO")}`
+                  : "Fecha de actualización no disponible"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {weatherCards.map((c) => {
+                const tone = TONE_CLASSES[c.tone] || TONE_CLASSES.sky;
+                return (
+                  <div
+                    key={c.key}
+                    className="tarpuy-card-physical p-4 flex flex-col justify-between gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <WeatherIllustration kind={c.kind} className="w-12 h-12 shrink-0" />
+                        <span
+                          className="text-xs font-extrabold uppercase tracking-wider leading-tight"
+                          style={{ color: "var(--tinta-suave)" }}
+                        >
+                          {c.category}
+                        </span>
+                      </div>
+                      <span
+                        className="text-xs font-extrabold px-2.5 py-0.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: tone.bgVar,
+                          color: "var(--tinta)",
+                          border: "1.5px solid var(--tinta)",
+                        }}
+                      >
+                        {c.badge}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="font-extrabold text-lg leading-tight">{c.title}</p>
+                      <p className="text-sm font-bold mt-1" style={{ color: "var(--tinta-suave)" }}>
+                        {c.advice}
+                      </p>
+                      <p
+                        className="mt-2 text-xs font-mono font-bold px-2.5 py-1.5 rounded-xl"
+                        style={{
+                          backgroundColor: "var(--arena)",
+                          color: "var(--tinta)",
+                          border: "1.5px solid var(--tinta)",
+                        }}
+                      >
+                        {c.techText}
+                      </p>
+                    </div>
+
+                    {c.isRain ? (
+                      <div className="space-y-2">
+                        <RainDropsVisual count={c.drops} lang={voiceLang} />
+                        <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+                      </div>
+                    ) : (
+                      <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </section>
 
       <AlertsModal
         open={modalOpen}
