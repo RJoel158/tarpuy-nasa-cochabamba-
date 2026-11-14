@@ -19,11 +19,41 @@ const SHORT_NAMES = {
 };
 
 export const CAT_STYLE = {
-  main: { cls: "bg-emerald-50 border-emerald-300 text-emerald-950", ring: "ring-2 ring-emerald-500", dot: "bg-emerald-500" },
-  cover: { cls: "bg-sky-50 border-sky-300 text-sky-950", ring: "ring-2 ring-[#0284C7]", dot: "bg-[#0284C7]" },
-  mulch: { cls: "bg-amber-50 border-amber-300 text-amber-950", ring: "ring-2 ring-amber-500", dot: "bg-amber-500" },
-  bare: { cls: "bg-rose-50 border-rose-300 text-rose-950", ring: "ring-2 ring-rose-500", dot: "bg-rose-500" },
-  idle: { cls: "bg-slate-50 border-slate-200 text-slate-700", ring: "ring-2 ring-slate-400", dot: "bg-slate-400" },
+  main: {
+    cls: "",
+    ring: "",
+    dot: "",
+    bgVar: "var(--hoja-suave)",
+    accentVar: "var(--hoja)",
+  },
+  cover: {
+    cls: "",
+    ring: "",
+    dot: "",
+    bgVar: "var(--cielo-suave)",
+    accentVar: "var(--cielo)",
+  },
+  mulch: {
+    cls: "",
+    ring: "",
+    dot: "",
+    bgVar: "var(--dorado-suave)",
+    accentVar: "var(--dorado)",
+  },
+  bare: {
+    cls: "",
+    ring: "",
+    dot: "",
+    bgVar: "var(--alerta-critico-suave)",
+    accentVar: "var(--alerta-critico)",
+  },
+  idle: {
+    cls: "",
+    ring: "",
+    dot: "",
+    bgVar: "var(--arena)",
+    accentVar: "var(--piedra)",
+  },
 };
 
 export function shortCropWord(crop, lang = "es") {
@@ -62,6 +92,14 @@ export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [],
   let shortWord = qu ? "Samay" : "Libre";
   let role = qu ? "Chakrapi samay pacha." : "Parcela en transición entre campañas.";
 
+  /* Acción visual para la cinta de 12 meses:
+   * - 'sembrar' (semilla, --hoja) en el mes de inicio del cultivo
+   * - 'cosechar' (cosecha, --dorado) en el mes final del cultivo
+   * - 'regar' (gota_agua, --cielo) durante los meses de crecimiento
+   * - 'cubrir' (tierra_humeda, --tierra) si es rastrojo/descanso
+   */
+  let accionVisual = "regar";
+
   if (matched) {
     cropName = matched.crop_name || "";
     shortWord = shortCropWord(matched, lang);
@@ -70,20 +108,39 @@ export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [],
     if (matched.crop_id === "bare_soil_fallow" || /pelad|sin cobertura|barbecho limpio/.test(txt)) {
       category = "bare";
       cropId = "bare_soil_fallow";
+      accionVisual = "suelo_pelado";
     } else if (matched.crop_id === "mulch_residue" || /mulch|rastrojo|protector/.test(txt)) {
       category = "mulch";
       cropId = "mulch_residue";
+      accionVisual = "cubrir";
     } else if (/cobertura|legum|vicia|alfalfa|tarwi|arveja|haba|fijad/.test(txt)) {
       category = "cover";
+      accionVisual = m === matched.start_month ? "sembrar" : m === matched.end_month ? "cosechar" : "regar";
     } else {
       category = "main";
+      accionVisual = m === matched.start_month ? "sembrar" : m === matched.end_month ? "cosechar" : "regar";
     }
   } else if (ind.bare_soil_flag) {
     category = "bare";
     cropId = "bare_soil_fallow";
     cropName = qu ? "Q'ara allpa (wayra manchay)" : "Tierra pelada (alerta viento)";
     shortWord = qu ? "Q'ara" : "Pelada";
+    accionVisual = "suelo_pelado";
   }
 
-  return { m, monthName: MONTH_FULL[monthIndex], monthShort: MONTH_SHORT[monthIndex], category, cropId, cropName, shortWord, role, wx, rainMm, tmin, tmax };
+  return {
+    m,
+    monthName: MONTH_FULL[monthIndex],
+    monthShort: MONTH_SHORT[monthIndex],
+    category,
+    cropId,
+    cropName,
+    shortWord,
+    role,
+    wx,
+    rainMm,
+    tmin,
+    tmax,
+    accionVisual,
+  };
 }
