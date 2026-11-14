@@ -322,13 +322,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen tarpuy-page-surface flex flex-col lg:flex-row">
-      <button
-        type="button"
-        onClick={() => setShowFase1Preview(true)}
-        className="no-print fixed bottom-4 right-4 z-50 tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 cursor-pointer"
-      >
-        Ver prueba Fase 1
-      </button>
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}
@@ -417,9 +410,6 @@ export default function App() {
                 onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
               />
 
-              {/* 5. SABER DEL DÍA (Fase 1C al final de la pantalla) */}
-              <TarjetaSaberDelDia mostrarQuechua={voiceLang === "qu"} />
-
               <div className="flex justify-end">
                 <BotonGrande
                   variante="primario"
@@ -504,8 +494,17 @@ export default function App() {
         </main>
         </div>
 
-        <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4">
+        <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
           <InstitutionalBrandBar variant="footer" />
+          <div className="no-print flex justify-start">
+            <button
+              type="button"
+              onClick={() => setShowFase1Preview(true)}
+              className="tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 text-sm cursor-pointer"
+            >
+              Ver prueba Fase 1
+            </button>
+          </div>
         </footer>
       </div>
       <FeedbackHost

@@ -4,9 +4,9 @@ import { ZONE_GEO_CATALOG } from "../../utils/geoUtils.js";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
-import { PersonajeGuia, GloboHabla } from "../personality/PersonajeGuia.jsx";
 import { PatronPantalla, SelloCartilla } from "../personality/PatronesYSellos.jsx";
 import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
+import MamaTomasaAyuda from "../personality/MamaTomasaAyuda.jsx";
 import { speakSpanish, speakQuechua } from "../../services/speechService.js";
 
 /**
@@ -207,11 +207,14 @@ export default function CochabambaMap({
   const perfilActivo =
     PERFIL_VISUAL_ZONA[zonaActivaObj?.id] || PERFIL_VISUAL_ZONA.punata_valle_alto;
 
-  /* 4. Botón gigante "¿Dónde estoy?" con manejo amable de error */
+  /* 4. Botón gigante "¿Dónde estoy?" con manejo amable de error en la ventana de Mamá Tomasa */
+  const [abiertoMamaTomasa, setAbiertoMamaTomasa] = useState(false);
+
   const handleDondeEstoy = () => {
     setErrorGpsAmable(false);
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setErrorGpsAmable(true);
+      setAbiertoMamaTomasa(true);
       onDetectGps?.();
       return;
     }
@@ -222,6 +225,7 @@ export default function CochabambaMap({
       },
       () => {
         setErrorGpsAmable(true);
+        setAbiertoMamaTomasa(true);
         onDetectGps?.();
       },
       { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
@@ -382,30 +386,6 @@ export default function CochabambaMap({
             className="text-xl px-7"
           />
         </div>
-
-        {/* Mensaje amable con el Personaje Guía si el GPS no pudo encontrar al agricultor */}
-        {errorGpsAmable && (
-          <div
-            role="status"
-            className="p-4 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
-            style={{
-              backgroundColor: "var(--dorado-suave)",
-              border: "var(--border-width-medium) solid var(--tinta)",
-            }}
-          >
-            <PersonajeGuia pose="mapa" mostrarEtiquetaNombre={true} size={88} />
-            <GloboHabla
-              direccionCola="izquierda"
-              tono="recomendado"
-              texto={
-                qu
-                  ? "Mana tarirparisqaykichu. Saywitipi llaqtaykita ñit'iy."
-                  : "No pude encontrarte. Toca tu comunidad en el mapa."
-              }
-              className="w-full"
-            />
-          </div>
-        )}
       </div>
 
       {/* 1. MAPA BASE CÁLIDO (con controles +/- de 58 px y pines grandes por zona) */}
@@ -790,6 +770,62 @@ export default function CochabambaMap({
           </div>
         </section>
       )}
+
+      {/* Ventana emergente de Mamá Tomasa en la pantalla de Mapa */}
+      <MamaTomasaAyuda
+        titulo={
+          qu
+            ? `Saywiti · ${selectedCommunityName || zonaActivaObj?.name || ""}`
+            : `Tu comunidad: ${selectedCommunityName || zonaActivaObj?.name || ""}`
+        }
+        pose={errorGpsAmable ? "alerta" : "mapa"}
+        semaforoPrincipal={errorGpsAmable ? "amarillo" : "verde"}
+        mensaje={
+          errorGpsAmable
+            ? qu
+              ? "Mana GPS tarirparisunkichu. Saywitipi llaqtaykita ñit'iy."
+              : "No pude ubicarte con el GPS. Toca tu comunidad en el mapa."
+            : qu
+            ? `${selectedCommunityName || zonaActivaObj?.name} llaqtaq pachanta qhaway:`
+            : `Semáforo del terreno en ${selectedCommunityName || zonaActivaObj?.name}:`
+        }
+        tarjetas={[
+          {
+            id: "riesgo_zona",
+            dibujoId: perfilActivo.dibujoRiesgo,
+            pose: "alerta",
+            semaforo:
+              zonaActivaObj?.id === "tapacari_zona_andina" ? "rojo" : "amarillo",
+            titulo: qu ? perfilActivo.riesgoSimpleQu : perfilActivo.riesgoSimpleEs,
+            frase: zonaActivaObj?.risk || "Cuidar los cultivos según la temporada.",
+          },
+          {
+            id: "suelo_zona",
+            dibujoId: perfilActivo.dibujoSuelo,
+            pose: "siembra",
+            semaforo: "verde",
+            titulo: qu ? perfilActivo.sueloSimpleQu : perfilActivo.sueloSimpleEs,
+            frase: `${qu ? perfilActivo.alturaSimpleQu : perfilActivo.alturaSimpleEs} (${
+              zonaActivaObj?.elevation || ""
+            }).`,
+          },
+          {
+            id: "ayuda_gps",
+            dibujoId: "pin_ubicacion",
+            pose: "mapa",
+            semaforo: errorGpsAmable ? "amarillo" : "verde",
+            titulo: qu ? "Kay suyupi llaqtakuna" : "Pueblos de esta zona",
+            frase: zonaActivaObj?.towns || "Toca el mapa para cambiar de comunidad.",
+          },
+        ]}
+        onListen={handleEscucharComunidad}
+        isSpeaking={activeAudioKey === `mapa_zona_${zonaActivaObj?.id}`}
+        badgeCount={3}
+        tonoAvisoPrincipal={errorGpsAmable ? "cuidado" : "normal"}
+        lang={lang}
+        abiertoControlado={abiertoMamaTomasa}
+        onCambiarAbierto={setAbiertoMamaTomasa}
+      />
     </div>
   );
 }

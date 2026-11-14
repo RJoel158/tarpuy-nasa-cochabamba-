@@ -5,8 +5,9 @@ import DataVeracityCard from "./alerts/DataVeracityCard.jsx";
 import InstitutionalBrandBar from "./InstitutionalBrandBar.jsx";
 import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
-import { GuiaConGlobo } from "./personality/PersonajeGuia.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
+import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
+import { speakSpanish, speakQuechua } from "../services/speechService.js";
 
 const DEFAULT_MONTHS = [
   { month: 1, month_name: "Enero", precip_mm: 98, temp_min_c: 11.2, temp_max_c: 23.5, soil_moisture_index: 0.58, ndvi_mean: 0.54, frost_risk_days: 0, bare_soil_flag: false },
@@ -59,28 +60,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
 
   return (
     <div className="space-y-6">
-      {/* Guía campesina presentando los recuerdos del clima de 30 años */}
-      <div
-        className="tarpuy-card-physical p-5 sm:p-6"
-        style={{ backgroundColor: "var(--tarjeta)" }}
-      >
-        <GuiaConGlobo
-          pose="pensando"
-          size={88}
-          titulo={
-            isQu
-              ? `${zoneName || "Chakrayki"}: 30 wata pacha yuyariy`
-              : `Así se porta el tiempo en ${zoneName || "tu comunidad"} durante el año`
-          }
-          texto={
-            isQu
-              ? "NASA satélitekuna 30 wata qhawarqanku mayk'aqchus paran, qasan, ruphan ima."
-              : "Los satélites miraron el cielo durante 30 años para recordar en qué meses llueve más, cuándo cae helada y cuándo hace más calor."
-          }
-        />
-      </div>
-
-      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (sin bordes gruesos ni cajas dentro de cajas) */}
+      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (las explicaciones viven en Mamá Tomasa) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TARJETA 1: LOS MESES DE MÁS LLUVIA */}
         <article
@@ -114,18 +94,6 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 </h3>
               </div>
             </div>
-
-            <p
-              className="font-normal"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi para allpata uqhuchin tarpunapaq:"
-                : "En estos meses cae más agua para sembrar y llenar la tierra:"}
-            </p>
 
             {/* Barras dibujadas con gotas (sin bordes de caja anidados) */}
             <div className="space-y-3">
@@ -215,18 +183,6 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 </h3>
               </div>
             </div>
-
-            <p
-              className="font-normal"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi tutamanta sinchita chirin, yurakunata qhatana:"
-                : "En estos meses la madrugada enfría fuerte y conviene cuidar los brotes:"}
-            </p>
 
             <div className="space-y-3">
               {frostMonths.map((m) => {
@@ -321,18 +277,6 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 </h3>
               </div>
             </div>
-
-            <p
-              className="font-normal"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi inti allpata utqhaylla ch'akichin, rastrojowan qhatana:"
-                : "En estos meses el sol seca rápido la tierra; conviene cubrirla con rastrojo:"}
-            </p>
 
             <div className="space-y-3">
               {hotMonths.map((m) => {
@@ -912,6 +856,63 @@ export default function TechnicalMode({
           </p>
         ) : null}
       </section>
+
+      {/* Ventana emergente de Mamá Tomasa en la pantalla de Datos NASA */}
+      <MamaTomasaAyuda
+        titulo={
+          isQu
+            ? `NASA Willay · ${zone?.name || "Cochabamba"}`
+            : `Datos del año en ${zone?.name || "tu comunidad"}`
+        }
+        pose="pensando"
+        semaforoPrincipal="verde"
+        mensaje={
+          isQu
+            ? "30 wata satélite qhawarisqan: mayk'aqchus paran, qasan, ruphan."
+            : "Semáforo del año según 30 años de satélites NASA:"
+        }
+        tarjetas={[
+          {
+            id: "explicacion_lluvia",
+            dibujoId: "lluvia",
+            pose: "riego",
+            semaforo: "verde",
+            titulo: isQu ? "Aswan paray killakuna" : "Meses de más lluvia",
+            frase: isQu
+              ? "Para allpata uqhuchin tarpunapaq."
+              : "Momento seguro para sembrar con agua del cielo.",
+          },
+          {
+            id: "explicacion_calor",
+            dibujoId: "termometro_calor",
+            pose: "siembra",
+            semaforo: "amarillo",
+            titulo: isQu ? "Aswan q'uñi killakuna" : "Meses más calientes",
+            frase: isQu
+              ? "Inti allpata ch'akichin; rastrojowan qhatana."
+              : "El sol seca rápido la tierra; cúbrela con rastrojo.",
+          },
+          {
+            id: "explicacion_helada",
+            dibujoId: "termometro_frio",
+            pose: "alerta",
+            semaforo: "rojo",
+            titulo: isQu ? "Qasay killakuna" : "Meses con helada",
+            frase: isQu
+              ? "Tutamanta sinchita chirin; yurakunata qhatana."
+              : "Madrugadas muy frías: abriga tus brotes.",
+          },
+        ]}
+        onListen={() => {
+          const texto = isQu
+            ? "NASA satélitekuna 30 wata qhawarqanku mayk'aqchus paran, qasan, ruphan ima."
+            : `Así se porta el tiempo en ${zone?.name || "tu comunidad"} durante el año. Los satélites de la NASA miraron el cielo durante 30 años para recordar en qué meses llueve más, cuándo cae helada y cuándo hace más calor.`;
+          if (isQu) speakQuechua(texto);
+          else speakSpanish(texto);
+        }}
+        badgeCount={3}
+        lang={lang}
+      />
     </div>
   );
 }

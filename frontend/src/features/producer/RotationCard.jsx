@@ -278,24 +278,6 @@ export default function RotationCard({
       </div>
 
       <div className="p-6 sm:p-7 space-y-8">
-        {/* Una frase clara de por qué conviene (sin bordes dobles) */}
-        <div
-          className="p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
-          style={{ backgroundColor: "var(--arena)" }}
-        >
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: "var(--tarjeta)" }}
-          >
-            <CropIllustration
-              cropId={primerCultivo.crop_id}
-              name={primerCultivo.crop_name}
-              className="w-14 h-14"
-            />
-          </div>
-          <p className="tarpuy-body font-normal">{primaryText}</p>
-        </div>
-
         {/* 3 ÍCONOS SIMPLES: sin bordes gruesos ni cajas dentro de cajas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {tresIconosSimples.map((item) => (
@@ -321,65 +303,12 @@ export default function RotationCard({
           ))}
         </div>
 
-        {/* 4. CALENDARIO DE 12 MESES DIBUJADO */}
+        {/* 4. CALENDARIO DE 12 MESES DIBUJADO (los consejos de suelo viven en Mamá Tomasa) */}
         <CropCalendarBar
           cropSequence={strategy.crop_sequence}
           indicators={indicators}
           lang={lang}
         />
-
-        {/* 5. CONSEJOS DE SUELO EXISTENTES (sin bordes gruesos en elementos informativos) */}
-        {consejosSuelo.length > 0 && (
-          <div className="space-y-4">
-            <h4 className="tarpuy-subtitle">
-              {isQu ? "Allpa waqaychay yuyaychaykuna" : "Consejos para cuidar tu suelo en este plan"}
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {consejosSuelo.map((c, cIdx) => {
-                const audioConsejoKey = `${strategy.strategy_id}_consejo_${cIdx}_${lang}`;
-                return (
-                  <div
-                    key={c.id}
-                    className="p-5 rounded-3xl flex flex-col justify-between gap-4"
-                    style={{ backgroundColor: "var(--arena)" }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: "var(--tarjeta)" }}
-                      >
-                        <CropIllustration
-                          cropId={c.dibujoCropId}
-                          name={c.nombre}
-                          className="w-12 h-12"
-                        />
-                      </div>
-                      <h5 className="font-bold text-lg leading-tight">{c.nombre}</h5>
-                    </div>
-
-                    <p className="tarpuy-body font-normal">{c.frase}</p>
-
-                    <div className="pt-1 flex justify-end">
-                      <BotonAltavoz
-                        sonando={activeAudioKey === audioConsejoKey}
-                        mostrarTexto={true}
-                        etiqueta={tr(lang, "listenBtn")}
-                        onClick={() =>
-                          onSpeak(
-                            `${c.nombre}. ${c.frase}`,
-                            lang,
-                            audioConsejoKey
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Botones de voz bilingüe originales (Castellano y Runasimi) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">

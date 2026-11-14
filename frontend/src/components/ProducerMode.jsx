@@ -6,6 +6,8 @@ import { CropIllustration } from "../features/producer/FarmPictograms.jsx";
 import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
 import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
+import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
+import { buildStrategyNarration } from "../services/narration.js";
 import { tr } from "../utils/quechuaI18n.js";
 
 /**
@@ -60,6 +62,118 @@ export default function ProducerMode({
   }, [cropId, irrigation, priorities]);
 
   const shownStrategy = ordered[selectedIdx] || ordered[0];
+  const stratKey = shownStrategy
+    ? `${shownStrategy.strategy_id}_${qu ? "qu" : "es"}`
+    : `siembra_guia_${qu ? "qu" : "es"}`;
+
+  const handleListenMamaTomasa = () => {
+    if (shownStrategy) {
+      onSpeak?.(
+        buildStrategyNarration(shownStrategy, qu ? "qu" : "es"),
+        qu ? "qu" : "es",
+        stratKey,
+        `strat_${shownStrategy.strategy_id}`
+      );
+    } else {
+      const msg = qu
+        ? "Kay 4 tapuykunata kutichiy, chakraykipaq allin tarpuyta rikuchisqayki."
+        : "Responde estas 4 preguntas con calma tocando los dibujos. Abajo verás el mejor plan para tu tierra.";
+      onSpeak?.(msg, qu ? "qu" : "es", stratKey);
+    }
+  };
+
+  /* Semáforo y expresión de Fase 1 de Mamá Tomasa para la estrategia seleccionada */
+  const tl = shownStrategy?.traffic_light || {};
+  const esLineaBase = shownStrategy?.strategy_type === "current_baseline";
+  const semaforoPrincipalSiembra = esLineaBase
+    ? tl.soil === "red" || tl.water === "red"
+      ? "rojo"
+      : "amarillo"
+    : selectedIdx === 0
+    ? "verde"
+    : "verde";
+
+  const posePrincipalSiembra = esLineaBase
+    ? "alerta"
+    : selectedIdx === 0
+    ? "cosecha"
+    : "siembra";
+
+  const mensajeCortoSiembra = !shownStrategy
+    ? qu
+      ? "4 tapuykunata ñit'iy allin tarpuyta rikunapaq."
+      : "Toca los dibujos de las 4 preguntas para ver tu plan."
+    : esLineaBase
+    ? qu
+      ? "Kikinllata tarpuyqa allpata sayk'uchin."
+      : "Repetir el mismo cultivo cansa la tierra. Mira el semáforo:"
+    : selectedIdx === 0
+    ? qu
+      ? "Kay tarpuyqa allpaykita wanuchan, yakutapas waqaychan."
+      : "Este es el mejor plan: abona tu tierra y cuida el agua."
+    : qu
+    ? "Allin tarpuy allpayki samananpaq."
+    : "Buena opción para rotar tus cultivos y cuidar el suelo.";
+
+  const mapTrafficColor = (val) =>
+    val === "green" ? "verde" : val === "red" ? "rojo" : "amarillo";
+
+  const tarjetasMamaTomasa = shownStrategy
+    ? [
+        {
+          id: "semaforo_suelo",
+          dibujoId: "planta_crecida",
+          pose: tl.soil === "red" ? "alerta" : "siembra",
+          semaforo: mapTrafficColor(tl.soil || (esLineaBase ? "yellow" : "green")),
+          titulo: qu ? "Allpa wan wanu (Tu tierra)" : "Tu tierra y abono",
+          frase:
+            tl.soil === "green"
+              ? qu
+                ? "Allpata samachin, wanutapas saqin."
+                : "Deja abono natural y descansa la tierra."
+              : tl.soil === "red"
+              ? qu
+                ? "Allpata utqhaylla sayk'uchin."
+                : "Agota los nutrientes del suelo."
+              : qu
+              ? "Allpata chawpillanpi waqaychan."
+              : "Mantiene el suelo regular.",
+        },
+        {
+          id: "semaforo_agua",
+          dibujoId: "gota_agua",
+          pose: tl.water === "red" ? "alerta" : "riego",
+          semaforo: mapTrafficColor(tl.water || "green"),
+          titulo: qu ? "Yaku munay (El agua)" : "Cuidado del agua",
+          frase:
+            tl.water === "green"
+              ? qu
+                ? "Allpapi yakuta allinta waqaychan."
+                : "Guarda bien la humedad en los surcos."
+              : tl.water === "red"
+              ? qu
+                ? "Achka yakuta munan."
+                : "Pierde humedad rápido; pide más riego."
+              : qu
+              ? "Chawpi qarpayta munan."
+              : "Necesita riego moderado.",
+        },
+        {
+          id: "semaforo_cosecha",
+          dibujoId: "cosecha",
+          pose: esLineaBase ? "alerta" : "cosecha",
+          semaforo: esLineaBase ? "amarillo" : "verde",
+          titulo: qu ? "Puquy (La cosecha)" : "Tu cosecha",
+          frase: esLineaBase
+            ? qu
+              ? "Watamanta wataman pisi puquy."
+              : "Da menos cosecha con el paso de los años."
+            : qu
+            ? "Allin puquy, allin mikhuna."
+            : "Buena cosecha y alimento seguro.",
+        },
+      ]
+    : [];
 
   const handleVerMiPlan = () => {
     setShowComparison(true);
@@ -291,6 +405,23 @@ export default function ProducerMode({
           </div>
         )}
       </div>
+
+      {/* Ventana emergente de Mamá Tomasa en la pantalla de Siembra */}
+      <MamaTomasaAyuda
+        titulo={
+          shownStrategy
+            ? shownStrategy.title_es
+            : tr(lang, "rotationTitle")
+        }
+        pose={posePrincipalSiembra}
+        semaforoPrincipal={semaforoPrincipalSiembra}
+        mensaje={mensajeCortoSiembra}
+        tarjetas={tarjetasMamaTomasa}
+        onListen={handleListenMamaTomasa}
+        isSpeaking={activeAudioKey === stratKey}
+        badgeCount={tarjetasMamaTomasa.length}
+        lang={lang}
+      />
     </div>
   );
 }

@@ -4,9 +4,10 @@ import { AlertsModal } from "../ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
 import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
-import { PersonajeGuia, GloboHabla } from "../personality/PersonajeGuia.jsx";
 import { PatronPantalla } from "../personality/PatronesYSellos.jsx";
 import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
+import MamaTomasaAyuda from "../personality/MamaTomasaAyuda.jsx";
+import { SABERES_DEL_DIA_EJEMPLO } from "../../data/saberesDelDia.js";
 import { tr } from "../../utils/quechuaI18n.js";
 import {
   WeatherIllustration,
@@ -236,10 +237,67 @@ export default function EarlyWarningBanner({
   // TODO-FUNCIONALIDAD: el equipo decide cómo se calcula el momento del día (amanecer, mediodia, atardecer, noche) según la hora local o el pronóstico nocturno.
   const momentoEjemplo = minTemp <= 2 ? "noche" : "amanecer";
 
+  // Semáforo de Mamá Tomasa en Clima (sin repetir el aviso principal, solo puntos clave cortos con su expresión de Fase 1)
+  const saberHoy = SABERES_DEL_DIA_EJEMPLO[0];
+  const semaforoPrincipalClima =
+    primaryAlert.severity === "critical"
+      ? "rojo"
+      : primaryAlert.severity === "warning"
+      ? "amarillo"
+      : "verde";
+
+  const posePrincipalClima =
+    primaryAlert.severity === "critical" || primaryAlert.severity === "warning"
+      ? "alerta"
+      : lluvia7d < 5
+      ? "riego"
+      : "saludo";
+
+  const tarjetasMamaTomasa = [
+    ...alerts.slice(1).map((al, idx) => {
+      const cleaned = cleanAlertForFarmer(al, voiceLang);
+      const esCritico = cleaned?.severity === "critical";
+      const esCuidado = cleaned?.severity === "warning";
+      return {
+        id: `alerta_extra_${idx}`,
+        weatherKind: cleaned?.kind || "stable",
+        pose: esCritico || esCuidado ? "alerta" : "saludo",
+        semaforo: esCritico ? "rojo" : esCuidado ? "amarillo" : "verde",
+        titulo: cleaned?.cleanTitle || al.title,
+        frase: cleaned?.action || al.recommended_action || "",
+      };
+    }),
+    {
+      id: "semaforo_temperatura",
+      dibujoId: hoyTresTarjetas[0].dibujoId,
+      pose: minTemp <= 6 ? "alerta" : "saludo",
+      semaforo: minTemp <= 2 ? "rojo" : minTemp <= 6 ? "amarillo" : "verde",
+      titulo: `${hoyTresTarjetas[0].etiqueta}: ${hoyTresTarjetas[0].palabra}`,
+      frase: hoyTresTarjetas[0].explicacion,
+    },
+    {
+      id: "semaforo_lluvia",
+      dibujoId: hoyTresTarjetas[1].dibujoId,
+      pose: "riego",
+      semaforo: lluvia7d < 5 ? "amarillo" : "verde",
+      titulo: `${hoyTresTarjetas[1].etiqueta}: ${hoyTresTarjetas[1].palabra}`,
+      frase: hoyTresTarjetas[1].explicacion,
+    },
+    {
+      id: "semaforo_saber",
+      dibujoId: saberHoy.dibujoId,
+      pose: "pensando",
+      semaforo: "verde",
+      titulo: `${isQu ? "Yachay" : "Saber del día"}: ${saberHoy.tituloEs}`,
+      frase: isQu && saberHoy.textoQu ? saberHoy.textoQu : saberHoy.textoEs,
+    },
+  ];
+
   return (
     <div className="space-y-10">
       {/* ===================================================================
-       * 1. EL MENSAJE DEL DÍA (Protagonista único de la pantalla de Clima)
+       * 1. EL MENSAJE DEL DÍA (Protagonista único: titular corto + dibujo + Escuchar)
+       *    El texto largo de "Qué hacer hoy" y los avisos viven en Mamá Tomasa.
        * =================================================================== */}
       <section
         aria-label={isQu ? "Kunan p'unchaw willay" : "El mensaje del día"}
@@ -276,7 +334,7 @@ export default function EarlyWarningBanner({
           </span>
         </div>
 
-        {/* Cuerpo gigante del Mensaje del Día */}
+        {/* Cuerpo limpio del Mensaje del Día: dibujo grande + titular corto + Escuchar */}
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* UN dibujo grande del estado principal */}
@@ -302,18 +360,9 @@ export default function EarlyWarningBanner({
               )}
             </div>
 
-            {/* UNA frase simple y grande + acción inmediata */}
-            <div className="flex-1 text-center md:text-left space-y-2">
+            {/* Titular corto del aviso (el detalle largo de "Qué hacer hoy" está en Mamá Tomasa) */}
+            <div className="flex-1 text-center md:text-left">
               <h2 className="tarpuy-title">{primaryAlert.cleanTitle}</h2>
-              <p
-                className="font-normal leading-snug"
-                style={{
-                  fontSize: "var(--font-size-subtitle)",
-                  color: "var(--tinta)",
-                }}
-              >
-                {primaryAlert.action}
-              </p>
             </div>
 
             {/* Botón de altavoz grande dentro de la misma tarjeta */}
@@ -337,21 +386,6 @@ export default function EarlyWarningBanner({
             </div>
           </div>
 
-          {/* Personaje Guía señalando lo importante (sin doble caja con borde) */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
-            <PersonajeGuia
-              pose={estiloMensajeDia.poseGuia}
-              mostrarEtiquetaNombre={false}
-              size={84}
-            />
-            <GloboHabla
-              direccionCola="izquierda"
-              tono="normal"
-              texto={`${tr(voiceLang, "doToday")} ${primaryAlert.action}`}
-              className="w-full"
-            />
-          </div>
-
           {/* 5. PAISAJE POR HORA (Fase 1C, debajo del mensaje del día con TODO-FUNCIONALIDAD) */}
           <PaisajePorHora momento={momentoEjemplo} zona={zId} />
         </div>
@@ -361,8 +395,7 @@ export default function EarlyWarningBanner({
       <PatronPantalla tipo="ondas" />
 
       {/* ===================================================================
-       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno,
-       *    en tarjetas limpias sin bordes gruesos ni cajas anidadas)
+       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "weatherToday")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -396,11 +429,8 @@ export default function EarlyWarningBanner({
                 <IlustracionTarpuy id={item.dibujoId} size={68} />
               </div>
 
-              {/* UNA palabra grande en negrita y explicación en peso normal */}
-              <div className="space-y-1.5">
-                <h4 className="tarpuy-title">{item.palabra}</h4>
-                <p className="tarpuy-body font-normal">{item.explicacion}</p>
-              </div>
+              {/* UNA palabra grande en negrita (la explicación larga está en Mamá Tomasa) */}
+              <h4 className="tarpuy-title">{item.palabra}</h4>
 
               {/* Los números pequeños abajo como apoyo sin encerrar en otra caja */}
               <span
@@ -610,13 +640,23 @@ export default function EarlyWarningBanner({
         )}
       </section>
 
-      <AlertsModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        alerts={alerts}
-        zoneName={shortZone}
-        lang={voiceLang}
+      <MamaTomasaAyuda
+        titulo={
+          isQu
+            ? `Pacha willay · ${shortZone}`
+            : `Clima de hoy en ${shortZone}`
+        }
+        pose={posePrincipalClima}
+        semaforoPrincipal={semaforoPrincipalClima}
+        mensaje={primaryAlert.action}
+        tarjetas={tarjetasMamaTomasa}
         onListen={handleListen}
+        isSpeaking={estaHablandoAlerta}
+        badgeCount={tarjetasMamaTomasa.length}
+        tonoAvisoPrincipal={estiloMensajeDia.tonoGlobo}
+        lang={voiceLang}
+        abiertoControlado={modalOpen}
+        onCambiarAbierto={setModalOpen}
       />
 
       <DayForecastModal

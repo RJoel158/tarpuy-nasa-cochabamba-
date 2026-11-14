@@ -2,7 +2,6 @@ import React from "react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "../../components/ui/TarpuyBaseComponents.jsx";
-import { PersonajeGuia, GloboHabla } from "../../components/personality/PersonajeGuia.jsx";
 
 /**
  * TARPUY NASA COCHABAMBA — LAS 4 PREGUNTAS GUIADAS DE SIEMBRA (FASE 4)
@@ -191,22 +190,8 @@ export default function PrioritySelectorGrid({
 
   return (
     <div className="space-y-6">
-      {/* Encabezado conversacional con el Personaje Guía y Barra de avance dibujada */}
-      <div className="tarpuy-card-physical p-5 sm:p-6 space-y-5">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <PersonajeGuia pose="siembra" mostrarEtiquetaNombre={true} size={96} />
-          <GloboHabla
-            direccionCola="izquierda"
-            tono="recomendado"
-            texto={
-              qu
-                ? " kay 4 tapuykunata kutichiy, chakraykipaq allin tarpuyta rikuchisqayki."
-                : "Responde estas 4 preguntas con calma tocando los dibujos. Abajo verás el mejor plan para tu tierra."
-            }
-            className="w-full"
-          />
-        </div>
-
+      {/* Barra de avance dibujada (la explicación larga vive en la ventana de Mamá Tomasa) */}
+      <div className="tarpuy-card-physical p-5 sm:p-6">
         <BarraAvanceDibujada qu={qu} />
       </div>
 
