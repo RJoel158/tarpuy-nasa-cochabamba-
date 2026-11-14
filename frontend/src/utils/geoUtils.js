@@ -92,6 +92,32 @@ export function searchCommunities(query = "") {
   );
 }
 
+/** Adapt a GAMC district to the community shape used by the combobox and the app. */
+export function districtToCommunity(district) {
+  const { lat, lon } = district.center;
+  return {
+    id: `distrito_${district.code.toLowerCase()}`,
+    name: district.name,
+    code: district.code,
+    comuna: district.comuna,
+    region: "Cercado",
+    alt: district.comuna,
+    zoneId: findNearestZone(lat, lon).zone.id,
+    coords: [lat, lon],
+    bounds: district.bounds,
+    isDistrict: true,
+  };
+}
+
+export function searchDistricts(districts = [], query = "") {
+  const q = normText(query);
+  const items = districts.map(districtToCommunity);
+  if (!q) return items;
+  return items.filter((d) =>
+    [d.name, d.code, d.comuna, d.region].some((field) => normText(field).includes(q))
+  );
+}
+
 export function haversineKm(lat1, lon1, lat2, lon2) {
   const toRad = (deg) => (deg * Math.PI) / 180;
   const r = 6371;
