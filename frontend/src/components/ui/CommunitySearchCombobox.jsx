@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useId } from "react";
 import { Search, MapPin, ChevronDown, Check, X } from "lucide-react";
-import { searchCommunities } from "../../utils/geoUtils.js";
+import { searchCommunities, searchDistricts } from "../../utils/geoUtils.js";
+import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 
 const REGION_STYLE = {
   "Valle Alto": "bg-sky-100 text-sky-900",
   "Zona Alta": "bg-indigo-100 text-indigo-900",
   "Cono Sur": "bg-amber-100 text-amber-900",
+  Cercado: "bg-violet-100 text-violet-900",
 };
 
 export default function CommunitySearchCombobox({
@@ -22,7 +24,11 @@ export default function CommunitySearchCombobox({
   const inputRef = useRef(null);
   const listId = useId();
 
-  const results = searchCommunities(open ? query : "");
+  const districts = useGamcDistricts();
+  const results = [
+    ...searchDistricts(districts, open ? query : ""),
+    ...searchCommunities(open ? query : ""),
+  ];
   const isSidebar = variant === "sidebar";
 
   useEffect(() => {
@@ -129,8 +135,17 @@ export default function CommunitySearchCombobox({
               const selected =
                 item.name === selectedCommunityName || (!selectedCommunityName && item.zoneId === selectedZoneId);
               const highlighted = idx === highlightIdx;
+              const groupLabel = item.isDistrict
+                ? idx === 0 && "Distritos de Cochabamba"
+                : (idx === 0 || results[idx - 1].isDistrict) && "Comunidades";
               return (
-                <li key={item.id} role="option" aria-selected={selected}>
+                <React.Fragment key={item.id}>
+                  {groupLabel ? (
+                    <li role="presentation" className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                      {groupLabel}
+                    </li>
+                  ) : null}
+                <li role="option" aria-selected={selected}>
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
@@ -159,6 +174,7 @@ export default function CommunitySearchCombobox({
                     </span>
                   </button>
                 </li>
+                </React.Fragment>
               );
             })
           )}
