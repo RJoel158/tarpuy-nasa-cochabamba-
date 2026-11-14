@@ -590,26 +590,17 @@ export default function CochabambaMap({
           aria-label={`Comunidad seleccionada: ${zonaActivaObj.name}`}
           data-zona={zonaActivaObj.id}
           className="tarpuy-card-physical overflow-hidden"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            boxShadow: "0 6px 0 var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
-          {/* Franja de acento de la zona */}
+          {/* Franja de acento suave de la zona */}
           <div
-            className="px-6 py-3.5 flex flex-wrap items-center justify-between gap-3"
-            style={{
-              backgroundColor: "var(--acento-zona-suave)",
-              borderBottom: "var(--border-width-thick) solid var(--tinta)",
-            }}
+            className="px-6 py-4 flex flex-wrap items-center justify-between gap-3"
+            style={{ backgroundColor: "var(--acento-zona-suave)" }}
           >
             <div className="flex items-center gap-3">
               <span
-                className="w-5 h-5 rounded-full inline-block"
-                style={{
-                  backgroundColor: "var(--acento-zona)",
-                  border: "2px solid var(--tinta)",
-                }}
+                className="w-4 h-4 rounded-full inline-block"
+                style={{ backgroundColor: "var(--acento-zona)" }}
               />
               <h3 className="tarpuy-title">
                 {selectedCommunityName || zonaActivaObj.name} · {zonaActivaObj.sub}
@@ -627,76 +618,58 @@ export default function CochabambaMap({
             {/* Dibujo del paisaje de la zona */}
             <PaisajePorHora momento="amanecer" zona={perfilActivo.paisajeKey} />
 
-            {/* Los 3 datos con dibujo ("Altura: alto, frío", "Riesgo: heladas", "El suelo") */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Los 3 datos con dibujo (sin bordes gruesos ni cajas dentro de cajas) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-3"
-                style={{
-                  backgroundColor: "var(--cielo-suave)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
+                style={{ backgroundColor: "var(--arena)" }}
               >
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-18 h-18 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "var(--cielo-suave)" }}
                 >
-                  <IlustracionTarpuy id={perfilActivo.dibujoAltura} size={56} />
+                  <IlustracionTarpuy id={perfilActivo.dibujoAltura} size={50} />
                 </div>
-                <p className="font-extrabold text-xl leading-snug">
+                <p className="font-bold text-xl leading-snug">
                   {qu ? perfilActivo.alturaSimpleQu : perfilActivo.alturaSimpleEs}
                 </p>
-                <span className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {zonaActivaObj.elevation}
                 </span>
               </div>
 
               <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-3"
-                style={{
-                  backgroundColor: "var(--alerta-cuidado-suave)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
+                style={{ backgroundColor: "var(--arena)" }}
               >
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-18 h-18 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "var(--alerta-cuidado-suave)" }}
                 >
-                  <IlustracionTarpuy id={perfilActivo.dibujoRiesgo} size={56} />
+                  <IlustracionTarpuy id={perfilActivo.dibujoRiesgo} size={50} />
                 </div>
-                <p className="font-extrabold text-xl leading-snug">
+                <p className="font-bold text-xl leading-snug">
                   {qu ? perfilActivo.riesgoSimpleQu : perfilActivo.riesgoSimpleEs}
                 </p>
-                <span className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {zonaActivaObj.risk}
                 </span>
               </div>
 
               <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-3"
-                style={{
-                  backgroundColor: "var(--tierra-suave)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
+                style={{ backgroundColor: "var(--arena)" }}
               >
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-18 h-18 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "var(--tierra-suave)" }}
                 >
-                  <IlustracionTarpuy id={perfilActivo.dibujoSuelo} size={56} />
+                  <IlustracionTarpuy id={perfilActivo.dibujoSuelo} size={50} />
                 </div>
-                <p className="font-extrabold text-xl leading-snug">
+                <p className="font-bold text-xl leading-snug">
                   {qu ? perfilActivo.sueloSimpleQu : perfilActivo.sueloSimpleEs}
                 </p>
-                <span className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {zonaActivaObj.zoneData?.soil_context?.texture_class ||
                     zonaActivaObj.sub}
                 </span>

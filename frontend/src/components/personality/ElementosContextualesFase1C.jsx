@@ -274,25 +274,16 @@ export function PaisajePorHora({
         )}
       </svg>
 
-      {/* Pie informativo de la tarjeta de paisaje */}
+      {/* Pie informativo tranquilo de la tarjeta de paisaje */}
       <div
-        className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-sm font-extrabold"
+        className="px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-sm font-medium"
         style={{
           backgroundColor: "var(--tarjeta)",
-          borderTop: "var(--border-width-medium) solid var(--tinta)",
-          color: "var(--tinta)",
+          color: "var(--tinta-suave)",
         }}
       >
-        <span>Zona: {zonaNormalizada.toUpperCase()}</span>
-        <span
-          className="px-2.5 py-0.5 rounded-full"
-          style={{
-            backgroundColor: "var(--arena)",
-            border: "1.5px solid var(--tinta)",
-          }}
-        >
-          {estadoMomento.etiqueta}
-        </span>
+        <span>Paisaje de {zonaNormalizada}</span>
+        <span>{estadoMomento.etiqueta}</span>
       </div>
     </div>
   );
@@ -328,47 +319,36 @@ export function MiChacra({
 
   return (
     <div
-      className={`tarpuy-card-physical p-4 flex items-center gap-4 select-none ${className}`}
+      className={`tarpuy-card-physical p-5 flex items-center gap-4 select-none ${className}`}
       style={{ backgroundColor: "var(--tarjeta)" }}
     >
-      {/* Mini escena de surco con el cultivo y la etapa */}
+      {/* Mini escena de surco limpia (sin borde grueso) */}
       <div
-        className="w-24 h-24 rounded-2xl flex flex-col items-center justify-between p-2 shrink-0 overflow-hidden"
-        style={{
-          backgroundColor: "var(--hoja-suave)",
-          border: "var(--border-width-medium) solid var(--tinta)",
-        }}
+        className="w-20 h-20 rounded-2xl flex flex-col items-center justify-between p-2 shrink-0 overflow-hidden"
+        style={{ backgroundColor: "var(--hoja-suave)" }}
       >
         <div className="flex items-center justify-center gap-1">
-          <IlustracionTarpuy id={etapaInfo.dibujoId} size={46} />
-          <IlustracionTarpuy id={cultivoInfo.id} size={34} />
+          <IlustracionTarpuy id={etapaInfo.dibujoId} size={42} />
+          <IlustracionTarpuy id={cultivoInfo.id} size={30} />
         </div>
-        {/* Surco de tierra en la base */}
         <div
-          className="w-full h-3 rounded-full"
-          style={{
-            backgroundColor: "var(--tierra)",
-            border: "1.5px solid var(--tinta)",
-          }}
+          className="w-full h-2.5 rounded-full"
+          style={{ backgroundColor: "var(--tierra)" }}
           aria-hidden="true"
         />
       </div>
 
       <div className="space-y-1 text-left">
         <span
-          className="inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wide"
-          style={{
-            backgroundColor: "var(--dorado-suave)",
-            color: "var(--dorado-oscuro)",
-            border: "1.5px solid var(--tinta)",
-          }}
+          className="inline-block text-xs font-medium"
+          style={{ color: "var(--tinta-suave)" }}
         >
           Mi Chacra · {cultivoInfo.nombre}
         </span>
-        <h4 className="font-extrabold" style={{ fontSize: "var(--font-size-body)" }}>
+        <h4 className="font-bold" style={{ fontSize: "var(--font-size-body)" }}>
           {etapaInfo.nombre}
         </h4>
-        <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+        <p className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
           Cultivo: {cultivoInfo.nombre} · Etapa: {etapa}
         </p>
       </div>
@@ -393,38 +373,30 @@ export function TarjetaSaberDelDia({
   return (
     <article
       className={`tarpuy-card-physical p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 ${className}`}
-      style={{ backgroundColor: "var(--dorado-suave)" }}
+      style={{ backgroundColor: "var(--arena)" }}
     >
       <div
-        className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0"
-        style={{
-          backgroundColor: "var(--tarjeta)",
-          border: "var(--border-width-medium) solid var(--tinta)",
-        }}
+        className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+        style={{ backgroundColor: "var(--tarjeta)" }}
       >
-        <IlustracionTarpuy id={dibujoId} size={60} />
+        <IlustracionTarpuy id={dibujoId} size={52} />
       </div>
 
-      <div className="space-y-2 flex-1 text-left">
+      <div className="space-y-1.5 flex-1 text-left">
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className="px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              color: "var(--dorado-oscuro)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            className="text-sm font-bold"
+            style={{ color: "var(--dorado-oscuro)" }}
           >
             Saber del día
           </span>
 
           {pendienteValidacionComunidad && (
             <span
-              className="px-3 py-0.5 rounded-full text-xs font-extrabold"
+              className="px-2.5 py-0.5 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: "var(--ladrillo-suave)",
-                color: "var(--ladrillo-oscuro)",
-                border: "1.5px solid var(--tinta)",
+                backgroundColor: "var(--tarjeta)",
+                color: "var(--tinta-suave)",
               }}
             >
               Validar con la comunidad
@@ -433,7 +405,7 @@ export function TarjetaSaberDelDia({
         </div>
 
         <h3 className="tarpuy-subtitle">{titulo}</h3>
-        <p className="tarpuy-body">{mostrarQuechua && textoQuechua ? textoQuechua : texto}</p>
+        <p className="tarpuy-body font-normal">{mostrarQuechua && textoQuechua ? textoQuechua : texto}</p>
       </div>
     </article>
   );

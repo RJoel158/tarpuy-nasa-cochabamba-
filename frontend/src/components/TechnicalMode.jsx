@@ -62,14 +62,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
       {/* Guía campesina presentando los recuerdos del clima de 30 años */}
       <div
         className="tarpuy-card-physical p-5 sm:p-6"
-        style={{
-          backgroundColor: "var(--tarjeta)",
-          borderColor: "var(--tinta)",
-        }}
+        style={{ backgroundColor: "var(--tarjeta)" }}
       >
         <GuiaConGlobo
           pose="pensando"
-          size={92}
+          size={88}
           titulo={
             isQu
               ? `${zoneName || "Chakrayki"}: 30 wata pacha yuyariy`
@@ -83,41 +80,30 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
         />
       </div>
 
-      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (sin ejes ni números pequeños) */}
+      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (sin bordes gruesos ni cajas dentro de cajas) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TARJETA 1: LOS MESES DE MÁS LLUVIA */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--cielo-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--cielo-suave)" }}
               >
-                <IlustracionTarpuy id="lluvia" size={50} />
+                <IlustracionTarpuy id="lluvia" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--cielo-suave)",
-                    color: "var(--cielo-oscuro)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--cielo-oscuro)" }}
                 >
                   {isQu ? "Para pacha" : "Agua del cielo"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -130,7 +116,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
             </div>
 
             <p
-              className="font-bold"
+              className="font-normal"
               style={{
                 color: "var(--tinta-suave)",
                 fontSize: "var(--tarpuy-text-body-min)",
@@ -141,8 +127,8 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 : "En estos meses cae más agua para sembrar y llenar la tierra:"}
             </p>
 
-            {/* Barras dibujadas con gotas */}
-            <div className="space-y-3.5">
+            {/* Barras dibujadas con gotas (sin bordes de caja anidados) */}
+            <div className="space-y-3">
               {rainyMonths.map((m) => {
                 const pct = Math.max(28, Math.min(100, Math.round((Number(m.precip_mm || 0) / maxRain) * 100)));
                 const dropCount = pct >= 80 ? 3 : pct >= 50 ? 2 : 1;
@@ -151,14 +137,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`rain-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -168,33 +151,28 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                       <span className="inline-flex items-center gap-1">
                         {Array.from({ length: dropCount }).map((_, idx) => (
-                          <IlustracionTarpuy key={idx} id="gota_agua" size={24} />
+                          <IlustracionTarpuy key={idx} id="gota_agua" size={22} />
                         ))}
                         <span
-                          className="font-extrabold ml-1"
+                          className="font-medium ml-1"
                           style={{
                             color: "var(--cielo-oscuro)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
                         </span>
                       </span>
                     </div>
-                    {/* Barra dibujada a mano */}
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${pct}%`,
                           backgroundColor: "var(--cielo)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>
@@ -208,36 +186,25 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
         {/* TARJETA 2: LOS MESES CON HELADA */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--alerta-cuidado-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--alerta-cuidado-suave)" }}
               >
-                <IlustracionTarpuy id="termometro_frio" size={50} />
+                <IlustracionTarpuy id="termometro_frio" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--alerta-cuidado-suave)",
-                    color: "var(--alerta-cuidado-oscuro)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--alerta-cuidado-oscuro)" }}
                 >
                   {isQu ? "Qasa pacha" : "Frío de noche"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -250,7 +217,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
             </div>
 
             <p
-              className="font-bold"
+              className="font-normal"
               style={{
                 color: "var(--tinta-suave)",
                 fontSize: "var(--tarpuy-text-body-min)",
@@ -261,8 +228,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 : "En estos meses la madrugada enfría fuerte y conviene cuidar los brotes:"}
             </p>
 
-            {/* Barras dibujadas con termómetro de frío / helada */}
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {frostMonths.map((m) => {
                 const tMin = Number(m.temp_min_c ?? 2);
                 const frostScore = Math.max(30, Math.min(100, Math.round(((10 - tMin) / 14) * 100)));
@@ -272,14 +238,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`frost-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -290,15 +253,15 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       <span className="inline-flex items-center gap-1.5">
                         <IlustracionTarpuy
                           id={isHardFrost ? "helada" : "termometro_frio"}
-                          size={26}
+                          size={24}
                         />
                         <span
-                          className="font-extrabold"
+                          className="font-medium"
                           style={{
                             color: isHardFrost
                               ? "var(--alerta-critico-oscuro)"
                               : "var(--cielo-oscuro)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
@@ -306,11 +269,8 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                     </div>
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
@@ -319,7 +279,6 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                           backgroundColor: isHardFrost
                             ? "var(--alerta-critico)"
                             : "var(--cielo)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>
@@ -333,36 +292,25 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
         {/* TARJETA 3: LOS MESES MÁS CALIENTES */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--tierra-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--tierra-suave)" }}
               >
-                <IlustracionTarpuy id="termometro_calor" size={50} />
+                <IlustracionTarpuy id="termometro_calor" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--tierra-suave)",
-                    color: "var(--tierra-oscura)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--tierra-oscura)" }}
                 >
                   {isQu ? "Ruphay pacha" : "Sol fuerte"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -375,7 +323,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
             </div>
 
             <p
-              className="font-bold"
+              className="font-normal"
               style={{
                 color: "var(--tinta-suave)",
                 fontSize: "var(--tarpuy-text-body-min)",
@@ -386,8 +334,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                 : "En estos meses el sol seca rápido la tierra; conviene cubrirla con rastrojo:"}
             </p>
 
-            {/* Barras dibujadas con termómetro de calor y sol */}
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {hotMonths.map((m) => {
                 const isVeryHot = m.heatScore >= 85;
                 const levelWord = isVeryHot ? "Sol muy fuerte" : "Calor alto";
@@ -395,14 +342,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`hot-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -411,12 +355,12 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                         {m.month_name}
                       </span>
                       <span className="inline-flex items-center gap-1.5">
-                        <IlustracionTarpuy id="sol" size={26} />
+                        <IlustracionTarpuy id="sol" size={24} />
                         <span
-                          className="font-extrabold"
+                          className="font-medium"
                           style={{
                             color: "var(--tierra-oscura)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
@@ -424,18 +368,14 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                     </div>
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${m.heatScore}%`,
                           backgroundColor: "var(--tierra)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>

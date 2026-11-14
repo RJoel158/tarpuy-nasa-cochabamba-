@@ -133,20 +133,14 @@ export default function ProducerMode({
           >
             <span
               className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "var(--border-width-medium) solid var(--tinta)",
-              }}
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <IlustracionTarpuy id="cartilla_grafico" size={34} />
             </span>
-            <span className="font-extrabold">{tr(lang, "posterBtn")}</span>
+            <span className="font-bold">{tr(lang, "posterBtn")}</span>
           </a>
         </div>
       </div>
-
-      {/* Patrón fijo de Siembra: Terrazas agrícolas */}
-      <PatronPantalla tipo="terrazas" />
 
       {/* 1. LAS 4 PREGUNTAS CONVERSACIONALES + 2. BOTÓN GRANDE "VER MI PLAN" */}
       <PrioritySelectorGrid
@@ -164,7 +158,7 @@ export default function ProducerMode({
         lang={lang}
       />
 
-      {/* Patrón fijo de Siembra antes de los resultados */}
+      {/* Único patrón suave de Siembra antes de los resultados */}
       <PatronPantalla tipo="terrazas" />
 
       {/* 3. LOS RESULTADOS (Las 3 estrategias ordenadas) */}
@@ -176,15 +170,15 @@ export default function ProducerMode({
           </div>
         ) : ordered.length > 0 && shownStrategy ? (
           <div className="space-y-6">
-            {/* Encabezado de resultados + Sello de Cartilla de Fase 1C */}
+            {/* Encabezado de resultados + Sello de Cartilla */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="tarpuy-title">
                   {qu ? "Chakraykipaq 3 tarpuy ñankuna" : "Tus 3 opciones de siembra"}
                 </h3>
-                <p className="tarpuy-body font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <p className="tarpuy-body font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {qu
-                    ? " hukta ñit'iy 12 killa tarpuyta rikunapaq"
+                    ? "Hukta ñit'iy 12 killa tarpuyta rikunapaq"
                     : "Toca cualquiera de las 3 tarjetas para ver su calendario de 12 meses"}
                 </p>
               </div>
@@ -196,7 +190,7 @@ export default function ProducerMode({
               />
             </div>
 
-            {/* Selector visual de las 3 estrategias (La mejor para ti, Otra buena opción, Como siempre se hizo) */}
+            {/* Selector visual de las 3 estrategias */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {ordered.map((s, idx) => {
                 const info = tabInfo(s, idx);
@@ -213,19 +207,17 @@ export default function ProducerMode({
                       activa ? "tarpuy-btn-physical--pressed" : ""
                     } p-4 flex flex-col justify-between gap-3 text-left cursor-pointer`}
                     style={{
-                      minHeight: "148px",
+                      minHeight: "140px",
                       backgroundColor: activa ? info.bg : "var(--tarjeta)",
                       color: "var(--tinta)",
-                      outline: activa ? "3px solid var(--tinta)" : "none",
                     }}
                   >
                     <div className="flex items-center justify-between gap-2 w-full">
                       <span
-                        className="px-3 py-1 rounded-full text-sm font-extrabold uppercase tracking-wide"
+                        className="px-3 py-0.5 rounded-full text-sm font-bold"
                         style={{
-                          backgroundColor: info.bg,
+                          backgroundColor: activa ? "var(--tarjeta)" : info.bg,
                           color: "var(--tinta)",
-                          border: "1.5px solid var(--tinta)",
                         }}
                       >
                         {info.etiqueta}
@@ -233,10 +225,10 @@ export default function ProducerMode({
 
                       {info.estrella && (
                         <span
-                          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold"
                           style={{
                             backgroundColor: "var(--dorado)",
-                            border: "2px solid var(--tinta)",
+                            color: "var(--tinta)",
                           }}
                           aria-hidden="true"
                         >
@@ -247,16 +239,13 @@ export default function ProducerMode({
 
                     <div className="flex items-center gap-3">
                       <span
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: "var(--arena)",
-                          border: "var(--border-width-medium) solid var(--tinta)",
-                        }}
+                        className="w-13 h-13 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: "var(--arena)" }}
                       >
                         <CropIllustration
                           cropId={primerCultivo.crop_id}
                           name={primerCultivo.crop_name}
-                          className="w-12 h-12"
+                          className="w-11 h-11"
                         />
                       </span>
                       <div className="min-w-0">

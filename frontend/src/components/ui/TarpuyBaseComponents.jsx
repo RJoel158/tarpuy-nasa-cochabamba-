@@ -60,13 +60,12 @@ export function BotonGrande({
           className="shrink-0 flex items-center justify-center rounded-xl p-1"
           style={{
             backgroundColor: "var(--tarjeta)",
-            border: "var(--border-width-medium) solid var(--tinta)",
           }}
         >
-          <IlustracionTarpuy id={ilustracionId} size={42} />
+          <IlustracionTarpuy id={ilustracionId} size={40} />
         </span>
       ) : null}
-      <span className="leading-tight text-left">{labelContent}</span>
+      <span className="leading-tight text-left font-bold">{labelContent}</span>
     </button>
   );
 }

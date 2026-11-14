@@ -55,7 +55,8 @@ export function PatronPantalla({
     <div
       role="separator"
       aria-hidden="true"
-      className={`w-full select-none overflow-hidden flex flex-col items-center gap-1 ${className}`}
+      className={`w-full select-none overflow-hidden flex flex-col items-center gap-1 py-1 ${className}`}
+      style={{ opacity: 0.48 }}
     >
       <svg
         viewBox="0 0 640 32"
@@ -262,53 +263,43 @@ export function SelloCartilla({
   return (
     <div
       role="status"
-      className={`inline-flex items-center gap-3.5 px-4 py-3 select-none ${className}`}
+      className={`inline-flex items-center gap-2.5 px-3.5 py-2 select-none ${className}`}
       style={{
         backgroundColor: bg,
         color: "var(--tinta)",
-        border: "var(--border-width-thick) solid var(--tinta)",
-        borderRadius: "var(--radius-btn)",
-        outline: `2px dashed ${accent}`,
-        outlineOffset: "-6px",
+        border: "1px solid color-mix(in srgb, var(--tinta) 25%, transparent)",
+        borderRadius: "var(--radius-pill)",
       }}
     >
-      {/* Escudo circular tipo sello de goma de libreta agrícola */}
-      <svg width="46" height="46" viewBox="0 0 48 48" fill="none" className="shrink-0" aria-hidden="true">
+      {/* Escudo circular pequeño y limpio */}
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" className="shrink-0" aria-hidden="true">
         <circle
           cx="24"
           cy="24"
-          r="21"
-          fill="var(--tarjeta)"
-          stroke="var(--tinta)"
-          strokeWidth="2.8"
-        />
-        <circle
-          cx="24"
-          cy="24"
-          r="16.5"
+          r="20"
           fill={accent}
           stroke="var(--tinta)"
           strokeWidth="2"
-          strokeDasharray="4 2.5"
         />
-        {/* Check grueso dibujado a mano */}
         <path
           d="M15.5 24.5L21.5 30.5L33 18.5"
           stroke={esLadrillo ? "var(--tarjeta)" : "var(--tinta)"}
-          strokeWidth="4"
+          strokeWidth="3.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
 
       <div className="text-left leading-tight pr-1">
-        <span
-          className="block text-xs font-extrabold uppercase tracking-wider"
-          style={{ color: ink }}
-        >
-          {subtitulo}
-        </span>
-        <span className="block font-extrabold" style={{ fontSize: "var(--font-size-body-min)" }}>
+        {subtitulo && (
+          <span
+            className="block text-xs font-medium"
+            style={{ color: ink }}
+          >
+            {subtitulo}
+          </span>
+        )}
+        <span className="block font-bold" style={{ fontSize: "1rem" }}>
           {texto}
         </span>
       </div>

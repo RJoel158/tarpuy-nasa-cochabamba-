@@ -237,17 +237,16 @@ export default function EarlyWarningBanner({
   const momentoEjemplo = minTemp <= 2 ? "noche" : "amanecer";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* ===================================================================
-       * 1. EL MENSAJE DEL DÍA (Tarjeta gigante con UN dibujo grande, UNA frase
-       *    simple, el personaje guía señalando y botón de altavoz grande)
+       * 1. EL MENSAJE DEL DÍA (Protagonista único de la pantalla de Clima)
        * =================================================================== */}
       <section
         aria-label={isQu ? "Kunan p'unchaw willay" : "El mensaje del día"}
         className="tarpuy-card-physical overflow-hidden"
         style={{
           backgroundColor: estiloMensajeDia.bg,
-          boxShadow: "0 6px 0 var(--tinta)",
+          border: "2px solid var(--tinta)",
         }}
       >
         {/* Franja superior de estado del clima */}
@@ -255,20 +254,16 @@ export default function EarlyWarningBanner({
           className="px-6 py-3 flex flex-wrap items-center justify-between gap-3"
           style={{
             backgroundColor: estiloMensajeDia.franja,
-            borderBottom: "var(--border-width-thick) solid var(--tinta)",
             color:
               primaryAlert.severity === "warning"
                 ? "var(--tinta)"
                 : "var(--texto-sobre-fuerte)",
           }}
         >
-          <span className="inline-flex items-center gap-2.5 font-extrabold text-lg uppercase tracking-wider">
+          <span className="inline-flex items-center gap-2.5 font-bold text-lg">
             <span
-              className="w-4 h-4 rounded-full inline-block"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "2px solid var(--tinta)",
-              }}
+              className="w-3.5 h-3.5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--tarjeta)" }}
               aria-hidden="true"
             />
             <span>
@@ -276,7 +271,7 @@ export default function EarlyWarningBanner({
             </span>
           </span>
 
-          <span className="text-sm font-extrabold">
+          <span className="text-sm font-medium">
             {isQu ? "¿Imata kunan ruwana?" : "¿Qué debo hacer hoy?"}
           </span>
         </div>
@@ -284,40 +279,34 @@ export default function EarlyWarningBanner({
         {/* Cuerpo gigante del Mensaje del Día */}
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* UN dibujo grande del estado principal (y luna si es helada nocturna) */}
+            {/* UN dibujo grande del estado principal */}
             <div className="relative shrink-0">
               <div
-                className="w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "var(--tarjeta)" }}
               >
                 <WeatherIllustration
                   kind={primaryAlert.kind}
                   animated={true}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
+                  className="w-22 h-22 sm:w-24 sm:h-24"
                 />
               </div>
 
               {primaryAlert.kind === "frost" && (
                 <span
-                  className="w-12 h-12 rounded-full flex items-center justify-center absolute -top-2 -right-2"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-11 h-11 rounded-full flex items-center justify-center absolute -top-1 -right-1"
+                  style={{ backgroundColor: "var(--tarjeta)" }}
                 >
-                  <IlustracionTarpuy id="noche_luna" size={34} />
+                  <IlustracionTarpuy id="noche_luna" size={30} />
                 </span>
               )}
             </div>
 
             {/* UNA frase simple y grande + acción inmediata */}
-            <div className="flex-1 text-center md:text-left space-y-2.5">
+            <div className="flex-1 text-center md:text-left space-y-2">
               <h2 className="tarpuy-title">{primaryAlert.cleanTitle}</h2>
               <p
-                className="font-extrabold leading-snug"
+                className="font-normal leading-snug"
                 style={{
                   fontSize: "var(--font-size-subtitle)",
                   color: "var(--tinta)",
@@ -339,7 +328,7 @@ export default function EarlyWarningBanner({
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="font-extrabold text-base underline cursor-pointer py-1"
+                  className="font-bold text-base underline cursor-pointer py-1"
                   style={{ color: "var(--tinta)" }}
                 >
                   {tr(voiceLang, "seeAlerts")} ({alerts.length})
@@ -348,22 +337,16 @@ export default function EarlyWarningBanner({
             </div>
           </div>
 
-          {/* Personaje Guía señalando lo importante + Globo de Habla */}
-          <div
-            className="p-4 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "var(--border-width-medium) solid var(--tinta)",
-            }}
-          >
+          {/* Personaje Guía señalando lo importante (sin doble caja con borde) */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
             <PersonajeGuia
               pose={estiloMensajeDia.poseGuia}
-              mostrarEtiquetaNombre={true}
-              size={92}
+              mostrarEtiquetaNombre={false}
+              size={84}
             />
             <GloboHabla
               direccionCola="izquierda"
-              tono={estiloMensajeDia.tonoGlobo}
+              tono="normal"
               texto={`${tr(voiceLang, "doToday")} ${primaryAlert.action}`}
               className="w-full"
             />
@@ -374,65 +357,55 @@ export default function EarlyWarningBanner({
         </div>
       </section>
 
-      {/* Separador fijo de Clima: Ondas de agua y viento */}
+      {/* Único separador suave de la pantalla de Clima */}
       <PatronPantalla tipo="ondas" />
 
       {/* ===================================================================
-       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno)
+       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno,
+       *    en tarjetas limpias sin bordes gruesos ni cajas anidadas)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "weatherToday")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="tarpuy-subtitle">
             {isQu ? "Kunan p'unchaw (Hoy)" : "El clima de hoy en 3 miradas"}
           </h3>
-          <span className="text-base font-bold" style={{ color: "var(--tinta-suave)" }}>
+          <span className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
             {shortZone}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {hoyTresTarjetas.map((item) => (
             <article
               key={item.id}
               className="tarpuy-card-physical p-6 flex flex-col items-center text-center justify-between gap-4"
-              style={{ backgroundColor: item.bg }}
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <span
-                className="px-3.5 py-1 rounded-full text-sm font-extrabold uppercase tracking-wider"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  color: "var(--tinta)",
-                  border: "1.5px solid var(--tinta)",
-                }}
+                className="text-sm font-medium"
+                style={{ color: "var(--tinta-suave)" }}
               >
                 {item.etiqueta}
               </span>
 
-              {/* Dibujo grande arriba */}
+              {/* Dibujo grande arriba en fondo suave sin borde grueso */}
               <div
-                className="w-28 h-28 rounded-full flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="w-24 h-24 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: item.bg }}
               >
-                <IlustracionTarpuy id={item.dibujoId} size={76} />
+                <IlustracionTarpuy id={item.dibujoId} size={68} />
               </div>
 
-              {/* UNA palabra grande y clara */}
+              {/* UNA palabra grande en negrita y explicación en peso normal */}
               <div className="space-y-1.5">
                 <h4 className="tarpuy-title">{item.palabra}</h4>
-                <p className="tarpuy-body font-bold">{item.explicacion}</p>
+                <p className="tarpuy-body font-normal">{item.explicacion}</p>
               </div>
 
-              {/* Los números pequeños abajo como apoyo */}
+              {/* Los números pequeños abajo como apoyo sin encerrar en otra caja */}
               <span
-                className="px-3 py-1 rounded-xl text-xs font-extrabold"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  color: "var(--tinta-suave)",
-                  border: "1.5px solid var(--tinta)",
-                }}
+                className="text-sm font-normal pt-1"
+                style={{ color: "var(--tinta-suave)" }}
               >
                 {item.apoyoNumerico}
               </span>
@@ -442,7 +415,7 @@ export default function EarlyWarningBanner({
       </section>
 
       {/* ===================================================================
-       * 3. LA SEMANA (Tira de 7 casillas grandes: día + UN dibujo del clima)
+       * 3. LA SEMANA (Tira de 7 casillas interactivas limpias)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -452,12 +425,8 @@ export default function EarlyWarningBanner({
               : "La semana (toca un día para ver mañana, tarde y noche)"}
           </h3>
           <span
-            className="px-3 py-1 rounded-full text-sm font-extrabold"
-            style={{
-              backgroundColor: "var(--dorado-suave)",
-              color: "var(--dorado-oscuro)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            className="text-sm font-medium"
+            style={{ color: "var(--tinta-suave)" }}
           >
             {tr(voiceLang, "tapForDetail")}
           </span>
@@ -482,41 +451,31 @@ export default function EarlyWarningBanner({
                 onClick={() => setSelectedDay(d)}
                 className="tarpuy-btn-physical p-4 flex flex-col items-center justify-between gap-3 text-center cursor-pointer"
                 style={{
-                  minHeight: "196px",
+                  minHeight: "184px",
                   backgroundColor: bgCasilla,
                   color: "var(--tinta)",
                 }}
               >
                 {/* Día arriba */}
-                <span className="font-extrabold text-xl leading-tight">
+                <span className="font-bold text-lg leading-tight">
                   {d.day_label}
                 </span>
 
-                {/* UN dibujo grande del clima */}
+                {/* UN dibujo grande del clima sin borde interior */}
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center shrink-0"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: "var(--tarjeta)" }}
                 >
-                  <WeatherIllustration kind={dv.kind} className="w-14 h-14" />
+                  <WeatherIllustration kind={dv.kind} className="w-13 h-13" />
                 </div>
 
-                {/* Palabra de estado + números pequeños como apoyo */}
-                <div className="space-y-1 w-full">
-                  <span
-                    className="inline-block px-3 py-0.5 rounded-full text-sm font-extrabold"
-                    style={{
-                      backgroundColor: "var(--tarjeta)",
-                      color: "var(--tinta)",
-                      border: "1.5px solid var(--tinta)",
-                    }}
-                  >
+                {/* Palabra de estado + números de apoyo sin sub-cajas */}
+                <div className="space-y-0.5 w-full">
+                  <span className="block text-base font-bold">
                     {dv.word}
                   </span>
                   <span
-                    className="block text-xs font-bold"
+                    className="block text-xs font-normal"
                     style={{ color: "var(--tinta-suave)" }}
                   >
                     {d.temp_min_c}° / {d.temp_max_c}°C

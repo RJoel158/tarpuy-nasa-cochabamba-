@@ -139,7 +139,7 @@ function CheckDibujado({ size = 28 }) {
   );
 }
 
-/* Barra de avance dibujada: Semilla → Brote → Planta → Cosecha */
+/* Barra de avance dibujada: Semilla → Brote → Planta → Cosecha (sin bordes ni sub-cajas) */
 function BarraAvanceDibujada({ qu = false }) {
   const pasos = [
     { num: 1, dibujo: "semilla", texto: qu ? "1. Ñawpa tarpuy" : "1. Cultivo anterior" },
@@ -151,23 +151,16 @@ function BarraAvanceDibujada({ qu = false }) {
   return (
     <div
       aria-label="Pasos de tu conversación de siembra"
-      className="p-4 rounded-3xl grid grid-cols-2 sm:grid-cols-4 gap-3"
-      style={{
-        backgroundColor: "var(--arena)",
-        border: "var(--border-width-medium) solid var(--tinta)",
-      }}
+      className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-3"
     >
       {pasos.map((p) => (
         <div
           key={p.num}
-          className="px-3 py-2.5 rounded-2xl flex items-center gap-3"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            border: "var(--border-width-medium) solid var(--tinta)",
-          }}
+          className="px-3.5 py-2.5 rounded-2xl flex items-center gap-3"
+          style={{ backgroundColor: "var(--arena)" }}
         >
-          <IlustracionTarpuy id={p.dibujo} size={38} />
-          <span className="font-extrabold text-base leading-tight">{p.texto}</span>
+          <IlustracionTarpuy id={p.dibujo} size={36} />
+          <span className="font-medium text-base leading-tight">{p.texto}</span>
         </div>
       ))}
     </div>

@@ -378,7 +378,11 @@ export default function App() {
             dbStats={dbStats}
             syncStatus={syncStatus}
           />
-          <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+          <main
+            id="tarpuy-main-view"
+            data-producer-mode={!isAdvanced}
+            className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-4 sm:py-6 space-y-8"
+          >
           {loading && !recData ? (
             <p className="py-12 text-center font-extrabold" style={{ color: "var(--tinta-suave)" }}>
               Cargando datos...
@@ -449,38 +453,25 @@ export default function App() {
               onOpenMap={() => setActiveView("mapa")}
             />
           ) : activeView === "mapa" ? (
-            <div className="space-y-6">
-              <div
-                className="tarpuy-card-physical p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  borderColor: "var(--tinta)",
-                }}
-              >
-                <div>
-                  <span
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-extrabold uppercase tracking-wider mb-1.5"
-                    style={{
-                      backgroundColor: "var(--hoja-suave)",
-                      color: "var(--hoja)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    {tr(voiceLang, "mapSubtitle")}
-                  </span>
-                  <h2
-                    className="font-extrabold tracking-tight"
-                    style={{
-                      fontFamily: "var(--tarpuy-font-display)",
-                      fontSize: "var(--tarpuy-text-title)",
-                      lineHeight: "var(--tarpuy-line-title)",
-                      color: "var(--tinta)",
-                    }}
-                  >
-                    {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
-                  </h2>
-                </div>
+            <div className="space-y-8">
+              <div className="px-1">
+                <span
+                  className="inline-block text-sm font-medium mb-1"
+                  style={{ color: "var(--tinta-suave)" }}
+                >
+                  {tr(voiceLang, "mapSubtitle")}
+                </span>
+                <h2
+                  className="font-bold tracking-tight"
+                  style={{
+                    fontFamily: "var(--tarpuy-font-display)",
+                    fontSize: "var(--tarpuy-text-title)",
+                    lineHeight: "var(--tarpuy-line-title)",
+                    color: "var(--tinta)",
+                  }}
+                >
+                  {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
+                </h2>
               </div>
               <CochabambaMap
                 zones={zones}
