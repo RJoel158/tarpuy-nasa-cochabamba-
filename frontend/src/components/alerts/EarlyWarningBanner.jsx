@@ -36,9 +36,8 @@ export default function EarlyWarningBanner({ bulletin, zoneName = "", onSpeak, a
     if (voiceLang === "qu") {
       onSpeak?.(bulletin.alerts_spoken_qu || "", "qu", aKey, `alert_${zId}`);
     } else {
-      const top = alerts[0];
-      const msg = `${pred.plain_prediction_es || ""} ${top ? `${top.title_es}. ${top.action_es}` : ""}`;
-      onSpeak?.(msg, "es", aKey);
+      const msg = bulletin.alerts_spoken_es || pred.plain_prediction_es || "";
+      onSpeak?.(msg, "es", aKey, `alert_${zId}`);
     }
   };
 

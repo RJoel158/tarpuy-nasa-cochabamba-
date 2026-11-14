@@ -99,7 +99,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         </button>
         <button
           type="button"
-          onClick={() => onSpeak(strategy.spanish_summary, "es", esKey)}
+          onClick={() => onSpeak(strategy.spanish_summary, "es", esKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeAudioKey === esKey ? "bg-stone-800 text-white border-stone-900" : "bg-white hover:bg-stone-100 text-stone-900 border-stone-300"
           }`}
