@@ -45,16 +45,16 @@ export default function ProducerMode({
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">¿Qué conviene sembrar?</h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
-            <label htmlFor="crop-select" className="text-xs font-semibold text-stone-600 block mb-1">
+        <div className="flex flex-wrap items-end gap-3 w-full sm:w-auto min-w-0">
+          <div className="w-full sm:w-auto min-w-0">
+            <label htmlFor="crop-select" className="text-xs font-semibold text-slate-600 block mb-1">
               Última cosecha en tu terreno:
             </label>
             <select
               id="crop-select"
               value={cropId}
               onChange={(e) => onChangeCrop(e.target.value)}
-              className="px-3 py-2 border border-stone-300 rounded-lg text-sm font-semibold bg-white text-stone-900"
+              className="w-full max-w-full sm:w-auto px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold bg-white text-slate-900 truncate"
             >
               {crops.map((c) => (
                 <option key={c.crop_id} value={c.crop_id}>{c.name_es} ({c.name_qu})</option>
@@ -66,7 +66,7 @@ export default function ProducerMode({
             href={`/api/poster/${currentZoneId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 transition"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
           >
             <Printer className="w-4 h-4 text-amber-700" />
             <span>Cartilla para imprimir</span>
