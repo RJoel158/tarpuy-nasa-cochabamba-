@@ -6,7 +6,7 @@ import { tr } from "../../utils/quechuaI18n.js";
 const TOAST_STYLE = {
   success: { border: "border-l-emerald-600", Icon: CheckCircle2, color: "text-emerald-700" },
   warning: { border: "border-l-amber-500", Icon: AlertTriangle, color: "text-amber-600" },
-  info: { border: "border-l-[#0284C7]", Icon: Info, color: "text-[#0284C7]" },
+  info: { border: "border-l-[var(--cielo-oscuro)]", Icon: Info, color: "text-[var(--cielo-oscuro)]" },
 };
 
 export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast }) {
@@ -20,18 +20,18 @@ export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast
       {activeProcess ? (
         <div
           role="status"
-          className="pointer-events-auto bg-[#0B2545] text-white rounded-xl px-4 py-3 shadow-lg border border-sky-400/30 space-y-2"
+          className="pointer-events-auto bg-[var(--tinta)] text-white rounded-xl px-4 py-3 shadow-lg border border-sky-400/30 space-y-2"
         >
           <div className="flex items-center justify-between gap-2 text-xs font-bold">
             <span className="inline-flex items-center gap-2 min-w-0 truncate">
-              <Loader2 className="w-4 h-4 text-[#009FE3] animate-spin shrink-0" />
+              <Loader2 className="w-4 h-4 text-[var(--hoja-oscura)] animate-spin shrink-0" />
               <span className="truncate">{activeProcess.label}</span>
             </span>
             <span className="text-sky-300 shrink-0 tabular-nums">{activeProcess.pct}%</span>
           </div>
           <div className="h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#009FE3] rounded-full transition-all duration-150"
+              className="h-full bg-[var(--hoja-oscura)] rounded-full transition-all duration-150"
               style={{ width: `${activeProcess.pct}%` }}
             />
           </div>
@@ -50,7 +50,7 @@ export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast
             <div className="flex items-start gap-2.5 min-w-0">
               <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
               <div className="min-w-0 text-xs">
-                <p className="font-bold text-[#0B2545] leading-snug">{t.title}</p>
+                <p className="font-bold text-[var(--tinta)] leading-snug">{t.title}</p>
                 {t.detail ? <p className="text-slate-600 mt-0.5 leading-snug">{t.detail}</p> : null}
               </div>
             </div>
@@ -86,8 +86,8 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
       >
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0284C7]">{tr(lang, "alertsModalSub")}</p>
-            <h3 className="text-base font-bold text-[#0B2545]">{tr(lang, "seeAlerts")} · {zoneName}</h3>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--cielo-oscuro)]">{tr(lang, "alertsModalSub")}</p>
+            <h3 className="text-base font-bold text-[var(--tinta)]">{tr(lang, "seeAlerts")} · {zoneName}</h3>
           </div>
           <button
             type="button"
@@ -118,9 +118,9 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
                     </span>
                     <span className="text-[11px] font-semibold text-slate-500">{vis.category}</span>
                   </div>
-                  <p className="text-sm font-bold text-[#0B2545] leading-snug">{vis.cleanTitle}</p>
+                  <p className="text-sm font-bold text-[var(--tinta)] leading-snug">{vis.cleanTitle}</p>
                   <div className="bg-white/90 border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-700 leading-relaxed">
-                    <strong className="text-[#0B2545]">{tr(lang, "doToday")}</strong> {vis.action}
+                    <strong className="text-[var(--tinta)]">{tr(lang, "doToday")}</strong> {vis.action}
                   </div>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
           <button
             type="button"
             onClick={onListen}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[var(--cielo-oscuro)] hover:bg-[var(--cielo-presionado)] text-white text-xs font-bold cursor-pointer"
           >
             <Volume2 className="w-3.5 h-3.5" />
             <span>{tr(lang, "listenBtn")}</span>

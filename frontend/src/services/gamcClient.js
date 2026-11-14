@@ -88,7 +88,6 @@ async function featureInfoAt(serviceId, lat, lon, halfDeg = PROBE_HALF_DEG) {
   if (!res.ok) throw new Error("Consulta GAMC no disponible");
   return (await res.json())?.features?.[0]?.properties || null;
 }
-
 let districtsPromise = null;
 
 /** Municipal districts catalog (code, comuna, center, bounds); fetched once and cached. */

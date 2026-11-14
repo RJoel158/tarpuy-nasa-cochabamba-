@@ -67,13 +67,13 @@ export default function CommunitySearchCombobox({
   return (
     <div ref={rootRef} className="relative w-full min-w-0">
       <div
-        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition ${
+        className={`flex min-h-11 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition ${
           isSidebar
-            ? "bg-white/10 border-white/20 text-white focus-within:border-[#009FE3] focus-within:bg-white/15"
-            : "bg-white border-slate-300 text-[#0B2545] focus-within:border-[#0284C7]"
+            ? "bg-white/10 border-white/20 text-white focus-within:border-[var(--hoja-oscura)] focus-within:bg-white/15"
+            : "bg-white border-slate-300 text-[var(--tinta)] focus-within:border-[var(--cielo-oscuro)]"
         }`}
       >
-        <Search className={`w-3.5 h-3.5 shrink-0 ${isSidebar ? "text-sky-300" : "text-[#0284C7]"}`} />
+        <Search className={`w-3.5 h-3.5 shrink-0 ${isSidebar ? "text-sky-300" : "text-[var(--cielo-oscuro)]"}`} />
         <input
           ref={inputRef}
           type="text"
@@ -96,7 +96,7 @@ export default function CommunitySearchCombobox({
           }}
           onKeyDown={handleKeyDown}
           className={`w-full min-w-0 bg-transparent text-xs font-medium outline-none ${
-            isSidebar ? "text-white placeholder-sky-200/80" : "text-[#0B2545] placeholder-slate-400"
+            isSidebar ? "text-white placeholder-sky-200/80" : "text-[var(--tinta)] placeholder-slate-400"
           }`}
         />
         {open && query ? (
@@ -116,7 +116,7 @@ export default function CommunitySearchCombobox({
             if (open) setOpen(false);
             else inputRef.current?.focus();
           }}
-          className={`p-0.5 rounded cursor-pointer shrink-0 ${isSidebar ? "text-sky-200 hover:text-white" : "text-slate-500 hover:text-[#0B2545]"}`}
+          className={`p-0.5 rounded cursor-pointer shrink-0 ${isSidebar ? "text-sky-200 hover:text-white" : "text-slate-500 hover:text-[var(--tinta)]"}`}
         >
           <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
@@ -143,9 +143,9 @@ export default function CommunitySearchCombobox({
                     onClick={() => choose(item)}
                     className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 text-xs transition cursor-pointer ${
                       selected
-                        ? "bg-purple-50 text-[#0B2545] font-bold"
+                        ? "bg-purple-50 text-[var(--tinta)] font-bold"
                         : highlighted
-                        ? "bg-slate-100 text-[#0B2545]"
+                        ? "bg-slate-100 text-[var(--tinta)]"
                         : "hover:bg-slate-50 text-slate-800"
                     }`}
                   >
