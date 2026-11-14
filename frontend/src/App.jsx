@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight } from "lucide-react";
-import Navbar from "./components/layout/Navbar.jsx";
+import Navbar, { CabeceraNavegacion } from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import FarmerOverview from "./features/producer/FarmerOverview.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
@@ -52,7 +52,9 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [activeProcess, setActiveProcess] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [showFase1Preview, setShowFase1Preview] = useState(true);
+  const [showFase1Preview, setShowFase1Preview] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("vista") === "fase1"
+  );
   const processTimersRef = useRef([]);
   const calcTimerRef = useRef(null);
 
@@ -349,8 +351,32 @@ export default function App() {
         syncStatus={syncStatus}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col justify-between pb-28 lg:pb-8">
-        <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+      <div className="flex-1 min-w-0 flex flex-col justify-between pb-32 lg:pb-8">
+        <div>
+          <CabeceraNavegacion
+            activeView={activeView}
+            onChangeView={setActiveView}
+            appMode={appMode}
+            onChangeAppMode={handleChangeAppMode}
+            zoneId={zoneId}
+            onSelectZone={handleSelectZone}
+            selectedCommunityName={communityName}
+            onSelectCommunity={handleSelectCommunity}
+            onDetectGps={handleDetectGps}
+            voiceLang={voiceLang}
+            onChangeVoiceLang={handleChangeVoiceLang}
+            isSpeaking={isSpeaking}
+            onSpeakGuide={handleSpeakGuide}
+            onStopAudio={handleStopAudio}
+            isOnline={isOnline}
+            forceOffline={forceOffline}
+            onToggleOffline={handleToggleOffline}
+            onDownloadBundle={handleDownloadBundle}
+            cachedCount={cachedCount}
+            dbStats={dbStats}
+            syncStatus={syncStatus}
+          />
+          <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
           {!isAdvanced && activeView === "clima" && <FarmerOverview
             community={communityName} zone={currentZone}
             crop={crops.find((crop) => crop.crop_id === cropId)} cropId={cropId}
@@ -432,6 +458,7 @@ export default function App() {
             <TechnicalMode zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} />
           )}
         </main>
+        </div>
 
         <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4">
           <InstitutionalBrandBar variant="footer" />

@@ -2,10 +2,19 @@ import React, { useState, useRef, useEffect, useId } from "react";
 import { Search, MapPin, ChevronDown, Check, X } from "lucide-react";
 import { searchCommunities } from "../../utils/geoUtils.js";
 
-const REGION_STYLE = {
-  "Valle Alto": "bg-sky-100 text-sky-900",
-  "Zona Alta": "bg-indigo-100 text-indigo-900",
-  "Cono Sur": "bg-amber-100 text-amber-900",
+const REGION_TOKEN_STYLE = {
+  "Valle Alto": {
+    bg: "var(--dorado-suave)",
+    fg: "var(--dorado-oscuro)",
+  },
+  "Zona Alta": {
+    bg: "var(--piedra-suave)",
+    fg: "var(--piedra-oscura)",
+  },
+  "Cono Sur": {
+    bg: "var(--hoja-suave)",
+    fg: "var(--hoja-oscura)",
+  },
 };
 
 export default function CommunitySearchCombobox({
@@ -13,7 +22,7 @@ export default function CommunitySearchCombobox({
   selectedCommunityName = "",
   onSelectCommunity,
   variant = "sidebar",
-  placeholder = "Buscar comunidad o pueblo...",
+  placeholder = "Buscar otra comunidad o pueblo...",
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -61,13 +70,17 @@ export default function CommunitySearchCombobox({
   return (
     <div ref={rootRef} className="relative w-full min-w-0">
       <div
-        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition ${
-          isSidebar
-            ? "bg-white/10 border-white/20 text-white focus-within:border-[#009FE3] focus-within:bg-white/15"
-            : "bg-white border-slate-300 text-[#0B2545] focus-within:border-[#0284C7]"
-        }`}
+        className="flex items-center gap-2.5 px-4 py-2.5 transition"
+        style={{
+          minHeight: "var(--size-btn-min-h)",
+          backgroundColor: isSidebar ? "var(--tarjeta)" : "var(--tarjeta)",
+          color: "var(--tinta)",
+          border: "var(--border-width-thick) solid var(--tinta)",
+          borderRadius: "var(--radius-btn)",
+          boxShadow: "0 3px 0 var(--tinta)",
+        }}
       >
-        <Search className={`w-3.5 h-3.5 shrink-0 ${isSidebar ? "text-sky-300" : "text-[#0284C7]"}`} />
+        <Search className="w-6 h-6 shrink-0" style={{ color: "var(--tinta)" }} aria-hidden="true" />
         <input
           ref={inputRef}
           type="text"
@@ -77,7 +90,7 @@ export default function CommunitySearchCombobox({
           aria-autocomplete="list"
           aria-label="Buscar comunidad o municipio"
           value={open ? query : selectedCommunityName}
-          placeholder={selectedCommunityName ? `${selectedCommunityName} · Buscar...` : placeholder}
+          placeholder={selectedCommunityName ? `Cambiar comunidad (${selectedCommunityName})...` : placeholder}
           onFocus={() => {
             setOpen(true);
             setQuery("");
@@ -89,30 +102,45 @@ export default function CommunitySearchCombobox({
             setHighlightIdx(0);
           }}
           onKeyDown={handleKeyDown}
-          className={`w-full min-w-0 bg-transparent text-xs font-medium outline-none ${
-            isSidebar ? "text-white placeholder-sky-200/80" : "text-[#0B2545] placeholder-slate-400"
-          }`}
+          className="w-full min-w-0 bg-transparent font-extrabold outline-none"
+          style={{
+            color: "var(--tinta)",
+            fontSize: "var(--font-size-body-min)",
+          }}
         />
         {open && query ? (
           <button
             type="button"
             aria-label="Limpiar búsqueda"
-            onClick={() => { setQuery(""); inputRef.current?.focus(); }}
-            className={`p-0.5 rounded cursor-pointer ${isSidebar ? "text-sky-200 hover:text-white" : "text-slate-400 hover:text-slate-700"}`}
+            onClick={() => {
+              setQuery("");
+              inputRef.current?.focus();
+            }}
+            className="p-2 rounded-xl cursor-pointer shrink-0"
+            style={{
+              backgroundColor: "var(--arena)",
+              color: "var(--tinta)",
+              border: "1.5px solid var(--tinta)",
+            }}
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-5 h-5" />
           </button>
         ) : null}
         <button
           type="button"
-          aria-label="Mostrar comunidades"
+          aria-label="Mostrar lista de comunidades"
           onClick={() => {
             if (open) setOpen(false);
             else inputRef.current?.focus();
           }}
-          className={`p-0.5 rounded cursor-pointer shrink-0 ${isSidebar ? "text-sky-200 hover:text-white" : "text-slate-500 hover:text-[#0B2545]"}`}
+          className="p-2 rounded-xl cursor-pointer shrink-0"
+          style={{
+            backgroundColor: "var(--arena)",
+            color: "var(--tinta)",
+            border: "1.5px solid var(--tinta)",
+          }}
         >
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -120,42 +148,74 @@ export default function CommunitySearchCombobox({
         <ul
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full mt-1.5 bg-white text-slate-900 border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-[500] py-1 divide-y divide-slate-100"
+          className="absolute left-0 right-0 top-full mt-2 max-h-72 overflow-y-auto z-[500] py-2"
+          style={{
+            backgroundColor: "var(--tarjeta)",
+            color: "var(--tinta)",
+            border: "var(--border-width-thick) solid var(--tinta)",
+            borderRadius: "var(--radius-card)",
+            boxShadow: "0 6px 0 var(--tinta)",
+          }}
         >
           {results.length === 0 ? (
-            <li className="px-3 py-2.5 text-xs text-slate-500">Sin resultados para “{query}”</li>
+            <li
+              className="px-4 py-3 font-bold"
+              style={{ color: "var(--tinta-suave)", fontSize: "var(--font-size-body-min)" }}
+            >
+              No encontramos «{query}»
+            </li>
           ) : (
             results.map((item, idx) => {
               const selected =
-                item.name === selectedCommunityName || (!selectedCommunityName && item.zoneId === selectedZoneId);
+                item.name === selectedCommunityName ||
+                (!selectedCommunityName && item.zoneId === selectedZoneId);
               const highlighted = idx === highlightIdx;
+              const regColors = REGION_TOKEN_STYLE[item.region] || {
+                bg: "var(--arena)",
+                fg: "var(--tinta)",
+              };
               return (
                 <li key={item.id} role="option" aria-selected={selected}>
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => choose(item)}
-                    className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 text-xs transition cursor-pointer ${
-                      selected
-                        ? "bg-sky-50 text-[#0B2545] font-bold"
+                    className="w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition cursor-pointer"
+                    style={{
+                      minHeight: "56px",
+                      backgroundColor: selected
+                        ? "var(--dorado-suave)"
                         : highlighted
-                        ? "bg-slate-100 text-[#0B2545]"
-                        : "hover:bg-slate-50 text-slate-800"
-                    }`}
+                        ? "var(--arena)"
+                        : "transparent",
+                      color: "var(--tinta)",
+                      fontWeight: selected ? 800 : 700,
+                      fontSize: "var(--font-size-body-min)",
+                      borderBottom: "1px solid var(--arena)",
+                    }}
                   >
-                    <span className="flex items-center gap-1.5 min-w-0">
+                    <span className="flex items-center gap-2.5 min-w-0">
                       {selected ? (
-                        <Check className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                        <Check className="w-5 h-5 shrink-0" style={{ color: "var(--hoja-oscura)" }} />
                       ) : (
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <MapPin className="w-5 h-5 shrink-0" style={{ color: "var(--ladrillo)" }} />
                       )}
                       <span className="truncate">{item.name}</span>
                     </span>
-                    <span className="flex items-center gap-1.5 shrink-0">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${REGION_STYLE[item.region] || "bg-slate-100 text-slate-700"}`}>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span
+                        className="px-2.5 py-0.5 rounded-full text-xs font-extrabold"
+                        style={{
+                          backgroundColor: regColors.bg,
+                          color: regColors.fg,
+                          border: "1.5px solid var(--tinta)",
+                        }}
+                      >
                         {item.region}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{item.alt}</span>
+                      <span className="text-xs font-bold" style={{ color: "var(--tinta-suave)" }}>
+                        {item.alt}
+                      </span>
                     </span>
                   </button>
                 </li>

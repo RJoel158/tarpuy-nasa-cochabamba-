@@ -644,6 +644,218 @@ export function DibujoAltavoz({ size = 64, className = "", animated = false }) {
   );
 }
 
+/* =====================================================================
+ * ILUSTRACIONES DE NAVEGACIÓN (FASE 2: PESTAÑAS, MODO, GPS, SIN SEÑAL)
+ * ===================================================================== */
+
+/* 25. NUBE CON SOL (Pestaña Clima) */
+export function DibujoNubeConSol({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Clima: nube con sol">
+      {/* Sol detrás arriba a la izquierda */}
+      <circle cx="23" cy="22" r="11" fill={SUN} stroke={INK} strokeWidth="3" />
+      <path
+        d="M23 5V9M9 22H5M12 11L9 8M34 11L37 8"
+        stroke={INK}
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+      {/* Nube adelante */}
+      <path
+        d="M21 48H49C54.5 48 58 44 58 39C58 34.2 54.4 30.6 49.8 30.2C48.3 23.2 42 18.5 34.8 19C27.5 19.5 22.2 25 21.6 31.8C16.8 32.5 13.5 36.2 13.5 40.8C13.5 45.2 16.8 48 21 48Z"
+        fill={CLOUD}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+    </SvgFrame>
+  );
+}
+
+/* 26. MANO QUE SIEMBRA UNA SEMILLA (Pestaña Siembra) */
+export function DibujoManoSiembra({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Siembra: mano que siembra una semilla">
+      {/* Mano inclinada soltando semilla */}
+      <path
+        d="M10 18H28C33 18 37 21 38 25L42 27C44 28 43 32 39 32H25L18 27H10V18Z"
+        fill={SUN_SOFT}
+        stroke={INK}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Semilla dorada cayendo */}
+      <path
+        d="M36 35C39 35 41 38 40 41C39 44 35 45 33 43C31 41 32 35 36 35Z"
+        fill={SUN}
+        stroke={INK}
+        strokeWidth="2.6"
+      />
+      {/* Surco de tierra abajo con brote pequeño */}
+      <path
+        d="M8 52C16 47 26 47 34 52C42 47 50 47 56 52V56H8V52Z"
+        fill={EARTH_DRY}
+        stroke={INK}
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M22 48C22 43 17 41 16 44C15 47 19 48 22 48ZM22 48C22 43 27 41 28 44C29 47 25 48 22 48Z"
+        fill={LEAF}
+        stroke={INK}
+        strokeWidth="2.2"
+      />
+    </SvgFrame>
+  );
+}
+
+/* 27. CHACRA VISTA DESDE ARRIBA CON CAMINO (Pestaña Mapa) */
+export function DibujoMapaChacra({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Mapa: chacra vista desde arriba con camino">
+      {/* Marco de parcelas vistas desde arriba */}
+      <rect
+        x="9"
+        y="9"
+        width="46"
+        height="46"
+        rx="9"
+        fill={LEAF_SOFT}
+        stroke={INK}
+        strokeWidth="3.2"
+      />
+      {/* Parcela de tierra labrada arriba izquierda */}
+      <rect x="12" y="12" width="18" height="17" rx="3" fill={EARTH_DRY} stroke={INK} strokeWidth="2.2" />
+      {/* Parcela cultivada abajo derecha */}
+      <rect x="34" y="34" width="18" height="18" rx="3" fill={LEAF} stroke={INK} strokeWidth="2.2" />
+      {/* Camino serpenteante que cruza la chacra */}
+      <path
+        d="M12 48C22 44 26 36 30 30C34 24 40 18 52 15"
+        stroke={SUN_SOFT}
+        strokeWidth="7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 48C22 44 26 36 30 30C34 24 40 18 52 15"
+        stroke={INK}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeDasharray="4 4"
+      />
+      {/* Punto "estás aquí" en ladrillo */}
+      <circle cx="31" cy="29" r="5.5" fill={CLAY} stroke={INK} strokeWidth="2.5" />
+    </SvgFrame>
+  );
+}
+
+/* 28. CARTILLA CON GRÁFICO DIBUJADO (Pestaña Datos) */
+export function DibujoCartillaGrafico({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Datos: cartilla con gráfico dibujado">
+      {/* Hoja de cartilla */}
+      <rect
+        x="11"
+        y="8"
+        width="42"
+        height="48"
+        rx="6"
+        fill={HIGHLIGHT}
+        stroke={INK}
+        strokeWidth="3.2"
+      />
+      {/* Barras dibujadas a mano (agua, cultivo, sol) */}
+      <rect x="18" y="34" width="6" height="14" rx="1.5" fill={WATER} stroke={INK} strokeWidth="2.2" />
+      <rect x="29" y="26" width="6" height="22" rx="1.5" fill={LEAF} stroke={INK} strokeWidth="2.2" />
+      <rect x="40" y="20" width="6" height="28" rx="1.5" fill={SUN} stroke={INK} strokeWidth="2.2" />
+      {/* Línea base y encabezado */}
+      <path d="M16 48H48M18 15H36" stroke={INK} strokeWidth="2.6" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 29. LUPA DIBUJADA A MANO (Modo Avanzado) */
+export function DibujoLupa({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Modo Avanzado: lupa">
+      <circle
+        cx="27"
+        cy="27"
+        r="15"
+        fill={WATER_SOFT}
+        stroke={INK}
+        strokeWidth="3.4"
+      />
+      <path
+        d="M21 22C23 19 27 18 31 20"
+        stroke={INK}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M38 38L52 52"
+        stroke={WOOD}
+        strokeWidth="6.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M38 38L52 52"
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+    </SvgFrame>
+  );
+}
+
+/* 30. PIN DE UBICACIÓN (Comunidad y GPS) */
+export function DibujoPinUbicacion({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Ubicación y GPS">
+      {/* Base de tierra */}
+      <ellipse cx="32" cy="52" rx="16" ry="5" fill={SUN_SOFT} stroke={INK} strokeWidth="2.6" />
+      {/* Pin en ladrillo ("estás aquí") */}
+      <path
+        d="M32 8C21.5 8 14 15.5 14 25C14 36.5 32 50 32 50C32 50 50 36.5 50 25C50 15.5 42.5 8 32 8Z"
+        fill={CLAY}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      <circle cx="32" cy="24" r="6.5" fill={SUN} stroke={INK} strokeWidth="2.6" />
+    </SvgFrame>
+  );
+}
+
+/* 31. ANTENA CON ONDAS (Estado sin internet / señal) */
+export function DibujoAntenaOndas({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Antena con ondas">
+      {/* Ondas tranquilas */}
+      <path
+        d="M18 18C12 24 12 34 18 40M46 18C52 24 52 34 46 40"
+        stroke={WATER}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M24 23C20 27 20 31 24 35M40 23C44 27 44 31 40 35"
+        stroke={LEAF}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {/* Mástil y base de antena */}
+      <circle cx="32" cy="28" r="4.5" fill={SUN} stroke={INK} strokeWidth="2.8" />
+      <path
+        d="M32 33V52M22 52H42M26 43H38"
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+    </SvgFrame>
+  );
+}
+
 /* Catálogo completo de las 24 ilustraciones de la Fase 1 */
 export const CATALOGO_ILUSTRACIONES = [
   { id: "sol", nombre: "Sol", Component: DibujoSol },
@@ -672,8 +884,21 @@ export const CATALOGO_ILUSTRACIONES = [
   { id: "altavoz", nombre: "Altavoz", Component: DibujoAltavoz },
 ];
 
+export const CATALOGO_ILUSTRACIONES_NAVEGACION = [
+  { id: "nube_con_sol", nombre: "Clima (Nube con sol)", Component: DibujoNubeConSol },
+  { id: "mano_siembra", nombre: "Siembra (Mano con semilla)", Component: DibujoManoSiembra },
+  { id: "mapa_chacra", nombre: "Mapa (Chacra con camino)", Component: DibujoMapaChacra },
+  { id: "cartilla_grafico", nombre: "Datos (Cartilla con gráfico)", Component: DibujoCartillaGrafico },
+  { id: "lupa", nombre: "Modo Avanzado (Lupa)", Component: DibujoLupa },
+  { id: "pin_ubicacion", nombre: "Ubicación (Pin)", Component: DibujoPinUbicacion },
+  { id: "antena_ondas", nombre: "Señal (Antena con ondas)", Component: DibujoAntenaOndas },
+];
+
 const MAPA_POR_ID = Object.fromEntries(
-  CATALOGO_ILUSTRACIONES.map((item) => [item.id, item.Component])
+  [...CATALOGO_ILUSTRACIONES, ...CATALOGO_ILUSTRACIONES_NAVEGACION].map((item) => [
+    item.id,
+    item.Component,
+  ])
 );
 
 export function IlustracionTarpuy({ id = "semilla", size = 64, className = "", animated = false }) {
