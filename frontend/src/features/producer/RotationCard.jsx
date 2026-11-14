@@ -1,4 +1,5 @@
 import React from "react";
+import { buildStrategyNarration } from "../../services/narration.js";
 import { Volume2 } from "lucide-react";
 import CropCalendarBar from "./CropCalendarBar.jsx";
 import { CheckIllustration } from "./FarmPictograms.jsx";
@@ -15,13 +16,6 @@ const PLAIN_TITLES = {
   mizque_strat_drought_cover_mulch: { es: "Maíz tapado con Avena-Vicia y Haba", qu: "Sara chhallawan qhatasqa, Avena-Vicia, Jawasawan" },
   mizque_strat_agroforestry_alfalfa_grain: { es: "Franjas de Alfalfa con Quinua y Maíz", qu: "Alfalfa wach'ukuna Kinwawan, Sarawan" },
 };
-
-function firstSentence(text = "") {
-  const clean = String(text).replace(/\s+/g, " ").trim();
-  if (!clean) return "";
-  const first = clean.split(/(?<=[.!?])\s+/)[0] || clean;
-  return first.length > 140 ? `${first.slice(0, 137).trim()}...` : first;
-}
 
 export default function RotationCard({ strategy = {}, index = 1, indicators = [], onSpeak, activeAudioKey, isAdvanced = false, lang = "es" }) {
   const isQu = lang === "qu";
@@ -46,8 +40,8 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
     { key: "erosion", name: tr(lang, "windRainCheck"), val: tl.erosion || "yellow" },
   ];
 
-  const primaryText = isQu ? firstSentence(strategy.quechua_summary) : firstSentence(strategy.spanish_summary);
-  const secondaryText = isQu ? firstSentence(strategy.spanish_summary) : firstSentence(strategy.quechua_summary);
+  const primaryText = buildStrategyNarration(strategy, lang);
+
 
   return (
     <div className={`bg-white rounded-xl border p-5 sm:p-6 space-y-5 ${isBase ? "border-amber-400" : "border-stone-200"}`}>
@@ -71,7 +65,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       {/* Concise Plain Explanation (prioritizes active language) */}
       <div className="space-y-1.5 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
         <p className="leading-relaxed font-medium text-[#0B2545]">{primaryText}</p>
-        <p className="italic text-slate-600 leading-relaxed pt-1 border-t border-slate-200/80 text-xs">{secondaryText}</p>
+
       </div>
 
       {/* Illustrated 4 Status Checks */}
@@ -102,7 +96,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <button
           type="button"
-          onClick={() => onSpeak(strategy.quechua_summary, "qu", qKey, `strat_${strategy.strategy_id}`)}
+          onClick={() => onSpeak(buildStrategyNarration(strategy, "qu"), "qu", qKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeAudioKey === qKey ? "bg-[#0B2545] text-white border-[#081B33]" : "bg-sky-50 hover:bg-sky-100 text-[#0B2545] border-sky-300"
           }`}
@@ -112,7 +106,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         </button>
         <button
           type="button"
-          onClick={() => onSpeak(strategy.spanish_summary, "es", esKey, `strat_${strategy.strategy_id}`)}
+          onClick={() => onSpeak(buildStrategyNarration(strategy, "es"), "es", esKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeAudioKey === esKey ? "bg-stone-800 text-white border-stone-900" : "bg-white hover:bg-stone-100 text-stone-900 border-stone-300"
           }`}

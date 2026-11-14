@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { buildWeatherNarration } from "../../services/narration.js";
 import { Volume2, LocateFixed, MapPin, Bell, ArrowRight } from "lucide-react";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
@@ -29,7 +30,11 @@ export default function EarlyWarningBanner({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  if (!bulletin || !bulletin.current_conditions) return null;
+  if (!bulletin || !bulletin.current_conditions) return (
+    <p role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      {voiceLang === "qu" ? "Mana pacha yachay kanchu." : "No hay datos del clima disponibles para esta zona. Si tienes internet, vuelve a consultar."}
+    </p>
+  );
   const cur = bulletin.current_conditions;
   const pred = bulletin.predictions_summary || {};
   const alerts = bulletin.active_alerts || [];
@@ -40,12 +45,8 @@ export default function EarlyWarningBanner({
   const isQu = voiceLang === "qu";
 
   const handleListen = () => {
-    if (isQu) {
-      onSpeak?.(bulletin.alerts_spoken_qu || "", "qu", aKey, `alert_${zId}`);
-    } else {
-      const msg = bulletin.alerts_spoken_es || pred.plain_prediction_es || "";
-      onSpeak?.(msg, "es", aKey, `alert_${zId}`);
-    }
+    const message = buildWeatherNarration(bulletin, shortZone, voiceLang);
+    onSpeak?.(message, voiceLang, aKey);
   };
 
   const primaryAlert = cleanAlertForFarmer(alerts[0], voiceLang) || {
@@ -104,6 +105,11 @@ export default function EarlyWarningBanner({
         </div>
       </div>
 
+      {!isQu && <p className="text-sm text-slate-600">
+        Pronóstico de la zona · {bulletin.fetched_at_utc && Number.isFinite(Date.parse(bulletin.fetched_at_utc))
+          ? new Date(bulletin.fetched_at_utc).toLocaleString("es-BO") : "Fecha de actualización no disponible"}
+      </p>}
+      <h3 className="text-xl font-bold text-[#0B2545]">{isQu ? tr(voiceLang, "doToday") : "Qué hago ahora"}</h3>
       {/* Top Graphical Warning Banner (Semáforo del Campo) */}
       <div className={`rounded-2xl border border-l-4 ${primaryAlert.borderClass} ${primaryAlert.bgClass} p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
         <div className="flex items-start sm:items-center gap-3.5 min-w-0">
@@ -132,6 +138,7 @@ export default function EarlyWarningBanner({
         ) : null}
       </div>
 
+      <h3 className="text-xl font-bold text-[#0B2545]">{isQu ? "Allpayki" : "Cómo está mi tierra"}</h3>
       {/* 4 Graphical Weather Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {weatherCards.map((c) => {

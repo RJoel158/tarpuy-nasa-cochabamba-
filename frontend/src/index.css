@@ -66,3 +66,38 @@
     display: block !important;
   }
 }
+
+/* Comfortable controls for use in the field. */
+.producer-header > div:first-child {
+  flex-wrap: wrap;
+}
+.producer-header > div:first-child > div:last-child {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.producer-header > div:first-child > div:last-child > div:first-child {
+  grid-column: 1 / -1;
+}
+.producer-header input {
+  min-height: 48px;
+  font-size: 1rem;
+}
+[data-producer-mode="true"] button,
+[data-producer-mode="true"] a {
+  min-height: 48px;
+}
+[data-producer-mode="true"] p {
+  line-height: 1.6;
+}
+[data-producer-mode="true"] .text-xs {
+  font-size: 0.9375rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

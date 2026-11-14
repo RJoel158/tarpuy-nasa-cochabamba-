@@ -208,35 +208,27 @@ export function translateAlertText(alert, lang = "es") {
 }
 
 export function buildDayInterpretation(day = {}, dv = {}, lang = "es") {
-  const tmax = Number(day.temp_max_c ?? 18);
-  const tmin = Number(day.temp_min_c ?? 8);
-  const rain = Number(day.precip_mm ?? 0);
-  const prob = Number(day.precip_prob_pct ?? 0);
-  const wind = Number(day.wind_max_kmh ?? 12);
-  const et0 = Number(day.et0_mm ?? 3.5);
-  const isQu = lang === "qu";
-
-  const dayText = isQu
-    ? tmax >= 23 ? `P'unchawpi ${tmax}°C q'uñi kanqa; inti allpata usqhaylla ch'akichin.` : `P'unchawpi ${tmax}°C kachkan; allin llamk'anapaq.`
-    : tmax >= 23 ? `Día caluroso (${tmax}°C): el sol evapora agua rápido al mediodía.` : `Día templado (${tmax}°C): buena temperatura para trabajar en la chacra.`;
-
-  const nightText = isQu
-    ? tmin <= 2 ? `Tuta ${tmin}°C chiriwan qasa kanman; yurata qhatay.` : `Tuta ${tmin}°C kachkan; mana qasa manchay kanchu.`
-    : tmin <= 2 ? `Noche muy fría (${tmin}°C): posible helada en zonas bajas.` : `Noche sin riesgo de helada (${tmin}°C), segura para brotes tiernos.`;
-
-  const rainText = isQu
-    ? rain >= 2 ? `${rain} mm para jamunqa (${prob}%): allpata uqhuchanqa.` : `Mana sinchi para kanchu (${rain} mm): yaku waqaychana.`
-    : rain >= 2 ? `Se esperan ${rain} mm de lluvia (${prob}% de probabilidad) que ayudan a mojar la tierra.` : `Poca o nada de lluvia (${rain} mm, ${prob}%): conviene cuidar la humedad del suelo.`;
-
-  const adviceText = isQu
-    ? rain >= 5 ? "Allin p'unchaw tarpuyta qallarinapaq; ama qunqaychu allpa qhatayta." : wind >= 20 ? "Wayra kanqa: ama q'upata ruphachiychu, chhallawan allpata hark'ay." : "Tutamanta icha ch'isiman parqoy, chhallata allpa patapi saqiy."
-    : rain >= 5 ? "Aprovecha la humedad para sembrar o abonar; deja cobertura para retener el agua." : wind >= 20 ? "Viento fuerte hoy: riega al amanecer y evita dejar la tierra desnuda." : "Buen día para revisar el cultivo y mantener paja o chala sobre la tierra.";
-
-  return {
-    dayText,
-    nightText,
-    rainText,
-    adviceText,
-    spokenSummary: `${day.day_label || ""}. ${dayText} ${nightText} ${rainText} ${adviceText}`,
-  };
+  const value = (v) => v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v)) ? Number(v) : null;
+  const tmax = value(day.temp_max_c);
+  const tmin = value(day.temp_min_c);
+  const rain = value(day.precip_mm);
+  const prob = value(day.precip_prob_pct);
+  const wind = value(day.wind_kmh);
+  const qu = lang === "qu";
+  const fmt = (v) => v.toLocaleString("es-BO", { maximumFractionDigits: 1 });
+  const dayText = tmax === null ? (qu ? "Mana yachay kanchu." : "Falta la temperatura máxima.")
+    : qu ? `P'unchawpi ${fmt(tmax)} grados kanman.` : `Máxima prevista de ${fmt(tmax)} grados Celsius.`;
+  const nightText = tmin === null ? (qu ? "Mana chiri yachay kanchu." : "Falta la temperatura mínima; revisa el aviso de frío.")
+    : qu ? `Tuta ${fmt(tmin)} grados kanman. Yurakunata qhaway.`
+    : `Mínima prevista de ${fmt(tmin)} grados. ${tmin <= 2 ? "Posible frío intenso o helada; protege los cultivos sensibles." : "Las zonas bajas de tu parcela pueden estar más frías que esta estimación."}`;
+  const rainText = rain === null || rain < 0 ? (qu ? "Mana para yachay kanchu." : "Falta la estimación de lluvia.")
+    : qu ? `Para ${fmt(rain)} milímetros kanman.`
+    : `Lluvia prevista de ${fmt(rain)} milímetros${prob !== null && prob >= 0 && prob <= 100 ? `, con una probabilidad de precipitación de ${fmt(prob)} por ciento` : ""}. La cantidad que llegue a las raíces depende del suelo y el escurrimiento.`;
+  const adviceText = qu ? "Allpata, yakuta qhaway."
+    : tmin !== null && tmin <= 2 ? "Revisa la protección contra el frío antes de decidir sembrar."
+    : rain !== null && rain >= 20 ? "Revisa los desagües y comprueba si se acumula agua en tu terreno."
+    : wind !== null && wind >= 18 ? `Se prevé viento de hasta ${fmt(wind)} kilómetros por hora. Espera a que calme para aplicar productos por aspersión.`
+    : "Comprueba la humedad a la profundidad de las raíces y la necesidad de tu cultivo antes de decidir regar o sembrar.";
+  return { dayText, nightText, rainText, adviceText,
+    spokenSummary: `Pronóstico para ${day.date || day.day_label || "el día seleccionado"}. ${dayText} ${nightText} ${rainText} ${adviceText}` };
 }

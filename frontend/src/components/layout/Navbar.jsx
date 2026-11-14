@@ -15,19 +15,12 @@ const MODE_OPTIONS = [
   { id: "avanzado", key: "advMode", shortKey: "advShort", Icon: BarChart3, activeCls: "bg-[#009FE3] text-white shadow-xs" },
 ];
 
-const SHORT_ZONES = [
-  { id: "punata_valle_alto", label: "Punata · Valle Alto", short: "Punata" },
-  { id: "tapacari_zona_andina", label: "Tapacarí · Altura", short: "Tapacarí" },
-  { id: "mizque_cono_sur", label: "Mizque · Cono Sur", short: "Mizque" },
-];
-
 export default function Navbar({
   activeView = "clima",
   onChangeView,
   appMode = "facil",
   onChangeAppMode,
   zoneId = "punata_valle_alto",
-  onSelectZone,
   selectedCommunityName = "Punata",
   onSelectCommunity,
   onDetectGps,
@@ -95,22 +88,6 @@ export default function Navbar({
               onSelectCommunity={onSelectCommunity}
               variant="sidebar"
             />
-            <div className="space-y-1">
-              {SHORT_ZONES.map((z) => (
-                <button
-                  key={z.id}
-                  type="button"
-                  onClick={() => onSelectZone(z.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition cursor-pointer ${
-                    zoneId === z.id
-                      ? "bg-[#009FE3] text-white font-semibold shadow-xs"
-                      : "text-slate-300 hover:bg-white/10"
-                  }`}
-                >
-                  {z.label}
-                </button>
-              ))}
-            </div>
             <button
               type="button"
               onClick={onDetectGps}
@@ -194,7 +171,7 @@ export default function Navbar({
       </aside>
 
       {/* Mobile Header + Bottom Tab Bar */}
-      <header className="lg:hidden sticky top-0 z-40 bg-[#0B2545] text-white px-3 py-2.5 space-y-2 border-b border-[#081B33]">
+      <header className="producer-header lg:hidden relative z-40 bg-[#0B2545] text-white px-3 py-2.5 space-y-2 border-b border-[#081B33]">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1 shrink-0">
@@ -204,7 +181,7 @@ export default function Navbar({
             <span className="font-bold text-sm tracking-tight truncate">Tarpuy</span>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="inline-flex rounded-lg bg-black/30 p-0.5 text-[11px]">
               {MODE_OPTIONS.map((m) => (
                 <button
@@ -213,7 +190,7 @@ export default function Navbar({
                   onClick={() => onChangeAppMode?.(m.id)}
                   aria-label={tr(voiceLang, m.key)}
                   aria-pressed={appMode === m.id}
-                  className={`px-2 py-1 rounded-md font-bold transition cursor-pointer ${
+                  className={`min-h-12 px-2 py-1 rounded-md font-bold transition cursor-pointer ${
                     appMode === m.id ? m.activeCls : "text-slate-300"
                   }`}
                 >
@@ -225,17 +202,17 @@ export default function Navbar({
               type="button"
               onClick={() => onChangeVoiceLang(voiceLang === "qu" ? "es" : "qu")}
               aria-label="Cambiar idioma Castellano o Qhichwa"
-              className="px-2 py-1 rounded-lg bg-white/15 text-white font-bold text-[11px] shrink-0 cursor-pointer"
+              className="min-h-12 px-3 rounded-xl bg-white/15 text-white font-bold text-sm cursor-pointer"
             >
-              {voiceLang === "qu" ? "QU" : "ES"}
+              {voiceLang === "qu" ? "Qhichwa" : "Castellano"}
             </button>
             <button
               type="button"
               onClick={isSpeaking ? onStopAudio : onSpeakGuide}
-              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1 shrink-0 cursor-pointer"
+              className="min-h-12 px-4 rounded-xl bg-amber-400 text-[#0B2545] font-bold text-base inline-flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
-              <span>{tr(voiceLang, "listenBtn")}</span>
+              <span>{tr(voiceLang, isSpeaking ? "stopAudio" : "listenGuide")}</span>
             </button>
           </div>
         </div>
@@ -247,33 +224,23 @@ export default function Navbar({
           variant="sidebar"
         />
 
-        <div className="grid grid-cols-3 gap-1.5">
-          {SHORT_ZONES.map((z) => (
-            <button
-              key={z.id}
-              type="button"
-              onClick={() => onSelectZone(z.id)}
-              className={`py-1.5 px-2 rounded-lg text-xs text-center transition cursor-pointer ${
-                zoneId === z.id
-                  ? "bg-[#009FE3] text-white font-bold shadow-xs"
-                  : "bg-white/10 text-slate-200 hover:bg-white/15"
-              }`}
-            >
-              {z.short}
-            </button>
-          ))}
-        </div>
+        <button type="button" onClick={onDetectGps}
+          className="w-full min-h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-3 text-sm font-semibold text-white">
+          <LocateFixed className="w-5 h-5 shrink-0" aria-hidden="true" />
+          <span>{tr(voiceLang, "detectGps")}</span>
+        </button>
       </header>
 
-      <nav className={`lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid text-[11px] ${visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
+      <nav className={`lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid text-sm pb-[env(safe-area-inset-bottom)] ${visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleNavItems.map(({ id, key, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => onChangeView(id)}
-            className={`py-2.5 flex flex-col items-center gap-1 ${activeView === id ? "text-[#0284C7] font-bold" : "text-slate-500"}`}
+            aria-current={activeView === id ? "page" : undefined}
+            className={`min-h-20 py-3 flex flex-col items-center justify-center gap-1.5 ${activeView === id ? "text-[#0284C7] font-bold" : "text-slate-500"}`}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-7 h-7" aria-hidden="true" />
             <span>{tr(voiceLang, key)}</span>
           </button>
         ))}
