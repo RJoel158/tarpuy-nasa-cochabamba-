@@ -168,6 +168,8 @@ class AgroclimaticAlertEvaluator:
 
         alerts.sort(key=lambda a: SEV_ORDER.get(a["severity"], 9))
         alerts_qu_clean = ". ".join(a["title_qu"].split("(")[0].strip() for a in alerts[:3])
+        alerts_es_clean = ". ".join(a["title_es"].split("(")[0].replace("¡", "").replace("!", "").strip() for a in alerts[:3])
+        top_action_es = alerts[0]["action_es"] if alerts else "Cuida la humedad de tu terreno."
         return {
             "zone_id": zone_id,
             "data_status": z_rt.get("data_status", "unavailable_realtime_fallback"),
@@ -186,5 +188,6 @@ class AgroclimaticAlertEvaluator:
             "nasa_recent_daily": nasa_daily,
             "active_alerts": alerts,
             "alerts_spoken_qu": f"Allillanchu. Kay semanapaq willakuy: {alerts_qu_clean}. Allpata qhorawan p'istuy.",
+            "alerts_spoken_es": f"Hola compañero productor. Aviso del clima para esta semana: {alerts_es_clean}. Consejo práctico: {top_action_es}",
             "veracity_manifest": _build_veracity_manifest(fetched_at, bool(nasa_daily)),
         }
