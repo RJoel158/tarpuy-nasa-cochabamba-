@@ -20,6 +20,13 @@ const LIGHT_LABELS = {
   red: { dot: "bg-rose-600", text: "text-rose-900", word: "Riesgo" },
 };
 
+function firstSentence(text = "") {
+  const clean = String(text).replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  const first = clean.split(/(?<=[.!?])\s+/)[0] || clean;
+  return first.length > 140 ? `${first.slice(0, 137).trim()}...` : first;
+}
+
 export default function RotationCard({ strategy = {}, index = 1, indicators = [], onSpeak, activeAudioKey }) {
   const isBase = strategy.strategy_type === "current_baseline";
   const scorePct = Math.round((strategy.priority_alignment_score || 0.45) * 100);
@@ -43,8 +50,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
           <span className={`text-xs font-bold uppercase tracking-wider ${isBase ? "text-amber-700" : "text-[#0284C7]"}`}>
             {isBase ? "Práctica actual · Riesgo para el suelo" : `Opción recomendada · ${scorePct}% ideal`}
           </span>
-          <h3 className="text-xl font-bold text-stone-900 mt-1">{title}</h3>
-          <p className="text-sm italic text-stone-600 mt-0.5">{strategy.title_qu}</p>
+          <h3 className="text-xl font-bold text-[#0B2545] mt-1">{title}</h3>
         </div>
       </div>
 
@@ -63,10 +69,10 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       {/* 12-Month Timeline */}
       <CropCalendarBar cropSequence={strategy.crop_sequence} indicators={indicators} />
 
-      {/* Plain Explanation */}
-      <div className="space-y-2 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
-        <p className="leading-relaxed">{strategy.spanish_summary}</p>
-        <p className="italic text-[#0B2545] leading-relaxed pt-1 border-t border-slate-200/80">“{strategy.quechua_summary}”</p>
+      {/* Concise Plain Explanation */}
+      <div className="space-y-1.5 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
+        <p className="leading-relaxed">{firstSentence(strategy.spanish_summary)}</p>
+        <p className="italic text-[#0B2545] leading-relaxed pt-1 border-t border-slate-200/80">“{firstSentence(strategy.quechua_summary)}”</p>
       </div>
 
       {/* 4 Compact Status Checks */}
