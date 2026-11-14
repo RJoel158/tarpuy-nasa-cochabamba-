@@ -13,12 +13,13 @@ def _render_strategies(strategies: list[dict[str, Any]]) -> str:
     cards = []
     for s in strategies[:3]:
         badge_cls = "badge-green" if s.get("strategy_type") != "current_baseline" else "badge-amber"
-        seq = [esc(c) for c in s.get("rotation_sequence", [])]
+        raw_seq = s.get("crop_sequence") or s.get("rotation_sequence") or []
+        seq = [esc(c.get("crop_name") if isinstance(c, dict) else c) for c in raw_seq]
         crops = " &rarr; ".join(seq) if seq else "Rotaci&oacute;n est&aacute;ndar"
-        name = esc(s.get("name", "Estrategia"))
+        name = esc(s.get("title_es") or s.get("name", "Estrategia"))
         stype = esc(s.get("strategy_type", ""))
-        name_qu = esc(s.get("name_qu", s.get("summary_qu", "")))
-        rationale = esc(s.get("agronomic_rationale", s.get("summary_es", "")))
+        name_qu = esc(s.get("title_qu") or s.get("name_qu") or s.get("quechua_summary", ""))
+        rationale = esc(s.get("spanish_summary") or s.get("agronomic_rationale", ""))
         cards.append(
             f'<div class="strategy-card">\n'
             f'  <h4>{name} <span class="badge {badge_cls}">{stype}</span></h4>\n'
@@ -28,6 +29,28 @@ def _render_strategies(strategies: list[dict[str, Any]]) -> str:
             f'</div>'
         )
     return "\n".join(cards)
+
+
+def _poster_logos_svg() -> str:
+    """Return compact inline SVG institutional badges for NASA and GAM Cochabamba."""
+    nasa = (
+        '<svg width="46" height="46" viewBox="0 0 120 120" aria-label="NASA">'
+        '<circle cx="60" cy="60" r="54" fill="#0B3D91"/>'
+        '<path d="M16 92 L58 20 L65 23 L42 66 L104 34 L106 37 L38 78 L25 98 Z" fill="#FC3D21"/>'
+        '<text x="60" y="70" text-anchor="middle" fill="#FFF" font-family="Arial Black,sans-serif" '
+        'font-size="27" font-weight="900">NASA</text></svg>'
+    )
+    gamc = (
+        '<svg width="132" height="46" viewBox="0 0 240 88" aria-label="GAM Cochabamba">'
+        '<rect x="2" y="2" width="236" height="84" rx="14" fill="#FFF" stroke="#009FE3" stroke-width="3"/>'
+        '<path d="M16 16 H72 V50 C72 66 44 78 44 78 C44 78 16 66 16 50 Z" fill="#009FE3"/>'
+        '<circle cx="44" cy="34" r="9" fill="#F59E0B"/>'
+        '<path d="M18 53 L32 36 L44 46 L56 33 L70 53 Z" fill="#0F3D6E"/>'
+        '<text x="84" y="32" fill="#0F3D6E" font-family="sans-serif" font-size="11" font-weight="800">GOBIERNO MUNICIPAL</text>'
+        '<text x="84" y="56" fill="#009FE3" font-family="sans-serif" font-size="20" font-weight="900">COCHABAMBA</text>'
+        '</svg>'
+    )
+    return f'<div style="display:flex;align-items:center;gap:10px;">{nasa}{gamc}</div>'
 
 
 def _render_months(indicators: list[dict[str, Any]]) -> str:
@@ -91,10 +114,13 @@ def render_zone_poster_html(
         "    .quechua-sub { font-style: italic; color: #64748b; font-size: 13px; margin: 2px 0; }\n"
         "    @media print { body { margin: 0; } }\n"
         "  </style>\n</head>\n<body>\n"
-        '  <div class="header">\n'
-        "    <h1>&#127793; Cartilla Agr&iacute;cola Comunal &mdash; Cochabamba</h1>\n"
-        f'    <div class="meta"><strong>Zona:</strong> {z_name} ({z_qu}) | '
+        '  <div class="header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">\n'
+        '    <div>\n'
+        "      <h1>&#127793; Cartilla Agr&iacute;cola Comunal &mdash; Cochabamba</h1>\n"
+        f'      <div class="meta"><strong>Zona:</strong> {z_name} ({z_qu}) | '
         f"<strong>Municipio:</strong> {z_mun} | <strong>Altitud:</strong> {z_alt} msnm</div>\n"
+        '    </div>\n'
+        f'    {_poster_logos_svg()}\n'
         "  </div>\n"
         '  <div class="grid">\n'
         '    <div class="card">\n'
