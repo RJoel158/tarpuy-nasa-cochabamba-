@@ -1,4 +1,18 @@
 import test from "node:test";
+import { buildWeatherNarration } from "./narration.js";
+
+test("weather narration changes with the section data and rejects expired forecasts", () => {
+  const bulletin = (rain, minimum, date = "2099-11-20") => ({
+    seven_day_forecast: [{ date }],
+    predictions_summary: { total_precip_7d_mm: rain, min_temp_7d_c: minimum },
+  });
+  const wet = buildWeatherNarration(bulletin(30, 1), "Distrito 9");
+  const dry = buildWeatherNarration(bulletin(0, 8), "Distrito 13");
+  assert.ok(wet.includes("Distrito 9") && wet.includes("helada") && wet.includes("surcos"));
+  assert.ok(dry.includes("Distrito 13") && dry.includes("poca lluvia"));
+  assert.ok(!wet.includes("mm") && !dry.includes("ET0"));
+  assert.ok(buildWeatherNarration(bulletin(30, 1, "2000-01-01")).includes("ya terminó"));
+});
 import assert from "node:assert/strict";
 import { buildStrategyNarration } from "./narration.js";
 

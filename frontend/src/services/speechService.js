@@ -20,15 +20,15 @@ function prepareNeuralPlayer(session) {
   }).catch(() => {});
 }
 
-function speechChunks(text) {
+function speechChunks(text, limit = 240) {
   const clean = String(text || "").replace(/\s+/g, " ").trim();
   const chunks = [];
   let remaining = clean;
-  while (remaining.length > 240) {
-    const window = remaining.slice(0, 240);
+  while (remaining.length > limit) {
+    const window = remaining.slice(0, limit);
     const boundaries = [...window.matchAll(/[.!?;](?=\s)/gu)];
     const sentenceEnd = boundaries.at(-1);
-    const cut = sentenceEnd ? sentenceEnd.index + 1 : window.lastIndexOf(" ") > 0 ? window.lastIndexOf(" ") : 240;
+    const cut = sentenceEnd ? sentenceEnd.index + 1 : window.lastIndexOf(" ") > 0 ? window.lastIndexOf(" ") : limit;
     chunks.push(remaining.slice(0, cut).trim());
     remaining = remaining.slice(cut).trim();
   }
@@ -217,7 +217,7 @@ async function speakNeuralVoice(text, cfg, callbacks = {}) {
     if (typeof navigator === "undefined" || navigator.onLine) {
       onEngine?.(cfg.liveEngine);
       callbacks.onLoading?.(true);
-      const chunks = speechChunks(text);
+      const chunks = speechChunks(text, cfg.isSpanish ? 480 : 240);
       const request = (chunk) => requestGeneratedAudio(cfg.endpoint, chunk, controller.signal).catch(() => null);
       const audio = [];
       for (let index = 0; index < chunks.length; index++) {
@@ -238,7 +238,7 @@ async function speakNeuralVoice(text, cfg, callbacks = {}) {
   } catch {}
   if (session !== playbackSession) return false;
   callbacks.onLoading?.(false);
-  if (callbacks.neuralOnly || !cfg.isSpanish) {
+  if (callbacks.neuralOnly !== false || !cfg.isSpanish) {
     callbacks.onError?.(new Error("Native audio unavailable"));
     callbacks.onEnd?.();
     return false;

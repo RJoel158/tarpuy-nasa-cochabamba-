@@ -22,6 +22,7 @@ export default function DayForecastModal({
   lang = "es",
   onClose,
   onSpeak,
+  activeAudioKey,
 }) {
   if (!day || !dv) return null;
 
@@ -92,9 +93,9 @@ export default function DayForecastModal({
           </div>
 
           <BotonAltavoz
-            sonando={false}
+            sonando={activeAudioKey === `day_${day.date}_${lang}`}
             mostrarTexto={true}
-            etiqueta={tr(lang, "listenBtn")}
+            etiqueta={tr(lang, activeAudioKey === `day_${day.date}_${lang}` ? "stopAudio" : "listenBtn")}
             onClick={() =>
               onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)
             }

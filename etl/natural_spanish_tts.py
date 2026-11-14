@@ -1,12 +1,25 @@
 """Natural Spanish speech for farmer-facing explanations."""
 import asyncio
 from functools import lru_cache
+import re
+
+
+def normalize_spoken_spanish(text: str) -> str:
+    """Expand display units so the established voice reads prose, not symbols."""
+    text = re.sub(r"\bET[0₀]\b", "demanda de agua de referencia", text)
+    for symbol, spoken in [("°C", " grados Celsius"), ("km/h", " kilómetros por hora"),
+                           ("%", " por ciento")]:
+        text = text.replace(symbol, spoken)
+    text = re.sub(r"\bmm\b", "milímetros", text)
+    text = re.sub(r"(?<=\d)[.,](?=\d)", " coma ", text)
+    text = re.sub(r"(?<!\w)-(\d)", r"menos \1", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 async def _synthesize(text: str) -> bytes:
     import edge_tts
 
     speech = edge_tts.Communicate(
-        text, voice="es-BO-SofiaNeural", rate="-8%", pitch="+0Hz",
+        normalize_spoken_spanish(text), voice="es-BO-SofiaNeural", rate="-8%", pitch="+0Hz",
         connect_timeout=10, receive_timeout=30,
     )
     audio = bytearray()

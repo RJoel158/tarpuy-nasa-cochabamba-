@@ -1,7 +1,7 @@
 import HorizontalCarousel from "../ui/HorizontalCarousel.jsx";
 import WeatherDetailCards from "../alerts/WeatherDetailCards.jsx";
 import React, { useState, useEffect } from "react";
-import { buildWeatherNarration } from "../../variants/liz/services/narration.js";
+import { buildWeatherNarration } from "../../services/narration.js";
 import { AlertsModal } from "../../variants/liz/components/ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
 import { BotonGrande, BotonAltavoz } from "../../variants/liz/components/ui/TarpuyBaseComponents.jsx";
@@ -564,6 +564,7 @@ export default function EarlyWarningBanner({
       />
 
       <DayForecastModal
+        activeAudioKey={activeAudioKey}
         day={selectedDay}
         dv={selectedDay ? describeDayVisual(selectedDay, voiceLang) : null}
         zoneName={shortZone}

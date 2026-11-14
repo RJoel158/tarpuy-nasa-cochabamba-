@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { buildStrategyNarration } from "../../services/narration.js";
+import { buildStrategyNarration } from "../../../../services/narration.js";
 import CropCalendarBar from "./CropCalendarBar.jsx";
 import { CropIllustration, CheckIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
@@ -202,7 +202,7 @@ export default function RotationCard({
     { key: "erosion", name: tr(lang, "windRainCheck"), val: tl.erosion || "yellow" },
   ];
 
-  const primaryText = buildStrategyNarration(strategy, lang);
+  const primaryText = buildStrategyNarration(strategy, lang, indicators);
 
   /* 5. Consejos de suelo extraídos de los pasos de la estrategia */
   const consejosSuelo = (strategy.crop_sequence || []).slice(0, 3).map((paso, idx) => ({
@@ -268,7 +268,7 @@ export default function RotationCard({
           etiqueta={tr(lang, "listenBtn")}
           onClick={() =>
             onSpeak(
-              buildStrategyNarration(strategy, isQu ? "qu" : "es"),
+              buildStrategyNarration(strategy, isQu ? "qu" : "es", indicators),
               isQu ? "qu" : "es",
               isQu ? qKey : esKey,
               `strat_${strategy.strategy_id}`
@@ -390,7 +390,7 @@ export default function RotationCard({
             texto={tr(lang, "listenQuBtn")}
             onClick={() =>
               onSpeak(
-                buildStrategyNarration(strategy, "qu"),
+                buildStrategyNarration(strategy, "qu", indicators),
                 "qu",
                 qKey,
                 `strat_${strategy.strategy_id}`
@@ -404,7 +404,7 @@ export default function RotationCard({
             texto={tr(lang, "listenEsBtn")}
             onClick={() =>
               onSpeak(
-                buildStrategyNarration(strategy, "es"),
+                buildStrategyNarration(strategy, "es", indicators),
                 "es",
                 esKey,
                 `strat_${strategy.strategy_id}`

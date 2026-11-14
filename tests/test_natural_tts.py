@@ -5,6 +5,17 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from backend.main import app
 from etl.natural_spanish_tts import synthesize_spanish_mp3
+from etl.natural_spanish_tts import normalize_spoken_spanish
+
+
+def test_voice_expands_units_and_decimal_numbers():
+    spoken = normalize_spoken_spanish("Mínima -2.5 °C, lluvia 4 mm, humedad 26%, viento 18 km/h. ET0: 3.")
+    assert "menos 2 coma 5" in spoken
+    assert "grados Celsius" in spoken
+    assert "milímetros" in spoken
+    assert "26 por ciento" in spoken
+    assert "kilómetros por hora" in spoken
+    assert "demanda de agua de referencia" in spoken
 
 
 def test_natural_voice_keeps_audio_chunks_and_uses_bolivian_spanish():

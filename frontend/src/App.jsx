@@ -57,6 +57,12 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
+  useEffect(() => {
+    stopSpeaking();
+    setActiveAudioKey(null);
+    setIsSpeaking(false);
+    setAudioLoading(false);
+  }, [activeView, zoneId, voiceLang]);
   const [waterLocation, setWaterLocation] = useState(null);
   useEffect(() => {
     let cancelled = false;
@@ -212,7 +218,7 @@ export default function App() {
     const cb = {
       onLoading: setAudioLoading,
       clipKey,
-      neuralOnly: key.startsWith("water_"),
+      neuralOnly: true,
       onEngine: (engine) => {
         if (engine === "browser_fallback") pushToast("Voz básica del equipo", "La voz natural no está disponible en este momento", "info");
       },
