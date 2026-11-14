@@ -167,7 +167,7 @@ class AgroclimaticAlertEvaluator:
             })
 
         alerts.sort(key=lambda a: SEV_ORDER.get(a["severity"], 9))
-        alerts_qu_script = ". ".join(f"{a['title_qu']}" for a in alerts[:3])
+        alerts_qu_clean = ". ".join(a["title_qu"].split("(")[0].strip() for a in alerts[:3])
         return {
             "zone_id": zone_id,
             "data_status": z_rt.get("data_status", "unavailable_realtime_fallback"),
@@ -185,6 +185,6 @@ class AgroclimaticAlertEvaluator:
             "seven_day_forecast": forecast,
             "nasa_recent_daily": nasa_daily,
             "active_alerts": alerts,
-            "alerts_spoken_qu": f"Allillanchu. Kay semanapaq willakuy: {alerts_qu_script}. Allpata qhorawan p'istuy.",
+            "alerts_spoken_qu": f"Allillanchu. Kay semanapaq willakuy: {alerts_qu_clean}. Allpata qhorawan p'istuy.",
             "veracity_manifest": _build_veracity_manifest(fetched_at, bool(nasa_daily)),
         }

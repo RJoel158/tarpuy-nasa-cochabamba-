@@ -46,3 +46,9 @@ class HealthResponse(BaseStrictModel):
     version: str = "1.0.0"
     zones_loaded: int
     telemetry_source: str
+
+
+class QuechuaTtsRequest(BaseStrictModel):
+    """Request schema for live Bolivian Quechua speech synthesis (OWASP strict bounds)."""
+
+    text: str = Field(..., min_length=2, max_length=480)

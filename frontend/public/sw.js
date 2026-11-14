@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v3";
+const CACHE_NAME = "tarpuy-nasa-v4";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -7,6 +7,10 @@ const STATIC_ASSETS = [
   "/logos/nasa-space-apps.png",
   "/logos/alcaldia-cochabamba-celeste.png",
   "/logos/alcaldia-cochabamba-escudo.jpg",
+  "/audio/quh/manifest.json",
+  "/audio/quh/guide_punata_valle_alto.wav",
+  "/audio/quh/guide_tapacari_zona_andina.wav",
+  "/audio/quh/guide_mizque_cono_sur.wav",
 ];
 
 self.addEventListener("install", (event) => {
