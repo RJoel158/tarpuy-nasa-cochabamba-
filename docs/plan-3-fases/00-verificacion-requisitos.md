@@ -20,9 +20,9 @@ La observación de la compañera acierta en lo **incompleto** (alertas a regante
 | 5 | Comparar ≥3 rotaciones | **Cumplido** | `engine/scoring.py` + `recommender.py`; baseline + alternativas. UI fácil prioriza 1 opción. |
 | 6 | UI Farmers-First | **Parcial–Cumplido** | Modo fácil, pictogramas, audio ES/Quechua, PWA offline: sí. Aún falta acción única de agua y menos jerga/navegación técnica. |
 | 7 | Mapa oficial GAMC / distritos | **Cumplido** (ampliado) | WMS: **Distritos**, **Periurbanos**, **Drenaje e Influencia**; GPS → distrito; catálogo `/api/gamc/districts`. |
-| 8 | Alertas a regantes y GAMC (canales / anegamiento) | **Incompleto** — **confirmado** | Alertas actuales: helada, déficit hídrico, lluvia, viento → productor. **No** hay vista/texto para asociaciones de regantes ni desborde de canales ligado a drenaje GAMC. |
-| 9 | Enfoque periurbano La Maica, D9, D13 | **Incompleto** — **confirmado** | Zonas piloto: Punata, Tapacarí, Mizque. Distritos 1–15 existen en mapa/GPS, pero el recomendador **no** tiene perfiles agronómicos D9/La Maica ni D13. |
-| 10 | Proyección 7–14 días | **Parcial** — **confirmado** | `forecast_days: 7` en Open-Meteo (`realtime_weather_client.py`). Falta opción/horizonte **14 días**. |
+| 8 | Alertas a regantes y GAMC (canales / anegamiento) | **Cumplido** (Fase 3) | `municipal_alert` con audiencia `regantes_gamc`, temas `anegamiento_canales` / `desabastecimiento`, acciones de compuertas y modal Farmers First con `share_text` listo para WhatsApp / radio. |
+| 9 | Enfoque periurbano La Maica, D9, D13 | **Cumplido** (Fase 2) | Perfiles periurbanos D9/La Maica y D13 integrados en el motor, con ponderación de drenaje y presión urbana. |
+| 10 | Proyección 7–14 días | **Cumplido** (Fase 3) | ETL Open-Meteo con `forecast_days: 14`, resumen `predictions_summary_14d` y selector [7 días | 14 días] en la UI. |
 
 ---
 

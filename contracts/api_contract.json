@@ -43,6 +43,41 @@
         }
       }
     },
+    "/api/alerts/{zone_id}": {
+      "method": "GET",
+      "summary": "Get real-time meteorological alerts, 7/14-day forecasts, and municipal irrigation warnings",
+      "description": "Returns current observations, 7-day and 14-day forecast horizons, active agroclimatic alerts, and tailored municipal canal/irrigation alerts (regantes_gamc) considering local district and drainage characteristics.",
+      "parameters": [
+        {
+          "name": "zone_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "district_code",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "comuna",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "drainage",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json"
+      }
+    },
     "/api/recommend": {
       "method": "POST",
       "summary": "Generate comparative crop rotation strategies",

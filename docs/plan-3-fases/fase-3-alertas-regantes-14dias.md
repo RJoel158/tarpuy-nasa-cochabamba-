@@ -1,6 +1,6 @@
 # Fase 3 — Alertas a regantes / GAMC + proyección 14 días
 
-**Estado:** pendiente de ejecución (solo plan)  
+**Estado:** completado y verificado  
 **Prioridad:** media–alta para cerrar el enunciado municipal de canales y anegamiento  
 **Depende de:** Fase 1 (acción de agua) y Fase 2 (distrito/periurbano en contexto)  
 **Verificación previa:** [00-verificacion-requisitos.md](./00-verificacion-requisitos.md)
@@ -102,11 +102,11 @@ Reglas (borrador):
 
 ## Criterios de aceptación
 
-- [ ] El boletín expone métricas agregadas a **14 días** además de 7.
-- [ ] Modo fácil puede mostrar pictogramas a 14 días sin saturar la primera pantalla (detalle bajo toggle).
-- [ ] Cuando hay riesgo de anegamiento + drenaje/distrito, existe `municipal_alert` con `share_text`.
-- [ ] El productor copia/comparte el aviso en ≤ 2 toques.
-- [ ] Tests unitarios para: solo sequía → tema `desabastecimiento`; lluvia+drenaje → tema `anegamiento_canales`.
+- [x] El boletín expone métricas agregadas a **14 días** además de 7.
+- [x] Modo fácil puede mostrar pictogramas a 14 días sin saturar la primera pantalla (detalle bajo toggle).
+- [x] Cuando hay riesgo de anegamiento + drenaje/distrito, existe `municipal_alert` con `share_text`.
+- [x] El productor copia/comparte el aviso en ≤ 2 toques.
+- [x] Tests unitarios para: solo sequía → tema `desabastecimiento`; lluvia+drenaje → tema `anegamiento_canales`.
 
 ---
 
