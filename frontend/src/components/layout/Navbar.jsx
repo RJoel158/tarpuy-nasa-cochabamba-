@@ -1,11 +1,16 @@
 import React from "react";
-import { CloudSun, Sprout, MapPin, Database, Volume2, Square, Download, Wifi, WifiOff, LocateFixed } from "lucide-react";
+import { CloudSun, Sprout, MapPin, Database, BarChart3, Volume2, Square, Download, Wifi, WifiOff, LocateFixed } from "lucide-react";
 
 const NAV_ITEMS = [
   { id: "clima", label: "Clima hoy", Icon: CloudSun },
   { id: "siembra", label: "Qué sembrar", Icon: Sprout },
   { id: "mapa", label: "Mapa", Icon: MapPin },
   { id: "datos", label: "Datos NASA", Icon: Database },
+];
+
+const MODE_OPTIONS = [
+  { id: "facil", label: "Modo Fácil", short: "Fácil", Icon: Sprout, activeCls: "bg-emerald-600 text-white shadow-xs" },
+  { id: "avanzado", label: "Modo Avanzado", short: "Avanzado", Icon: BarChart3, activeCls: "bg-[#009FE3] text-white shadow-xs" },
 ];
 
 const SHORT_ZONES = [
@@ -17,6 +22,8 @@ const SHORT_ZONES = [
 export default function Navbar({
   activeView = "clima",
   onChangeView,
+  appMode = "facil",
+  onChangeAppMode,
   zoneId = "punata_valle_alto",
   onSelectZone,
   onDetectGps,
@@ -33,6 +40,7 @@ export default function Navbar({
   syncStatus = "",
 }) {
   const onlineActive = !forceOffline && isOnline;
+  const visibleNavItems = appMode === "avanzado" ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "datos");
 
   return (
     <>
@@ -49,6 +57,27 @@ export default function Navbar({
             <div>
               <h1 className="text-base font-bold tracking-tight text-white">Tarpuy Cochabamba</h1>
               <p className="text-xs text-sky-300/90">Guía agrícola por satélite</p>
+            </div>
+          </div>
+
+          {/* Easy vs Advanced Mode Switcher */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Nivel de detalle</span>
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-black/25 p-1 text-[11px]">
+              {MODE_OPTIONS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => onChangeAppMode?.(m.id)}
+                  aria-pressed={appMode === m.id}
+                  className={`py-1.5 px-1.5 rounded-md inline-flex items-center justify-center gap-1 font-bold transition cursor-pointer whitespace-nowrap ${
+                    appMode === m.id ? m.activeCls : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  <m.Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{m.label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -81,10 +110,10 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* 4 Decentralized Screens */}
+          {/* Decentralized Screens (3 in Fácil, 4 in Avanzado) */}
           <nav className="space-y-1">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">Secciones</span>
-            {NAV_ITEMS.map(({ id, label, Icon }) => (
+            {visibleNavItems.map(({ id, label, Icon }) => (
               <button
                 key={id}
                 type="button"
@@ -147,21 +176,40 @@ export default function Navbar({
       {/* Mobile Header + Bottom Tab Bar */}
       <header className="lg:hidden sticky top-0 z-40 bg-[#0B2545] text-white px-3 py-2.5 space-y-2 border-b border-[#081B33]">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1 shrink-0">
               <img src="/logos/nasa-space-apps.png" alt="NASA" className="h-5 w-auto object-contain" />
               <img src="/logos/alcaldia-cochabamba-escudo.jpg" alt="Alcaldía Cochabamba" className="h-5 w-auto object-contain" />
             </div>
             <span className="font-bold text-sm tracking-tight truncate">Tarpuy</span>
           </div>
-          <button
-            type="button"
-            onClick={isSpeaking ? onStopAudio : onSpeakGuide}
-            className="px-3 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1.5 shrink-0 cursor-pointer"
-          >
-            {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
-            <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
-          </button>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="inline-flex rounded-lg bg-black/30 p-0.5 text-[11px]">
+              {MODE_OPTIONS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => onChangeAppMode?.(m.id)}
+                  aria-label={m.label}
+                  aria-pressed={appMode === m.id}
+                  className={`px-2 py-1 rounded-md font-bold transition cursor-pointer ${
+                    appMode === m.id ? m.activeCls : "text-slate-300"
+                  }`}
+                >
+                  {m.short}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={isSpeaking ? onStopAudio : onSpeakGuide}
+              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1 shrink-0 cursor-pointer"
+            >
+              {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
+              <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-1.5">
@@ -182,8 +230,8 @@ export default function Navbar({
         </div>
       </header>
 
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-4 text-[11px]">
-        {NAV_ITEMS.map(({ id, label, Icon }) => (
+      <nav className={`lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid text-[11px] ${visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
+        {visibleNavItems.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
