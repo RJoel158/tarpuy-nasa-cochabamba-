@@ -4,16 +4,17 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from backend.config import Settings
 from backend.poster import render_zone_poster_html
 from backend.repositories import HarmonizedJsonZoneRepository, SafeJsonCropRepository
-from backend.schemas import HealthResponse, RecommendationRequest
+from backend.schemas import HealthResponse, QuechuaTtsRequest, RecommendationRequest
 from backend.security import RequestGuardMiddleware, SecurityHeadersMiddleware, validate_safe_id
 from engine.alerts import AgroclimaticAlertEvaluator
 from engine.recommender import RotationRecommendationService
 from engine.scoring import MultiCriteriaRotationScorer
+from etl.quechua_tts_client import QuechuaTtsClient
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -111,6 +112,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if not zone:
             raise HTTPException(status_code=404, detail=f"Zone '{valid_id}' not found")
         return alert_evaluator.evaluate_zone(valid_id, zone)
+
+    @app.post("/api/tts/quechua")
+    def synthesize_quechua_audio(req: QuechuaTtsRequest) -> Response:
+        try:
+            wav_bytes = QuechuaTtsClient().synthesize_wav_bytes(req.text)
+            return Response(content=wav_bytes, media_type="audio/wav")
+        except Exception:
+            raise HTTPException(status_code=503, detail="Native Quechua TTS service unavailable")
 
     @app.post("/api/recommend")
     def recommend(req: RecommendationRequest) -> dict[str, Any]:

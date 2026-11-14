@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from backend.main import app
 from engine.alerts import AgroclimaticAlertEvaluator
+from etl.quechua_tts_client import QuechuaTtsClient, clean_quechua_for_tts
 from etl.realtime_weather_client import RealtimeWeatherClient
 
 
@@ -72,3 +73,14 @@ def test_api_alerts_endpoint_and_security():
     assert "media-src 'self'" in res.headers["content-security-policy"]
     assert client.get("/api/alerts/bad$zone").status_code == 400
     assert client.get("/api/alerts/unknown_zone_xyz").status_code == 404
+
+
+def test_quechua_tts_clean_and_api_endpoint():
+    assert clean_quechua_for_tts("Sara -> Avena!") == "Sara , chanta Avena."
+    client = TestClient(app)
+    with patch.object(QuechuaTtsClient, "synthesize_wav_bytes", return_value=b"RIFF\x24\x00\x00\x00WAVEfmt "):
+        res = client.post("/api/tts/quechua", json={"text": "Allillanchu Cochabamba"})
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("audio/wav")
+    assert res.content.startswith(b"RIFF")
+    assert client.post("/api/tts/quechua", json={"text": "a", "extra": "hack"}).status_code == 422
