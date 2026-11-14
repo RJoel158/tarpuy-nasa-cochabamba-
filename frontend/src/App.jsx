@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { ArrowRight } from "lucide-react";
 import Navbar from "./components/layout/Navbar.jsx";
-import VoiceAssistantDock from "./components/audio/VoiceAssistantDock.jsx";
+import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
+import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
 
 export default function App() {
-  const [mode, setMode] = useState("producer");
+  const [activeView, setActiveView] = useState("clima");
   const [zones, setZones] = useState([]);
   const [crops, setCrops] = useState([]);
   const [zoneId, setZoneId] = useState("punata_valle_alto");
@@ -23,17 +25,15 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [voiceLang, setVoiceLang] = useState("qu");
-  const [voiceEngine, setVoiceEngine] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [subtitle, setSubtitle] = useState("");
   const [activeAudioKey, setActiveAudioKey] = useState(null);
 
   useEffect(() => {
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+    const onOn = () => setIsOnline(true);
+    const onOff = () => setIsOnline(false);
+    window.addEventListener("online", onOn);
+    window.addEventListener("offline", onOff);
+    return () => { window.removeEventListener("online", onOn); window.removeEventListener("offline", onOff); };
   }, []);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function App() {
       );
       setRecData(data);
       if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
-    } catch (err) { console.warn("Recs load error:", err); } finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline]);
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
@@ -63,25 +63,22 @@ export default function App() {
   const cachedCount = listCachedZoneIds().length;
 
   const handleDownloadBundle = async () => {
-    setSyncStatus("⏳ Descargando y verificando integridad SHA-256...");
+    setSyncStatus("Guardando...");
     try {
       const res = await downloadZoneBundle(zoneId);
-      const zoneName = currentZone?.name || zoneId;
-      setSyncStatus(`✅ Paquete ${zoneName} verificado (${res.sizeKb} KB)`);
-    } catch (err) { setSyncStatus(`❌ Error en descarga: ${err.message}`); }
+      setSyncStatus(`Listo offline (${res.sizeKb} KB)`);
+    } catch { setSyncStatus("Error al guardar"); }
   };
 
-  const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setSubtitle(""); setActiveAudioKey(null); };
+  const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
 
   const handleSpeakGuide = () => {
     handleStopAudio();
     setIsSpeaking(true);
     speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
       onStart: () => setIsSpeaking(true),
-      onEnd: () => { setIsSpeaking(false); setSubtitle(""); },
-      onError: () => { setIsSpeaking(false); setSubtitle(""); },
-      onSubtitle: (text) => setSubtitle(text),
-      onEngine: (eng) => setVoiceEngine(eng),
+      onEnd: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
     });
   };
 
@@ -90,49 +87,86 @@ export default function App() {
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
-    setSubtitle(text);
-    const cb = {
-      clipKey,
-      onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); },
-      onError: () => { setActiveAudioKey(null); setIsSpeaking(false); setSubtitle(""); },
-      onEngine: (eng) => setVoiceEngine(eng),
-    };
+    const cb = { clipKey, onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); }, onError: () => { setActiveAudioKey(null); setIsSpeaking(false); } };
     if (lang === "qu") speakQuechua(text, cb);
     else speakSpanish(text, cb);
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 font-sans pb-12 flex flex-col justify-between">
-      <div className="space-y-4">
-        <Navbar mode={mode} onChangeMode={setMode} isOnline={isOnline} forceOffline={forceOffline} onToggleOffline={() => setForceOffline((p) => !p)} onDownloadBundle={handleDownloadBundle} cachedCount={cachedCount} syncStatus={syncStatus} />
-        <main className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4">
-          <VoiceAssistantDock voiceLang={voiceLang} onChangeVoiceLang={setVoiceLang} isSpeaking={isSpeaking} subtitle={subtitle} voiceEngine={voiceEngine} onSpeakGuide={handleSpeakGuide} onStop={handleStopAudio} />
-          <section className="bg-white p-3.5 sm:p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4 text-xs">
-              <div>
-                <label htmlFor="zone-select" className="font-bold text-stone-700 block mb-1">Elige tu Municipio o Comunidad:</label>
-                <select id="zone-select" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className="p-2 border border-stone-300 rounded-xl font-semibold bg-stone-50 text-stone-800">
-                  {zones.map((z) => (<option key={z.zone_id} value={z.zone_id}>{z.name} ({z.elevation_msnm} msnm)</option>))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="crop-select" className="font-bold text-stone-700 block mb-1">¿Qué sembraste la última vez en tu chacra?</label>
-                <select id="crop-select" value={cropId} onChange={(e) => setCropId(e.target.value)} className="p-2 border border-stone-300 rounded-xl font-semibold bg-stone-50 text-stone-800">
-                  {crops.map((c) => (<option key={c.crop_id} value={c.crop_id}>{c.name_es} ({c.name_qu})</option>))}
-                </select>
+    <div className="min-h-screen bg-[#F6F4EE] text-stone-900 font-sans flex flex-col lg:flex-row">
+      <Navbar
+        activeView={activeView}
+        onChangeView={setActiveView}
+        zoneId={zoneId}
+        onSelectZone={setZoneId}
+        voiceLang={voiceLang}
+        onChangeVoiceLang={setVoiceLang}
+        isSpeaking={isSpeaking}
+        onSpeakGuide={handleSpeakGuide}
+        onStopAudio={handleStopAudio}
+        isOnline={isOnline}
+        forceOffline={forceOffline}
+        onToggleOffline={() => setForceOffline((p) => !p)}
+        onDownloadBundle={handleDownloadBundle}
+        cachedCount={cachedCount}
+        syncStatus={syncStatus}
+      />
+
+      <div className="flex-1 min-w-0 flex flex-col justify-between pb-20 lg:pb-8">
+        <main className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+          {loading && !recData ? (
+            <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
+          ) : activeView === "clima" ? (
+            <div className="space-y-6">
+              <EarlyWarningBanner bulletin={alertBulletin} zoneName={currentZone?.name} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} voiceLang={voiceLang} />
+              <div className="flex justify-end">
+                <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-bold cursor-pointer">
+                  <span>Ver qué sembrar en {currentZone?.name || "tu zona"}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
-          </section>
-          {loading ? (
-            <div className="p-12 text-center text-stone-500 font-medium">Buscando el clima de hoy y mejores siembras para tu tierra...</div>
-          ) : mode === "producer" ? (
-            <ProducerMode zones={zones} zone={currentZone} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} priorities={priorities} onTogglePriority={(id) => setPriorities((prev) => prev.includes(id) ? (prev.length > 1 ? prev.filter((p) => p !== id) : prev) : [...prev, id])} irrigation={irrigation} onChangeIrrigation={setIrrigation} equipment={equipment} onChangeEquipment={setEquipment} strategies={recData?.strategies || []} bulletin={alertBulletin} voiceLang={voiceLang} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} />
+          ) : activeView === "siembra" ? (
+            <ProducerMode
+              zone={currentZone}
+              activeZoneId={zoneId}
+              crops={crops}
+              cropId={cropId}
+              onChangeCrop={setCropId}
+              priorities={priorities}
+              onTogglePriority={(id) => setPriorities((prev) => prev.includes(id) ? (prev.length > 1 ? prev.filter((p) => p !== id) : prev) : [...prev, id])}
+              irrigation={irrigation}
+              onChangeIrrigation={setIrrigation}
+              equipment={equipment}
+              onChangeEquipment={setEquipment}
+              strategies={recData?.strategies || []}
+              onSpeak={handleSpeak}
+              activeAudioKey={activeAudioKey}
+            />
+          ) : activeView === "mapa" ? (
+            <div className="space-y-6">
+              <div className="border-b border-stone-200 pb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Ubicación y suelo</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Mapa de comunidades · {currentZone?.name || ""}</h2>
+              </div>
+              <CochabambaMap zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} tall={true} />
+              {currentZone?.soil_context ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
+                  <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
+                  <div className="p-4"><span className="text-xs text-stone-500 block">Terreno</span><strong className="text-stone-900">{currentZone.slope_category}</strong></div>
+                  <div className="p-4"><span className="text-xs text-stone-500 block">Suelo</span><strong className="text-stone-900">{currentZone.soil_context.texture_class}</strong></div>
+                </div>
+              ) : null}
+            </div>
           ) : (
-            <TechnicalMode zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} forceOffline={forceOffline} isOnline={isOnline} />
+            <TechnicalMode zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} />
           )}
         </main>
+
+        <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4">
+          <InstitutionalBrandBar variant="footer" />
+        </footer>
       </div>
-      <footer className="mt-8"><InstitutionalBrandBar variant="footer" /></footer>
     </div>
   );
 }
