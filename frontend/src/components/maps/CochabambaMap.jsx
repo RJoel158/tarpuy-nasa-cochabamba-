@@ -57,6 +57,7 @@ export default function CochabambaMap({
   const mapRef = useRef(null);
   const layerRef = useRef(null);
   const wmsRef = useRef({});
+  const didFitDistrictsRef = useRef(false);
   const pickRef = useRef(onPickMapPoint);
   const selectRef = useRef(onSelectZone);
   pickRef.current = onPickMapPoint;
@@ -112,9 +113,26 @@ export default function CochabambaMap({
     if (isAdvanced) {
       setEnabledIds(new Set(gamcServices.filter((s) => s.default_on).map((s) => s.service_id)));
     } else {
-      setEnabledIds(new Set());
+      setEnabledIds(new Set(gamcServices.filter((s) => s.simple_mode).map((s) => s.service_id)));
     }
   }, [gamcServices, isAdvanced]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapEpoch || didFitDistrictsRef.current) return;
+    const districts = gamcServices.find((s) => s.id === "limite_distritos");
+    if (!districts?.bounds) return;
+    didFitDistrictsRef.current = true;
+    const { south, west, north, east } = districts.bounds;
+    map.fitBounds([[south, west], [north, east]], { padding: [24, 24] });
+  }, [gamcServices, mapEpoch]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const b = userPoint?.bounds;
+    if (!map || !mapEpoch || !b) return;
+    map.fitBounds([[b.south, b.west], [b.north, b.east]], { padding: [24, 24], maxZoom: 14 });
+  }, [userPoint, mapEpoch]);
 
   const queryGamc = useCallback(async (e) => {
     const map = mapRef.current;
@@ -246,7 +264,7 @@ export default function CochabambaMap({
           weight: 3,
           fillOpacity: 1,
         });
-        pin.bindTooltip("Tu ubicación seleccionada", { permanent: true, direction: "bottom" });
+        pin.bindTooltip(userPoint.district || "Tu ubicación seleccionada", { permanent: true, direction: "bottom" });
         pin.addTo(layer);
       }
     }
@@ -351,6 +369,11 @@ export default function CochabambaMap({
         {canUseLeaflet ? (
           <>
             <div ref={containerRef} className="w-full h-full z-10" />
+            {gamcServices.length > 0 ? (
+              <p className="absolute bottom-2 left-2 z-20 max-w-[60%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
+                Haz clic sobre el mapa para consultar atributos · GetFeatureInfo
+              </p>
+            ) : null}
             {gamcServices.length > 0 ? (
               <div className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[#0284C7]">Capas GAMC</p>

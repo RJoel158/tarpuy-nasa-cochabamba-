@@ -8,7 +8,8 @@ import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
-import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
+import { ZONE_GEO_CATALOG, findNearestZone, districtToCommunity } from "./utils/geoUtils.js";
+import { fetchDistrictAt, fetchGamcDistricts } from "./services/gamcClient.js";
 import {
   fetchZones,
   fetchCrops,
@@ -220,14 +221,39 @@ export default function App() {
 
   const handleSelectCommunity = (comm) => {
     setCommunityName(comm.name);
-    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name });
+    setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name, bounds: comm.bounds });
     applyZoneChange(comm.zoneId);
     simulateProcess(`Ubicando comunidad: ${comm.name}...`, 460, () => {
-      pushToast(`Comunidad: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
+      pushToast(`${comm.isDistrict ? "Distrito" : "Comunidad"}: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
     });
   };
 
-  const handlePickMapPoint = (lat, lon, source = "mapa") => {
+  // Municipal district (GAMC "Límite Distritos") that contains a point, or null.
+  const findDistrictAt = async (lat, lon) => {
+    if (forceOffline || !isOnline) return null;
+    try {
+      const hit = await fetchDistrictAt(lat, lon);
+      if (!hit) return null;
+      const catalog = await fetchGamcDistricts();
+      return catalog.find((d) => d.code === hit.code) || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handlePickMapPoint = async (lat, lon, source = "mapa") => {
+    const district = await findDistrictAt(lat, lon);
+    if (district) {
+      const comm = districtToCommunity(district);
+      const label = `${comm.name} · ${comm.comuna}`;
+      setCommunityName(comm.name);
+      setUserPoint({ lat, lon, source, district: label, bounds: source === "GPS" ? comm.bounds : undefined });
+      applyZoneChange(comm.zoneId);
+      simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
+        pushToast(label, `Detectado por ${source}`, "success");
+      });
+      return;
+    }
     const nearest = findNearestZone(lat, lon);
     setCommunityName(nearest.zone.name);
     setUserPoint({ lat, lon, source });
