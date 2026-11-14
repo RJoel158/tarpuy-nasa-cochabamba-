@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Printer, Loader2, LocateFixed, MapPin } from "lucide-react";
+import { Printer, Loader2, LocateFixed, MapPin, Award, Sprout, AlertTriangle } from "lucide-react";
 import PrioritySelectorGrid from "../features/producer/PrioritySelectorGrid.jsx";
 import RotationCard from "../features/producer/RotationCard.jsx";
 
@@ -98,22 +98,26 @@ export default function ProducerMode({
       ) : ordered.length > 0 && activeStrategy ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {ordered.map((s, idx) => (
-              <button
-                key={s.strategy_id || idx}
-                type="button"
-                onClick={() => setSelectedIdx(idx)}
-                className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold border text-left transition cursor-pointer ${
-                  selectedIdx === idx
-                    ? s.strategy_type === "current_baseline"
-                      ? "bg-amber-600 text-white border-amber-700"
-                      : "bg-[#0B2545] text-white border-[#081B33]"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {tabLabel(s, idx)}
-              </button>
-            ))}
+            {ordered.map((s, idx) => {
+              const TabIcon = s.strategy_type === "current_baseline" ? AlertTriangle : idx === 0 ? Award : Sprout;
+              return (
+                <button
+                  key={s.strategy_id || idx}
+                  type="button"
+                  onClick={() => setSelectedIdx(idx)}
+                  className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold border text-left transition cursor-pointer inline-flex items-center gap-2 ${
+                    selectedIdx === idx
+                      ? s.strategy_type === "current_baseline"
+                        ? "bg-amber-600 text-white border-amber-700"
+                        : "bg-[#0B2545] text-white border-[#081B33]"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4 shrink-0" />
+                  <span>{tabLabel(s, idx)}</span>
+                </button>
+              );
+            })}
           </div>
 
           <RotationCard
