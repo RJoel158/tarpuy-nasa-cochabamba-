@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { ArrowRight, LocateFixed, MapPin } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { ArrowRight } from "lucide-react";
 import Navbar from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
+import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
 import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
@@ -29,7 +30,41 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
-  const [geoStatus, setGeoStatus] = useState("");
+  const [toasts, setToasts] = useState([]);
+  const [activeProcess, setActiveProcess] = useState(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const processTimersRef = useRef([]);
+  const calcTimerRef = useRef(null);
+
+  const pushToast = useCallback((title, detail = "", type = "info") => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setToasts((prev) => [...prev.slice(-2), { id, title, detail, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((item) => item.id !== id));
+    }, 3600);
+  }, []);
+
+  const simulateProcess = useCallback((label, durationMs = 500, onDone) => {
+    processTimersRef.current.forEach((t) => clearTimeout(t));
+    processTimersRef.current = [];
+    setActiveProcess({ label, pct: 25 });
+    const t1 = setTimeout(() => setActiveProcess({ label, pct: 75 }), Math.round(durationMs * 0.45));
+    const t2 = setTimeout(() => setActiveProcess({ label, pct: 100 }), durationMs);
+    const t3 = setTimeout(() => {
+      setActiveProcess(null);
+      if (onDone) onDone();
+    }, durationMs + 180);
+    processTimersRef.current = [t1, t2, t3];
+  }, []);
+
+  const triggerAgronomicCalc = useCallback((label, detail) => {
+    if (calcTimerRef.current) clearTimeout(calcTimerRef.current);
+    setIsCalculating(true);
+    simulateProcess(label, 500, () => {
+      pushToast("Cálculo actualizado", detail, "success");
+    });
+    calcTimerRef.current = setTimeout(() => setIsCalculating(false), 550);
+  }, [simulateProcess, pushToast]);
 
   useEffect(() => {
     const onOn = () => setIsOnline(true);
@@ -67,10 +102,18 @@ export default function App() {
 
   const handleDownloadBundle = async () => {
     setSyncStatus("Guardando...");
+    setActiveProcess({ label: "Guardando datos sin internet...", pct: 45 });
     try {
       const res = await downloadZoneBundle(zoneId);
+      setActiveProcess({ label: "Guardando datos sin internet...", pct: 100 });
+      setTimeout(() => setActiveProcess(null), 220);
       setSyncStatus(`Listo offline (${res.sizeKb} KB)`);
-    } catch { setSyncStatus("Error al guardar"); }
+      pushToast("Cartilla guardada", `${currentZone?.name || "Zona"} (${res.sizeKb} KB)`, "success");
+    } catch {
+      setActiveProcess(null);
+      setSyncStatus("Error al guardar");
+      pushToast("Error al guardar", "No se pudo descargar sin señal", "warning");
+    }
   };
 
   const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
@@ -78,53 +121,111 @@ export default function App() {
   const handleSpeakGuide = () => {
     handleStopAudio();
     setIsSpeaking(true);
+    pushToast(`Voz (${voiceLang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo guía de siembra", "info");
     speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
       onStart: () => setIsSpeaking(true),
       onEnd: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
+      onError: () => {
+        setIsSpeaking(false);
+        pushToast("Audio no disponible", "Revisa el volumen o conexión", "warning");
+      },
     });
   };
 
   const handleSpeak = (text, lang, key, clipKey = null) => {
-    if (activeAudioKey === key) { handleStopAudio(); return; }
+    if (activeAudioKey === key) {
+      handleStopAudio();
+      pushToast("Audio detenido", "", "info");
+      return;
+    }
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
-    const cb = { clipKey, onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); }, onError: () => { setActiveAudioKey(null); setIsSpeaking(false); } };
+    pushToast(`Voz (${lang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo aviso", "info");
+    const cb = {
+      clipKey,
+      onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); },
+      onError: () => {
+        setActiveAudioKey(null);
+        setIsSpeaking(false);
+        pushToast("Audio no disponible", "Intenta de nuevo", "warning");
+      },
+    };
     if (lang === "qu") speakQuechua(text, cb);
     else speakSpanish(text, cb);
   };
 
-  const handleSelectZone = (newZoneId) => {
+  const applyZoneChange = (newZoneId) => {
     setZoneId(newZoneId);
     setCropId(newZoneId === "tapacari_zona_andina" ? "papa_huaycha" : "maiz_valle");
+  };
+
+  const handleSelectZone = (newZoneId) => {
+    applyZoneChange(newZoneId);
+    const geo = ZONE_GEO_CATALOG.find((z) => z.id === newZoneId);
+    if (calcTimerRef.current) clearTimeout(calcTimerRef.current);
+    setIsCalculating(true);
+    simulateProcess("Cargando clima y siembra...", 480, () => {
+      pushToast(`Zona: ${geo?.name || newZoneId}`, geo?.sub || "Datos actualizados", "success");
+    });
+    calcTimerRef.current = setTimeout(() => setIsCalculating(false), 520);
   };
 
   const handlePickMapPoint = (lat, lon, source = "mapa") => {
     const nearest = findNearestZone(lat, lon);
     setUserPoint({ lat, lon, source });
-    handleSelectZone(nearest.zone.id);
-    setGeoStatus(`Zona reconocida (${source}): ${nearest.zone.name} — ${nearest.zone.sub} (a ${nearest.distanceKm} km)`);
+    applyZoneChange(nearest.zone.id);
+    simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
+      pushToast(`Zona: ${nearest.zone.name}`, `A ${nearest.distanceKm} km (${source})`, "success");
+    });
   };
 
   const handleDetectGps = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setActiveView("mapa");
-      setGeoStatus("Toca tu ubicación o comunidad directamente en el mapa");
+      pushToast("Elige en el mapa", "Toca tu comunidad para ubicarte", "warning");
       return;
     }
-    setGeoStatus("Buscando tu ubicación...");
+    setActiveProcess({ label: "Buscando tu GPS...", pct: 35 });
     navigator.geolocation.getCurrentPosition(
       (pos) => handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS"),
       () => {
+        setActiveProcess(null);
         setActiveView("mapa");
-        setGeoStatus("Toca tu ubicación o comunidad directamente en el mapa");
+        pushToast("GPS no disponible", "Toca tu comunidad en el mapa", "warning");
       },
       { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
     );
   };
 
-  const activeGeo = ZONE_GEO_CATALOG.find((z) => z.id === zoneId) || ZONE_GEO_CATALOG[1];
+  const handleChangeCrop = (id) => {
+    setCropId(id);
+    const crop = crops.find((c) => c.crop_id === id);
+    triggerAgronomicCalc("Calculando mejor siembra...", crop?.common_name_es || "Cultivo actualizado");
+  };
+
+  const handleChangePriorities = (next) => {
+    setPriorities(next);
+    triggerAgronomicCalc("Recalculando prioridad...", "Prioridades actualizadas");
+  };
+
+  const handleChangeIrrigation = (val) => {
+    setIrrigation(val);
+    triggerAgronomicCalc("Ajustando riego...", "Disponibilidad de agua actualizada");
+  };
+
+  const handleChangeEquipment = (val) => {
+    setEquipment(val);
+    triggerAgronomicCalc("Ajustando herramientas...", "Preparación de suelo actualizada");
+  };
+
+  const handleToggleOffline = () => {
+    const next = !forceOffline;
+    setForceOffline(next);
+    simulateProcess(next ? "Activando modo sin internet..." : "Reconectando...", 360, () => {
+      pushToast(next ? "Modo sin señal" : "Modo en línea", next ? "Usando datos guardados" : "Conectado al servicio", "info");
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
@@ -141,7 +242,7 @@ export default function App() {
         onStopAudio={handleStopAudio}
         isOnline={isOnline}
         forceOffline={forceOffline}
-        onToggleOffline={() => setForceOffline((p) => !p)}
+        onToggleOffline={handleToggleOffline}
         onDownloadBundle={handleDownloadBundle}
         cachedCount={cachedCount}
         syncStatus={syncStatus}
@@ -149,41 +250,19 @@ export default function App() {
 
       <div className="flex-1 min-w-0 flex flex-col justify-between pb-20 lg:pb-8">
         <main className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
-          {(activeView === "clima" || activeView === "siembra") ? (
-            <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0 basis-full sm:basis-0 sm:flex-1 text-xs space-y-0.5">
-                <p className="font-bold text-[#0B2545] flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
-                  <span>Zona: {activeGeo.name} · {activeGeo.sub}</span>
-                </p>
-                <p className="text-slate-600 break-words">{geoStatus || `Pueblos cercanos: ${activeGeo.towns}`}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleDetectGps}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
-                >
-                  <LocateFixed className="w-3.5 h-3.5" />
-                  <span>Mi ubicación GPS</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveView("mapa")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0B2545] text-xs font-bold transition cursor-pointer"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
-                  <span>Elegir en el mapa</span>
-                </button>
-              </div>
-            </div>
-          ) : null}
-
           {loading && !recData ? (
             <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
           ) : activeView === "clima" ? (
             <div className="space-y-6">
-              <EarlyWarningBanner bulletin={alertBulletin} zoneName={currentZone?.name} onSpeak={handleSpeak} activeAudioKey={activeAudioKey} voiceLang={voiceLang} />
+              <EarlyWarningBanner
+                bulletin={alertBulletin}
+                zoneName={currentZone?.name}
+                onSpeak={handleSpeak}
+                activeAudioKey={activeAudioKey}
+                voiceLang={voiceLang}
+                onOpenMap={() => setActiveView("mapa")}
+                onDetectGps={handleDetectGps}
+              />
               <div className="flex justify-end">
                 <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
                   <span>Ver qué sembrar en {currentZone?.name || "tu zona"}</span>
@@ -197,16 +276,19 @@ export default function App() {
               activeZoneId={zoneId}
               crops={crops}
               cropId={cropId}
-              onChangeCrop={setCropId}
+              onChangeCrop={handleChangeCrop}
               priorities={priorities}
-              onChangePriorities={setPriorities}
+              onChangePriorities={handleChangePriorities}
               irrigation={irrigation}
-              onChangeIrrigation={setIrrigation}
+              onChangeIrrigation={handleChangeIrrigation}
               equipment={equipment}
-              onChangeEquipment={setEquipment}
+              onChangeEquipment={handleChangeEquipment}
               strategies={recData?.strategies || []}
               onSpeak={handleSpeak}
               activeAudioKey={activeAudioKey}
+              isCalculating={isCalculating}
+              onDetectGps={handleDetectGps}
+              onOpenMap={() => setActiveView("mapa")}
             />
           ) : activeView === "mapa" ? (
             <div className="space-y-6">
@@ -221,7 +303,6 @@ export default function App() {
                 userPoint={userPoint}
                 onPickMapPoint={handlePickMapPoint}
                 onDetectGps={handleDetectGps}
-                geoStatus={geoStatus}
                 forceOffline={forceOffline}
                 isOnline={isOnline}
                 tall={true}
@@ -243,6 +324,11 @@ export default function App() {
           <InstitutionalBrandBar variant="footer" />
         </footer>
       </div>
+      <FeedbackHost
+        activeProcess={activeProcess}
+        toasts={toasts}
+        onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
+      />
     </div>
   );
 }

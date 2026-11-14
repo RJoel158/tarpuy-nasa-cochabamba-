@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Printer } from "lucide-react";
+import { Printer, Loader2, LocateFixed, MapPin } from "lucide-react";
 import PrioritySelectorGrid from "../features/producer/PrioritySelectorGrid.jsx";
 import RotationCard from "../features/producer/RotationCard.jsx";
 
@@ -18,6 +18,9 @@ export default function ProducerMode({
   strategies = [],
   onSpeak,
   activeAudioKey,
+  isCalculating = false,
+  onDetectGps,
+  onOpenMap,
 }) {
   const currentZoneId = activeZoneId || zone?.zone_id || "punata_valle_alto";
   const indicators = zone?.monthly_harmonized_indicators || [];
@@ -44,15 +47,33 @@ export default function ProducerMode({
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">¿Qué conviene sembrar?</h2>
         </div>
 
-        <a
-          href={`/api/poster/${currentZoneId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
-        >
-          <Printer className="w-4 h-4 text-amber-700" />
-          <span>Cartilla para imprimir</span>
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onDetectGps}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
+          >
+            <LocateFixed className="w-3.5 h-3.5" />
+            <span>Mi GPS</span>
+          </button>
+          <button
+            type="button"
+            onClick={onOpenMap}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer"
+          >
+            <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
+            <span>Mapa</span>
+          </button>
+          <a
+            href={`/api/poster/${currentZoneId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
+          >
+            <Printer className="w-3.5 h-3.5 text-amber-700" />
+            <span>Cartilla</span>
+          </a>
+        </div>
       </div>
 
       {/* 2-Step Simple Form */}
@@ -68,8 +89,13 @@ export default function ProducerMode({
         onChangeEquipment={onChangeEquipment}
       />
 
-      {/* Single-Option Tab Viewer */}
-      {ordered.length > 0 && activeStrategy ? (
+      {/* Single-Option Tab Viewer / Process Indicator */}
+      {isCalculating ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
+          <Loader2 className="w-6 h-6 text-[#0284C7] animate-spin" />
+          <p className="text-sm font-bold text-[#0B2545]">Calculando mejor siembra...</p>
+        </div>
+      ) : ordered.length > 0 && activeStrategy ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {ordered.map((s, idx) => (
