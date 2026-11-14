@@ -58,7 +58,7 @@ export default function Navbar({
             }`}
           >
             <Sprout className="w-4 h-4" />
-            <span>Guía del Productor</span>
+            <span>Guía para tu Chacra</span>
           </button>
           <button
             type="button"
@@ -70,7 +70,7 @@ export default function Navbar({
             }`}
           >
             <Satellite className="w-4 h-4" />
-            <span>Panel Científico NASA</span>
+            <span>Datos del Satélite NASA</span>
           </button>
         </nav>
 
@@ -89,7 +89,7 @@ export default function Navbar({
               <WifiOff className="w-3.5 h-3.5 text-amber-600" />
             )}
             <span className="hidden sm:inline">
-              {onlineActive ? "En línea" : "Modo Campo"}
+              {onlineActive ? "Con Internet" : "Sin Internet"}
             </span>
           </span>
 
@@ -98,7 +98,7 @@ export default function Navbar({
             onClick={onToggleOffline}
             className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 transition"
           >
-            {forceOffline ? "Reconectar Red" : "Modo Campo (Sin Red)"}
+            {forceOffline ? "Volver a Conectar" : "Probar Sin Internet"}
           </button>
 
           <button
@@ -107,7 +107,7 @@ export default function Navbar({
             className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs transition"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Guardar Offline ({cachedCount})</span>
+            <span>Guardar en Celular ({cachedCount})</span>
           </button>
         </div>
       </div>

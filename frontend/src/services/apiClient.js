@@ -87,6 +87,16 @@ export async function fetchCrops(forceOffline = false) {
   ];
 }
 
+export async function fetchAlerts(zoneId, forceOffline = false) {
+  if (!forceOffline) {
+    try {
+      const res = await fetch(`/api/alerts/${zoneId}`);
+      if (res.ok) return await res.json();
+    } catch {}
+  }
+  return loadOfflineBundle(zoneId)?.realtime_bulletin || null;
+}
+
 export async function fetchRecommendations(payload, forceOffline = false) {
   if (!forceOffline) {
     try {
@@ -114,6 +124,7 @@ export async function fetchRecommendations(payload, forceOffline = false) {
     current_crop_id: payload.current_crop_id,
     priorities_considered: payload.farmer_priorities,
     strategies: scored,
+    realtime_bulletin: bundle?.realtime_bulletin || null,
     data_provenance: {
       nasa_datasets: ["NASA POWER", "SMAP L4", "MODIS/Sentinel-2", "GPM/IMERG", "SRTM"],
       soil_dataset: "ISRIC SoilGrids 250m & FAO GAEZ v4 (Offline Sync)",

@@ -63,8 +63,8 @@ export default function CropCalendarBar({ cropSequence = [], indicators = [] }) 
   return (
     <div className="w-full space-y-2 py-1">
       <div className="flex items-center justify-between text-[11px] font-semibold text-stone-600">
-        <span>Calendario Anual de Cobertura de Suelo</span>
-        <span className="text-[10px] text-stone-400 font-mono">12 meses</span>
+        <span>Meses en que tu Tierra está Tapada</span>
+        <span className="text-[10px] text-stone-400 font-mono">todo el año</span>
       </div>
 
       <div className="grid grid-cols-12 gap-1 sm:gap-1.5">
@@ -96,15 +96,15 @@ export default function CropCalendarBar({ cropSequence = [], indicators = [] }) 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 pt-1 text-[11px] text-stone-600">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-          <span>Cultivo principal</span>
+          <span>Cultivo para cosecha</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
-          <span>Cobertura / Leguminosa</span>
+          <span>Pasto / planta que abona</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
-          <span>Suelo descubierto</span>
+          <span>Tierra pelada (peligro)</span>
         </div>
       </div>
     </div>

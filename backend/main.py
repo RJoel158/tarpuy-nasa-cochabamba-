@@ -4,15 +4,17 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from backend.config import Settings
 from backend.poster import render_zone_poster_html
 from backend.repositories import HarmonizedJsonZoneRepository, SafeJsonCropRepository
-from backend.schemas import HealthResponse, RecommendationRequest
+from backend.schemas import HealthResponse, QuechuaTtsRequest, RecommendationRequest
 from backend.security import RequestGuardMiddleware, SecurityHeadersMiddleware, validate_safe_id
+from engine.alerts import AgroclimaticAlertEvaluator
 from engine.recommender import RotationRecommendationService
 from engine.scoring import MultiCriteriaRotationScorer
+from etl.quechua_tts_client import QuechuaTtsClient
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -28,11 +30,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     zone_repo = HarmonizedJsonZoneRepository(base_dir=cfg.BASE_DIR)
     crop_repo = SafeJsonCropRepository(base_dir=cfg.BASE_DIR)
     scorer = MultiCriteriaRotationScorer()
-    service = RotationRecommendationService(zone_repo=zone_repo, crop_repo=crop_repo, scorer=scorer)
+    alert_path = cfg.BASE_DIR / "data" / "zones" / "realtime_weather_telemetry.json"
+    alert_evaluator = AgroclimaticAlertEvaluator(telemetry_path=alert_path)
+    service = RotationRecommendationService(
+        zone_repo=zone_repo, crop_repo=crop_repo, scorer=scorer, alert_evaluator=alert_evaluator
+    )
 
     app.state.settings = cfg
     app.state.zone_repo = zone_repo
     app.state.crop_repo = crop_repo
+    app.state.alert_evaluator = alert_evaluator
     app.state.service = service
 
     app.add_middleware(
@@ -97,6 +104,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if not zone:
             raise HTTPException(status_code=404, detail=f"Zone '{valid_id}' not found")
         return zone
+
+    @app.get("/api/alerts/{zone_id}")
+    def get_zone_alerts(zone_id: str) -> dict[str, Any]:
+        valid_id = validate_safe_id(zone_id, "zone_id")
+        zone = zone_repo.get_zone(valid_id)
+        if not zone:
+            raise HTTPException(status_code=404, detail=f"Zone '{valid_id}' not found")
+        return alert_evaluator.evaluate_zone(valid_id, zone)
+
+    @app.post("/api/tts/quechua")
+    def synthesize_quechua_audio(req: QuechuaTtsRequest) -> Response:
+        try:
+            wav_bytes = QuechuaTtsClient().synthesize_wav_bytes(req.text)
+            return Response(content=wav_bytes, media_type="audio/wav")
+        except Exception:
+            raise HTTPException(status_code=503, detail="Native Quechua TTS service unavailable")
 
     @app.post("/api/recommend")
     def recommend(req: RecommendationRequest) -> dict[str, Any]:

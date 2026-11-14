@@ -28,10 +28,10 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "" }) {
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-wrap items-center justify-between gap-2">
         <CardTitle>
-          <span>🛰️ Telemetría Satelital Mensual NASA</span>
+          <span>🛰️ Climatología Histórica NASA (30 años)</span>
           {zoneName ? <Badge variant="nasa">{zoneName}</Badge> : null}
         </CardTitle>
-        <span className="text-[11px] font-mono text-stone-500">NASA POWER • SMAP L4 • Sentinel/MODIS</span>
+        <span className="text-[11px] font-mono text-stone-500">NASA POWER (30y) • SMAP L4 / Sentinel (Referencia)</span>
       </CardHeader>
 
       <CardContent className="space-y-4">

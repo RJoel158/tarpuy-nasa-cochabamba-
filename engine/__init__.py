@@ -1,5 +1,6 @@
 """Engine package for agronomic crop rotation scoring and recommendations."""
 
+from engine.alerts import AgroclimaticAlertEvaluator
 from engine.interfaces import CropRepository, RotationScorer, ZoneRepository
 from engine.recommender import (
     JsonCropRepository,
@@ -9,6 +10,7 @@ from engine.recommender import (
 from engine.scoring import MultiCriteriaRotationScorer
 
 __all__ = [
+    "AgroclimaticAlertEvaluator",
     "CropRepository",
     "JsonCropRepository",
     "JsonZoneRepository",
