@@ -8,27 +8,40 @@ import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
-import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
+import {
+  fetchZones,
+  fetchCrops,
+  fetchRecommendations,
+  fetchAlerts,
+  autoSyncZoneSnapshot,
+  listCachedZoneIds,
+} from "./services/apiClient.js";
+import { loadDeviceSnapshotSync, getDeviceDbStats } from "./services/embeddedDb.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
 
 export default function App() {
+  const initialSnapRef = useRef(loadDeviceSnapshotSync());
+  const initialSnap = initialSnapRef.current;
   const [activeView, setActiveView] = useState("clima");
   const [appMode, setAppMode] = useState("facil");
   const isAdvanced = appMode === "avanzado";
   const [zones, setZones] = useState([]);
   const [crops, setCrops] = useState([]);
-  const [zoneId, setZoneId] = useState("punata_valle_alto");
-  const [communityName, setCommunityName] = useState("Punata");
-  const [cropId, setCropId] = useState("maiz_valle");
+  const [zoneId, setZoneId] = useState(initialSnap?.zoneId || "punata_valle_alto");
+  const [communityName, setCommunityName] = useState(initialSnap?.communityName || "Punata");
+  const [cropId, setCropId] = useState(initialSnap?.cropId || "maiz_valle");
   const [priorities, setPriorities] = useState(["water_conservation", "nitrogen_fixation", "erosion_control"]);
-  const [irrigation, setIrrigation] = useState("deficit_auxiliary");
+  const [irrigation, setIrrigation] = useState(initialSnap?.irrigation || "deficit_auxiliary");
   const [equipment, setEquipment] = useState("manual_yunta");
   const [forceOffline, setForceOffline] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
   const [alertBulletin, setAlertBulletin] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [syncStatus, setSyncStatus] = useState("");
+  const [dbStats, setDbStats] = useState(() => getDeviceDbStats());
+  const [syncStatus, setSyncStatus] = useState(
+    initialSnap?.sizeKb ? `Base local (${initialSnap.sizeKb} KB)` : "Sincronizando base local..."
+  );
   const [voiceLang, setVoiceLang] = useState("qu");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
@@ -100,22 +113,45 @@ export default function App() {
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!forceOffline && isOnline) {
+      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation })
+        .then((res) => {
+          if (cancelled) return;
+          setDbStats(getDeviceDbStats());
+          setSyncStatus(`Autoguardado local (${res.sizeKb} KB · sobreescrito)`);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          const stats = getDeviceDbStats();
+          if (stats.sizeKb > 0) setSyncStatus(`Base local (${stats.sizeKb} KB)`);
+        });
+    } else {
+      const stats = getDeviceDbStats();
+      setDbStats(stats);
+      setSyncStatus(stats.sizeKb > 0 ? `Leído de base local (${stats.sizeKb} KB)` : "Sin copia local aún");
+    }
+    return () => { cancelled = true; };
+  }, [zoneId, communityName, cropId, irrigation, forceOffline, isOnline]);
+
   const currentZone = zones.find((z) => z.zone_id === zoneId) || zones[0];
   const cachedCount = listCachedZoneIds().length;
 
   const handleDownloadBundle = async () => {
-    setSyncStatus("Guardando...");
-    setActiveProcess({ label: "Guardando datos sin internet...", pct: 45 });
+    setSyncStatus("Actualizando base local...");
+    setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 45 });
     try {
-      const res = await downloadZoneBundle(zoneId);
-      setActiveProcess({ label: "Guardando datos sin internet...", pct: 100 });
+      const res = await autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation });
+      setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 100 });
       setTimeout(() => setActiveProcess(null), 220);
-      setSyncStatus(`Listo offline (${res.sizeKb} KB)`);
-      pushToast("Cartilla guardada", `${currentZone?.name || "Zona"} (${res.sizeKb} KB)`, "success");
+      setDbStats(getDeviceDbStats());
+      setSyncStatus(`Autoguardado local (${res.sizeKb} KB · sobreescrito)`);
+      pushToast("Base local actualizada", `${communityName || currentZone?.name || "Zona"} (${res.sizeKb} KB)`, "success");
     } catch {
       setActiveProcess(null);
-      setSyncStatus("Error al guardar");
-      pushToast("Error al guardar", "No se pudo descargar sin señal", "warning");
+      setSyncStatus("Usando copia anterior");
+      pushToast("Sin señal", "Se mantiene la copia local anterior", "warning");
     }
   };
 
@@ -278,6 +314,7 @@ export default function App() {
         onToggleOffline={handleToggleOffline}
         onDownloadBundle={handleDownloadBundle}
         cachedCount={cachedCount}
+        dbStats={dbStats}
         syncStatus={syncStatus}
       />
 

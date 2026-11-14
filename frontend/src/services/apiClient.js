@@ -1,4 +1,8 @@
-const BUNDLE_KEY = (id) => `tarpuy_bundle_${id}`;
+import {
+  saveDeviceSnapshot,
+  loadDeviceSnapshotSync,
+  getDeviceDbStats,
+} from "./embeddedDb.js";
 
 export function canonicalJsonStringify(obj) {
   if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
@@ -18,32 +22,22 @@ export async function verifyBundleIntegrity(bundle) {
   return hex.toLowerCase() === bundle.integrity_sha256.toLowerCase();
 }
 
-export function saveOfflineBundle(zoneId, bundle) {
-  try {
-    localStorage.setItem(BUNDLE_KEY(zoneId), JSON.stringify(bundle));
-    return true;
-  } catch (err) {
-    console.error("Error saving bundle:", err);
-    return false;
-  }
+export function saveOfflineBundle(zoneId, bundle, meta = {}) {
+  return saveDeviceSnapshot({ zoneId, ...meta, bundle });
 }
 
 export function loadOfflineBundle(zoneId) {
-  try {
-    const raw = localStorage.getItem(BUNDLE_KEY(zoneId));
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
+  const snap = loadDeviceSnapshotSync();
+  if (!snap?.bundle) return null;
+  if (!zoneId || snap.zoneId === zoneId || snap.bundle?.zone_profile?.zone_id === zoneId) {
+    return snap.bundle;
   }
+  return null;
 }
 
 export function listCachedZoneIds() {
-  const ids = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith("tarpuy_bundle_")) ids.push(key.replace("tarpuy_bundle_", ""));
-  }
-  return ids;
+  const stats = getDeviceDbStats();
+  return stats.zoneId ? [stats.zoneId] : [];
 }
 
 const FALLBACK_ZONES = [
@@ -134,13 +128,24 @@ export async function fetchRecommendations(payload, forceOffline = false) {
   };
 }
 
-export async function downloadZoneBundle(zoneId) {
-  const res = await fetch(`/api/offline-bundle/${zoneId}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} al descargar bundle`);
+export async function autoSyncZoneSnapshot(zoneId, meta = {}) {
+  const res = await fetch(`/api/offline-bundle/${encodeURIComponent(zoneId)}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} al sincronizar base local`);
   const bundle = await res.json();
   const verified = await verifyBundleIntegrity(bundle);
   if (!verified) throw new Error("Firma SHA-256 del paquete satelital inválida");
-  saveOfflineBundle(zoneId, bundle);
-  const sizeKb = Math.round(new Blob([JSON.stringify(bundle)]).size / 1024);
-  return { success: true, verified, sizeKb, bundle };
+  const saved = await saveDeviceSnapshot({ zoneId, ...meta, bundle });
+  return {
+    success: true,
+    verified,
+    zoneId,
+    sizeKb: saved.sizeKb,
+    updatedAt: saved.updatedAt,
+    engine: "SQLite-IDB",
+    bundle,
+  };
+}
+
+export async function downloadZoneBundle(zoneId, meta = {}) {
+  return autoSyncZoneSnapshot(zoneId, meta);
 }
