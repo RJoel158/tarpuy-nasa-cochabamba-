@@ -1,5 +1,5 @@
 import React from "react";
-import { CloudSun, Sprout, MapPin, Database, Volume2, Square, Download, Wifi, WifiOff } from "lucide-react";
+import { CloudSun, Sprout, MapPin, Database, Volume2, Square, Download, Wifi, WifiOff, LocateFixed } from "lucide-react";
 
 const NAV_ITEMS = [
   { id: "clima", label: "Clima hoy", Icon: CloudSun },
@@ -19,6 +19,7 @@ export default function Navbar({
   onChangeView,
   zoneId = "punata_valle_alto",
   onSelectZone,
+  onDetectGps,
   voiceLang = "qu",
   onChangeVoiceLang,
   isSpeaking = false,
@@ -70,6 +71,14 @@ export default function Navbar({
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={onDetectGps}
+              className="w-full mt-1.5 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-sky-300 bg-white/5 hover:bg-white/15 border border-white/10 transition cursor-pointer"
+            >
+              <LocateFixed className="w-3.5 h-3.5 shrink-0" />
+              <span>Detectar mi ubicación (GPS)</span>
+            </button>
           </div>
 
           {/* 4 Decentralized Screens */}

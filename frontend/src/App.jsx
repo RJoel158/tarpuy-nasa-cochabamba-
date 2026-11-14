@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LocateFixed, MapPin } from "lucide-react";
 import Navbar from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
+import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
 import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts, downloadZoneBundle, listCachedZoneIds } from "./services/apiClient.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
 
@@ -27,6 +28,8 @@ export default function App() {
   const [voiceLang, setVoiceLang] = useState("qu");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
+  const [userPoint, setUserPoint] = useState(null);
+  const [geoStatus, setGeoStatus] = useState("");
 
   useEffect(() => {
     const onOn = () => setIsOnline(true);
@@ -97,6 +100,32 @@ export default function App() {
     setCropId(newZoneId === "tapacari_zona_andina" ? "papa_huaycha" : "maiz_valle");
   };
 
+  const handlePickMapPoint = (lat, lon, source = "mapa") => {
+    const nearest = findNearestZone(lat, lon);
+    setUserPoint({ lat, lon, source });
+    handleSelectZone(nearest.zone.id);
+    setGeoStatus(`Zona reconocida (${source}): ${nearest.zone.name} — ${nearest.zone.sub} (a ${nearest.distanceKm} km)`);
+  };
+
+  const handleDetectGps = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setActiveView("mapa");
+      setGeoStatus("Toca tu ubicación o comunidad directamente en el mapa");
+      return;
+    }
+    setGeoStatus("Buscando tu ubicación...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS"),
+      () => {
+        setActiveView("mapa");
+        setGeoStatus("Toca tu ubicación o comunidad directamente en el mapa");
+      },
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
+    );
+  };
+
+  const activeGeo = ZONE_GEO_CATALOG.find((z) => z.id === zoneId) || ZONE_GEO_CATALOG[1];
+
   return (
     <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
       <Navbar
@@ -104,6 +133,7 @@ export default function App() {
         onChangeView={setActiveView}
         zoneId={zoneId}
         onSelectZone={handleSelectZone}
+        onDetectGps={handleDetectGps}
         voiceLang={voiceLang}
         onChangeVoiceLang={setVoiceLang}
         isSpeaking={isSpeaking}
@@ -119,6 +149,36 @@ export default function App() {
 
       <div className="flex-1 min-w-0 flex flex-col justify-between pb-20 lg:pb-8">
         <main className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+          {(activeView === "clima" || activeView === "siembra") ? (
+            <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0 basis-full sm:basis-0 sm:flex-1 text-xs space-y-0.5">
+                <p className="font-bold text-[#0B2545] flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                  <span>Zona: {activeGeo.name} · {activeGeo.sub}</span>
+                </p>
+                <p className="text-slate-600 break-words">{geoStatus || `Pueblos cercanos: ${activeGeo.towns}`}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDetectGps}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
+                >
+                  <LocateFixed className="w-3.5 h-3.5" />
+                  <span>Mi ubicación GPS</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveView("mapa")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0B2545] text-xs font-bold transition cursor-pointer"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
+                  <span>Elegir en el mapa</span>
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           {loading && !recData ? (
             <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
           ) : activeView === "clima" ? (
@@ -154,7 +214,18 @@ export default function App() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Ubicación y suelo</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Mapa de comunidades · {currentZone?.name || ""}</h2>
               </div>
-              <CochabambaMap zones={zones} activeZoneId={zoneId} onSelectZone={handleSelectZone} forceOffline={forceOffline} isOnline={isOnline} tall={true} />
+              <CochabambaMap
+                zones={zones}
+                activeZoneId={zoneId}
+                onSelectZone={handleSelectZone}
+                userPoint={userPoint}
+                onPickMapPoint={handlePickMapPoint}
+                onDetectGps={handleDetectGps}
+                geoStatus={geoStatus}
+                forceOffline={forceOffline}
+                isOnline={isOnline}
+                tall={true}
+              />
               {currentZone?.soil_context ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
                   <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
