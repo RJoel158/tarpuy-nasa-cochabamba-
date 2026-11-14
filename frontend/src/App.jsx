@@ -137,8 +137,12 @@ export default function App() {
   }, [forceOffline]);
 
   useEffect(() => {
-    fetchAlerts(zoneId, forceOffline).then((b) => b && setAlertBulletin(b));
-  }, [zoneId, forceOffline]);
+    fetchAlerts(zoneId, forceOffline, {
+      districtCode: districtMeta?.code,
+      comuna: districtMeta?.comuna,
+      drainage,
+    }).then((b) => b && setAlertBulletin(b));
+  }, [zoneId, forceOffline, districtMeta, drainage]);
 
   const loadRecs = useCallback(async () => {
     setLoading(true);

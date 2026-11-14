@@ -81,10 +81,18 @@ export async function fetchCrops(forceOffline = false) {
   ];
 }
 
-export async function fetchAlerts(zoneId, forceOffline = false) {
+export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, comuna, drainage } = {}) {
   if (!forceOffline) {
     try {
-      const res = await fetch(`/api/alerts/${zoneId}`);
+      const params = new URLSearchParams();
+      if (districtCode) params.set("district_code", districtCode);
+      if (comuna) params.set("comuna", comuna);
+      if (drainage) {
+        const dText = typeof drainage === "string" ? drainage : drainage.clasificacion || drainage.tipo || "";
+        if (dText) params.set("drainage", dText);
+      }
+      const qs = params.toString();
+      const res = await fetch(`/api/alerts/${zoneId}${qs ? `?${qs}` : ""}`);
       if (res.ok) return await res.json();
     } catch {}
   }
