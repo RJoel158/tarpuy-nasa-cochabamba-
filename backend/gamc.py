@@ -56,6 +56,7 @@ PUBLIC_SERVICE_FIELDS = (
     "description",
     "layers",
     "enabled_by_default",
+    "simple_mode",
     "bounds",
     "legend_classes",
 )
@@ -66,6 +67,7 @@ def _public_service(raw: dict[str, Any], theme: str) -> dict[str, Any]:
     item = {k: raw.get(k) for k in PUBLIC_SERVICE_FIELDS if k in raw}
     item["theme"] = theme
     item["default_on"] = bool(raw.get("enabled_by_default"))
+    item["simple_mode"] = bool(raw.get("simple_mode"))
     return item
 
 
@@ -87,7 +89,19 @@ class GamcWmsProxy:
         self._by_service_id = {
             str(s.get("service_id", "")).lower(): s for s in self._services if s.get("service_id")
         }
+        districts_path = resolve_safe_data_path(
+            settings.BASE_DIR, "data", "gamc", "districts.json"
+        )
+        districts_raw = (
+            json.loads(districts_path.read_text(encoding="utf-8")) if districts_path.exists() else {}
+        )
+        self._districts_source = str(districts_raw.get("source") or "")
+        self._districts: list[dict[str, Any]] = list(districts_raw.get("districts") or [])
         self._client = http_client or httpx.Client(timeout=15.0, follow_redirects=False)
+
+    def list_districts(self) -> dict[str, Any]:
+        """Municipal districts (code, comuna, center, bounds) sampled from the WMS."""
+        return {"source": self._districts_source, "districts": self._districts}
 
     def list_services(self) -> dict[str, Any]:
         return {

@@ -1,0 +1,21 @@
+{
+  "source": "Alcaldía de Cochabamba — Límite Distritos (WMS GetFeatureInfo)",
+  "service_id": "7eb13092-bf0e-493b-aae6-03c43eedda2c",
+  "districts": [
+    {"code": "D1", "number": 1, "name": "Distrito 1", "comuna": "Tunari", "center": {"lat": -17.36919, "lon": -66.130703}, "bounds": {"south": -17.37819, "west": -66.151703, "north": -17.35419, "east": -66.109703}, "samples": 14},
+    {"code": "D2", "number": 2, "name": "Distrito 2", "comuna": "Tunari", "center": {"lat": -17.35119, "lon": -66.172703}, "bounds": {"south": -17.36619, "west": -66.199703, "north": -17.33619, "east": -66.151703}, "samples": 26},
+    {"code": "D3", "number": 3, "name": "Distrito 3", "comuna": "Molle", "center": {"lat": -17.36919, "lon": -66.190703}, "bounds": {"south": -17.39619, "west": -66.205703, "north": -17.34819, "east": -66.175703}, "samples": 26},
+    {"code": "D4", "number": 4, "name": "Distrito 4", "comuna": "Molle", "center": {"lat": -17.39919, "lon": -66.190703}, "bounds": {"south": -17.41419, "west": -66.217703, "north": -17.37819, "east": -66.169703}, "samples": 18},
+    {"code": "D5", "number": 5, "name": "Distrito 5", "comuna": "Alejo Calatayud", "center": {"lat": -17.42319, "lon": -66.166703}, "bounds": {"south": -17.44419, "west": -66.193703, "north": -17.40819, "east": -66.145703}, "samples": 27},
+    {"code": "D6", "number": 6, "name": "Distrito 6", "comuna": "Valle Hermoso", "center": {"lat": -17.41119, "lon": -66.142703}, "bounds": {"south": -17.42619, "west": -66.151703, "north": -17.40219, "east": -66.127703}, "samples": 15},
+    {"code": "D7", "number": 7, "name": "Distrito 7", "comuna": "Valle Hermoso", "center": {"lat": -17.41719, "lon": -66.124703}, "bounds": {"south": -17.43819, "west": -66.133703, "north": -17.39019, "east": -66.109703}, "samples": 15},
+    {"code": "D8", "number": 8, "name": "Distrito 8", "comuna": "Alejo Calatayud", "center": {"lat": -17.45919, "lon": -66.106703}, "bounds": {"south": -17.49219, "west": -66.151703, "north": -17.42619, "east": -66.067703}, "samples": 67},
+    {"code": "D9", "number": 9, "name": "Distrito 9", "comuna": "Itocta", "center": {"lat": -17.46519, "lon": -66.202703}, "bounds": {"south": -17.52819, "west": -66.277703, "north": -17.40219, "east": -66.133703}, "samples": 292},
+    {"code": "D10", "number": 10, "name": "Distrito 10", "comuna": "Adela Zamudio", "center": {"lat": -17.39919, "lon": -66.160703}, "bounds": {"south": -17.41419, "west": -66.169703, "north": -17.37819, "east": -66.145703}, "samples": 14},
+    {"code": "D11", "number": 11, "name": "Distrito 11", "comuna": "Adela Zamudio", "center": {"lat": -17.38719, "lon": -66.136703}, "bounds": {"south": -17.40219, "west": -66.151703, "north": -17.37219, "east": -66.127703}, "samples": 16},
+    {"code": "D12", "number": 12, "name": "Distrito 12", "comuna": "Adela Zamudio", "center": {"lat": -17.37519, "lon": -66.160703}, "bounds": {"south": -17.39619, "west": -66.181703, "north": -17.36619, "east": -66.139703}, "samples": 18},
+    {"code": "D13", "number": 13, "name": "Distrito 13", "comuna": "Tunari", "center": {"lat": -17.31519, "lon": -66.148703}, "bounds": {"south": -17.36619, "west": -66.193703, "north": -17.25819, "east": -66.103703}, "samples": 138},
+    {"code": "D14", "number": 14, "name": "Distrito 14", "comuna": "Valle Hermoso", "center": {"lat": -17.44119, "lon": -66.112703}, "bounds": {"south": -17.46219, "west": -66.121703, "north": -17.42019, "east": -66.097703}, "samples": 17},
+    {"code": "D15", "number": 15, "name": "Distrito 15", "comuna": "Tamborada", "center": {"lat": -17.48919, "lon": -66.130703}, "bounds": {"south": -17.51619, "west": -66.151703, "north": -17.45619, "east": -66.097703}, "samples": 59}
+  ]
+}
