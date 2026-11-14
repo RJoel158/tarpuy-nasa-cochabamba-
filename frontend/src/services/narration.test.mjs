@@ -37,7 +37,8 @@ test("explains a documented purpose once and preserves Quechua month ranges and 
   assert.equal(es.match(/Ayuda a aportar nitrógeno/g).length, 1);
   assert.ok(es.includes("alimento para los animales"));
   const qu = buildStrategyNarration(strategy, "qu");
-  assert.ok(qu.includes("Enero killamanta Mayo killakama, Jawasa."));
-  assert.ok(qu.includes("Uywakunapaq mikhuna."));
-  assert.ok(qu.includes("yachaqwan tapurikuy"));
+  assert.ok(qu.includes("Enero killamanta Mayo killakama, Hawas,"));
+  assert.ok(qu.includes("uywakunapaq mikhuna."));
+  assert.ok(qu.includes("Yachaqwan tapurikuy"));
+  assert.ok(qu.includes("Avenawan wikawan"));
 });

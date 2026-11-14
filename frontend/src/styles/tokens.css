@@ -1,0 +1,504 @@
+/**
+ * TARPUY NASA COCHABAMBA — ARCHIVO ÚNICO DE TOKENS Y REGLAS DE COLOR (FASE 1 + 1B)
+ * =================================================================================
+ * Fuente única de verdad para toda la aplicación.
+ * Los colores técnicos antiguos (#0B2545, #0284C7, #009FE3) quedan eliminados.
+ * Ningún componente usa códigos hexadecimales sueltos.
+ */
+
+:root {
+  /* ===================================================================
+   * 1. COLORES BASE (Papel cálido, tarjeta, arena, tinta y separadores)
+   * =================================================================== */
+  --papel: #F3EEE3;                /* Fondo general, crema cálido */
+  --tarjeta: #FAF7F0;              /* Crema más claro para tarjetas y etiquetas de logos */
+  --arena: #EBE4D3;                /* Paneles, recuadros interiores y zonas secundarias */
+
+  --tinta: #231A14;                /* Café muy oscuro: texto principal (15.97:1 AAA) y todos los bordes gruesos */
+  --tinta-suave: #5A4A3E;          /* Texto secundario (7.90:1 AAA sobre tarjeta, 7.31:1 AAA sobre papel) */
+  --tinta-apagada: #736052;        /* Texto deshabilitado / auxiliar (4.92:1 AA sobre tarjeta) */
+  --texto-sobre-fuerte: #FAF7F0;   /* Texto claro sobre botones oscuros */
+
+  /* Los 3 colores tradicionales de los separadores con chakana */
+  --dorado: #D9A733;               /* Sol, lo recomendado, lo importante (relleno/ícono, NUNCA texto sobre crema) */
+  --hoja: #4C7A45;                 /* Verde hoja: cultivo, rellenos de plantas y separador */
+  --ladrillo: #7A2E2E;             /* Rojo vino apagado: detalles decorativos y marcador "estás aquí" (nunca aviso) */
+
+  /* ===================================================================
+   * 2. COLORES NUEVOS Y SUS VARIANTES (Fuerte, Suave y Oscura)
+   * =================================================================== */
+
+  /* HOJA = cultivo, "sí", acción principal (continuar / confirmar) */
+  --hoja-suave: #D5E3C9;           /* Fondo suave para zonas de cultivo */
+  --hoja-oscura: #2F5E2E;          /* Texto sobre crema/hoja-suave y fondo de botón principal (7.11:1 AAA con crema) */
+  --hoja-presionada: #214520;      /* Estado hundido / presionado del botón principal */
+
+  /* DORADO = lo recomendado, lo importante, el sol, acento Punata */
+  --dorado-suave: #F3DFA2;         /* Fondo suave para marcar lo recomendado */
+  --dorado-oscuro: #6B4D0B;        /* Texto y borde de contraste sobre --dorado-suave (5.90:1 AA) */
+
+  /* CIELO = SOLO para agua, lluvia, riego y cielo (único azul de la app) */
+  --cielo: #5B8FA8;                /* Rellenos de gotas, barras de lluvia e íconos de agua */
+  --cielo-suave: #D6E4EA;          /* Fondo suave para zonas de agua y riego */
+  --cielo-oscuro: #245269;         /* Botones de agua/voz y texto sobre --cielo-suave (7.90:1 AAA con crema) */
+  --cielo-presionado: #1A3D4F;     /* Estado hundido del botón de agua/voz */
+
+  /* TIERRA = suelo, adobe, chacra */
+  --tierra: #B5683C;               /* Terracota suave: suelo, adobe, chacra */
+  --tierra-suave: #EED8C9;         /* Fondo suave de suelo y parcela */
+  --tierra-oscura: #6B381B;        /* Texto, madera oscura y estado presionado (8.89:1 AAA con crema) */
+
+  /* LADRILLO = detalles decorativos de aguayo y "estás aquí" */
+  --ladrillo-suave: #E8D0D0;       /* Fondo suave para indicador de ubicación actual */
+  --ladrillo-oscuro: #4F1B1B;      /* Versión oscura para texto o estado presionado (9.54:1 AAA sobre suave) */
+
+  /* PIEDRA = ocre grisáceo, acento de la zona Tapacarí */
+  --piedra: #A8906A;               /* Acento de altura / cordillera Tapacarí */
+  --piedra-suave: #E6DECF;         /* Fondo suave de zona Tapacarí */
+  --piedra-oscura: #54452E;        /* Texto y borde oscuro de zona Tapacarí (6.93:1 AA sobre suave) */
+
+  /* ===================================================================
+   * 3. COLORES DE ALERTA (Únicos intensos; SOLO para avisos de clima)
+   * =================================================================== */
+
+  /* Nivel 1: Tranquilo (Buen tiempo) */
+  --alerta-tranquilo: var(--hoja-oscura);
+  --alerta-tranquilo-suave: var(--hoja-suave);
+  --alerta-tranquilo-oscuro: #1E401D;
+
+  /* Nivel 2: Cuidado (Ámbar) */
+  --alerta-cuidado: #E0A21B;
+  --alerta-cuidado-suave: #FBF0CE;
+  --alerta-cuidado-oscuro: #664300; /* 7.79:1 AAA sobre --alerta-cuidado-suave */
+
+  /* Nivel 3: Peligro cercano (Naranja) */
+  --alerta-peligro: #D9722B;
+  --alerta-peligro-suave: #FCE4D2;
+  --alerta-peligro-oscuro: #732F05; /* 8.03:1 AAA sobre --alerta-peligro-suave */
+
+  /* Nivel 4: Helada o sequía crítica (Rojo) */
+  --alerta-critico: #B3261E;
+  --alerta-critico-suave: #F9DBD8;
+  --alerta-critico-oscuro: #6E110C; /* 9.24:1 AAA sobre --alerta-critico-suave */
+
+  /* ===================================================================
+   * 4. ACENTO DINÁMICO POR ZONA (--acento-zona)
+   * Tapacarí = --piedra | Punata = --dorado | Chapare = --hoja
+   * =================================================================== */
+  --acento-zona: var(--dorado);
+  --acento-zona-suave: var(--dorado-suave);
+  --acento-zona-oscuro: var(--dorado-oscuro);
+
+  /* ===================================================================
+   * 5. TOKENS SEMÁNTICOS PARA GRÁFICOS Y MAPA
+   * =================================================================== */
+  --grafico-temp-max: var(--tierra);
+  --grafico-temp-min: var(--cielo);
+  --grafico-lluvia: var(--cielo);
+  --grafico-et0: var(--hoja);
+  --grafico-helada: var(--alerta-critico);
+  --mapa-aqui: var(--ladrillo);
+
+  /* ===================================================================
+   * 6. ALIAS DE COMPATIBILIDAD CON COMPONENTES E ILUSTRACIONES FASE 1
+   * =================================================================== */
+  --color-bg-page: var(--papel);
+  --color-bg-card: var(--tarjeta);
+  --color-bg-card-alt: var(--arena);
+  --color-bg-logo-tag: var(--tarjeta);
+  --color-bg-disabled: var(--arena);
+
+  --color-text-primary: var(--tinta);
+  --color-text-secondary: var(--tinta-suave);
+  --color-text-muted: var(--tinta-apagada);
+  --color-text-on-primary: var(--texto-sobre-fuerte);
+  --color-ink-stroke: var(--tinta);
+  --color-ink-highlight: var(--tarjeta);
+
+  --color-border-strong: var(--tinta);
+  --color-border-subtle: var(--piedra);
+  --color-btn-bevel-dark: var(--tinta);
+  --color-btn-bevel-secondary: var(--tinta);
+  --color-btn-bevel-water: var(--tinta);
+  --color-focus-ring: var(--hoja-oscura);
+
+  --color-primary: var(--hoja-oscura);
+  --color-primary-hover: var(--hoja);
+  --color-primary-pressed: var(--hoja-presionada);
+
+  --color-secondary: var(--arena);
+  --color-secondary-hover: var(--dorado-suave);
+  --color-secondary-pressed: var(--piedra-suave);
+
+  --color-illus-sun: var(--dorado);
+  --color-illus-sun-soft: var(--dorado-suave);
+  --color-illus-water: var(--cielo);
+  --color-illus-water-soft: var(--cielo-suave);
+  --color-illus-leaf: var(--hoja);
+  --color-illus-leaf-soft: var(--hoja-suave);
+  --color-illus-earth-wet: var(--tierra-oscura);
+  --color-illus-earth-dry: var(--tierra);
+  --color-illus-andean-clay: var(--ladrillo);
+  --color-illus-wood: var(--tierra-oscura);
+  --color-illus-cloud: var(--arena);
+
+  --color-weather-ok-bg: var(--alerta-tranquilo-suave);
+  --color-weather-ok-border: var(--alerta-tranquilo);
+  --color-weather-ok-ink: var(--alerta-tranquilo-oscuro);
+
+  --color-weather-warn-bg: var(--alerta-cuidado-suave);
+  --color-weather-warn-border: var(--alerta-cuidado);
+  --color-weather-warn-ink: var(--alerta-cuidado-oscuro);
+
+  --color-weather-danger-bg: var(--alerta-critico-suave);
+  --color-weather-danger-border: var(--alerta-critico);
+  --color-weather-danger-ink: var(--alerta-critico-oscuro);
+
+  /* ===================================================================
+   * 7. TIPOGRAFÍA REDONDEADA Y DIMENSIONES TÁCTILES
+   * =================================================================== */
+  --font-family-base: "Atkinson Hyperlegible", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-family-display: "Nunito", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+  --font-size-body-min: 1.125rem;      /* 18 px */
+  --font-size-body: 1.25rem;           /* 20 px */
+  --font-size-subtitle: 1.5rem;        /* 24 px */
+  --font-size-title: clamp(1.875rem, 3.5vw, 2.25rem); /* 30 px - 36 px */
+
+  --line-height-body: 1.55;
+  --line-height-title: 1.2;
+
+  --border-width-thick: 3px;
+  --border-width-medium: 2px;
+
+  --radius-btn: 22px;
+  --radius-card: 28px;
+  --radius-pill: 9999px;
+
+  --size-btn-min-h: 68px;
+  --size-speaker-btn: 72px;
+  --space-btn-gap: 16px;
+
+  --btn-bevel-height: 5px;
+  --btn-bevel-pressed: 1px;
+  --btn-translate-pressed: 4px;
+}
+
+/* =====================================================================
+ * SELECTORES DE ACENTO POR ZONA (Tapacarí, Punata, Chapare)
+ * ===================================================================== */
+[data-zona="tapacari"],
+[data-zona="tapacari_zona_andina"] {
+  --acento-zona: var(--piedra);
+  --acento-zona-suave: var(--piedra-suave);
+  --acento-zona-oscuro: var(--piedra-oscura);
+}
+
+[data-zona="punata"],
+[data-zona="punata_valle_alto"] {
+  --acento-zona: var(--dorado);
+  --acento-zona-suave: var(--dorado-suave);
+  --acento-zona-oscuro: var(--dorado-oscuro);
+}
+
+[data-zona="chapare"],
+[data-zona="chapare_tropico"],
+[data-zona="mizque_cono_sur"] {
+  --acento-zona: var(--hoja);
+  --acento-zona-suave: var(--hoja-suave);
+  --acento-zona-oscuro: var(--hoja-oscura);
+}
+
+/* =====================================================================
+ * SUPERFICIES, TEXTURAS SUTILES Y MODO AVANZADO SOBRIO
+ * ===================================================================== */
+.tarpuy-page-surface {
+  background-color: var(--papel);
+  /* Textura de trama de papel / tela muy sutil a baja opacidad (sin degradados llamativos) */
+  background-image: radial-gradient(var(--piedra) 0.55px, transparent 0.55px);
+  background-size: 18px 18px;
+  color: var(--tinta);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-min);
+  line-height: var(--line-height-body);
+}
+
+/* Modo Avanzado: misma paleta pero más sobria (sin textura decorativa) */
+[data-modo="avanzado"] .tarpuy-page-surface,
+.tarpuy-page-surface[data-modo="avanzado"],
+[data-producer-mode="false"] {
+  background-image: none;
+}
+
+.tarpuy-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-title);
+  color: var(--tinta);
+  font-weight: 800;
+}
+
+.tarpuy-subtitle {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-subtitle);
+  line-height: 1.3;
+  color: var(--tinta);
+  font-weight: 800;
+}
+
+.tarpuy-body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--tinta);
+}
+
+/* =====================================================================
+ * BOTONES FÍSICOS (Relleno de color, borde grueso de tinta y sombra dura)
+ * ===================================================================== */
+.tarpuy-btn-physical {
+  min-height: var(--size-btn-min-h);
+  border: var(--border-width-thick) solid var(--tinta);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: 800;
+  box-shadow: 0 var(--btn-bevel-height) 0 var(--tinta);
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tarpuy-btn-physical--primary {
+  background-color: var(--hoja-oscura);
+  color: var(--texto-sobre-fuerte);
+}
+
+.tarpuy-btn-physical--primary:hover:not(:disabled) {
+  background-color: var(--hoja);
+}
+
+.tarpuy-btn-physical--secondary {
+  background-color: var(--arena);
+  color: var(--tinta);
+}
+
+.tarpuy-btn-physical--secondary:hover:not(:disabled) {
+  background-color: var(--dorado-suave);
+}
+
+.tarpuy-btn-physical--water {
+  background-color: var(--cielo-oscuro);
+  color: var(--texto-sobre-fuerte);
+}
+
+.tarpuy-btn-physical--water:hover:not(:disabled) {
+  background-color: var(--cielo);
+  color: var(--tinta);
+}
+
+.tarpuy-btn-physical--earth {
+  background-color: var(--tierra-oscura);
+  color: var(--texto-sobre-fuerte);
+}
+
+/* Se hunde al tocarlo */
+.tarpuy-btn-physical:active:not(:disabled),
+.tarpuy-btn-physical--pressed:not(:disabled) {
+  transform: translateY(var(--btn-translate-pressed));
+  box-shadow: 0 var(--btn-bevel-pressed) 0 var(--tinta);
+}
+
+.tarpuy-btn-physical--primary:active:not(:disabled),
+.tarpuy-btn-physical--primary.tarpuy-btn-physical--pressed:not(:disabled) {
+  background-color: var(--hoja-presionada);
+}
+
+.tarpuy-btn-physical--secondary:active:not(:disabled),
+.tarpuy-btn-physical--secondary.tarpuy-btn-physical--pressed:not(:disabled) {
+  background-color: var(--piedra-suave);
+}
+
+.tarpuy-btn-physical--water:active:not(:disabled),
+.tarpuy-btn-physical--water.tarpuy-btn-physical--pressed:not(:disabled) {
+  background-color: var(--cielo-presionado);
+  color: var(--texto-sobre-fuerte);
+}
+
+/* Deshabilitado */
+.tarpuy-btn-physical:disabled,
+.tarpuy-btn-physical--disabled {
+  background-color: var(--arena);
+  color: var(--tinta-apagada);
+  border-color: var(--tinta-suave);
+  border-style: dashed;
+  box-shadow: none;
+  transform: translateY(var(--btn-translate-pressed));
+  cursor: not-allowed;
+}
+
+/* =====================================================================
+ * TARJETAS, FRANJA DE ZONA Y ETIQUETA DE LOGOS
+ * ===================================================================== */
+.tarpuy-card-physical {
+  background-color: var(--tarjeta);
+  color: var(--tinta);
+  border: var(--border-width-thick) solid var(--tinta);
+  border-radius: var(--radius-card);
+}
+
+/* Franja superior de acento por zona en tarjetas o cabeceras */
+.tarpuy-zona-stripe {
+  background-color: var(--acento-zona-suave);
+  border-bottom: var(--border-width-medium) solid var(--tinta);
+  color: var(--tinta);
+}
+
+/* Etiqueta crema con borde de tinta y esquinas redondeadas para logos en cualquier fondo */
+.tarpuy-logo-paper-tag {
+  background-color: var(--tarjeta);
+  border: var(--border-width-medium) solid var(--tinta);
+  border-radius: var(--radius-btn);
+}
+
+/* =====================================================================
+ * ESTILOS DEL MAPA CÁLIDO Y CONTROLES DE ZOOM GRANDES (FASE 5)
+ * ===================================================================== */
+.tarpuy-warm-map.leaflet-container,
+.tarpuy-warm-map .leaflet-container {
+  background-color: var(--arena) !important;
+  font-family: var(--font-family-display) !important;
+}
+
+.tarpuy-warm-map .leaflet-tile-pane {
+  filter: sepia(0.32) saturate(0.72) brightness(1.03) contrast(0.92);
+}
+
+.tarpuy-warm-map .leaflet-control-zoom {
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin: 14px !important;
+}
+
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-in,
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-out {
+  width: 58px !important;
+  height: 58px !important;
+  line-height: 52px !important;
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  background-color: var(--tarjeta) !important;
+  color: var(--tinta) !important;
+  border: var(--border-width-thick) solid var(--tinta) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 0 var(--tinta) !important;
+  text-decoration: none !important;
+}
+
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-in:active,
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-out:active {
+  transform: translateY(3px) !important;
+  box-shadow: 0 1px 0 var(--tinta) !important;
+}
+
+.tarpuy-map-pin-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* Ondas animadas del botón de altavoz */
+@keyframes tarpuySpeakerWave {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.45;
+  }
+}
+
+.tarpuy-speaker-wave-1 {
+  animation: tarpuySpeakerWave 1.1s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.tarpuy-speaker-wave-2 {
+  animation: tarpuySpeakerWave 1.1s ease-in-out 0.35s infinite;
+  transform-origin: center;
+}
+
+/* =====================================================================
+ * RESPETO A PREFERS-REDUCED-MOTION (Cero animaciones que distraigan)
+ * ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .tarpuy-speaker-wave-1,
+  .tarpuy-speaker-wave-2 {
+    animation: none !important;
+  }
+}
+
+/* =====================================================================
+ * 8. IMPRESIÓN (@media print): Blanco y negro con bordes, dos logos y letra grande
+ * ===================================================================== */
+@media print {
+  :root {
+    --papel: #FFFFFF;
+    --tarjeta: #FFFFFF;
+    --arena: #FFFFFF;
+    --tinta: #000000;
+    --tinta-suave: #000000;
+    --tinta-apagada: #000000;
+    --cielo-suave: #FFFFFF;
+    --hoja-suave: #FFFFFF;
+    --dorado-suave: #FFFFFF;
+    --tierra-suave: #FFFFFF;
+    --alerta-cuidado-suave: #FFFFFF;
+    --alerta-critico-suave: #FFFFFF;
+  }
+
+  body,
+  .tarpuy-page-surface,
+  .tarpuy-card-physical,
+  .tarpuy-btn-physical,
+  .tarpuy-zona-stripe {
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    font-size: 13pt !important;
+    line-height: 1.45 !important;
+  }
+
+  aside[aria-label="Navegación principal"],
+  nav[aria-label="Navegación inferior móvil"],
+  header.tarpuy-zona-stripe,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .tarpuy-card-physical,
+  section,
+  article,
+  table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
-import { LocateFixed, MapPin } from "lucide-react";
-import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
+import { LocateFixed, Layers } from "lucide-react";
+import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 import {
   GAMC_WMS_PATH,
   fetchGamcServices,
   fetchGamcFeatureInfo,
   featureInfoRows,
   wmsTileOptions,
+  fetchDistrictAt,
 } from "../../services/gamcClient.js";
 
 function escapeHtml(value) {
@@ -27,20 +28,21 @@ function popupHtml(chunks) {
           .slice(0, 8)
           .map(
             ([key, val]) =>
-              `<tr><th style="text-align:left;padding:2px 8px 2px 0;color:#64748b;font-weight:600;">${escapeHtml(key)}</th><td>${escapeHtml(val)}</td></tr>`
+              `<tr><th style="text-align:left;padding:2px 8px 2px 0;color:var(--tinta-suave);font-weight:600;">${escapeHtml(key)}</th><td>${escapeHtml(val)}</td></tr>`
           )
           .join("")
       )
       .join("");
-    return `<p style="margin:0 0 6px;font-weight:700;color:#0B2545;">${escapeHtml(chunk.title)}</p><table style="font-size:12px;border-collapse:collapse;">${rows}</table>`;
+    return `<p style="margin:0 0 6px;font-weight:700;color:var(--tinta);">${escapeHtml(chunk.title)}</p><table style="font-size:12px;border-collapse:collapse;">${rows}</table>`;
   });
-  return `<div style="max-width:240px;font-family:system-ui,sans-serif;">${blocks.join("<hr style='margin:8px 0;border:0;border-top:1px solid #e2e8f0;'/>")}</div>`;
+  return `<div style="max-width:240px;font-family:system-ui,sans-serif;">${blocks.join("<hr style='margin:8px 0;border:0;border-top:1px solid var(--arena);'/>")}</div>`;
 }
 
 export default function CochabambaMap({
+  zones = [],
   activeZoneId,
   onSelectZone,
-  selectedCommunityName = "Distrito 9",
+  selectedCommunityName = "Punata",
   onSelectCommunity,
   userPoint = null,
   onPickMapPoint,
@@ -50,23 +52,33 @@ export default function CochabambaMap({
   isOnline,
   tall = false,
   isAdvanced = false,
+  onChooseDistrict,
+  guided = false,
+  onContinue,
+  onDistrictResolved,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
   const wmsRef = useRef({});
-  const didFitDistrictsRef = useRef(false);
   const pickRef = useRef(onPickMapPoint);
   const selectRef = useRef(onSelectZone);
   pickRef.current = onPickMapPoint;
   selectRef.current = onSelectZone;
 
   const [mapEpoch, setMapEpoch] = useState(0);
+  const districts = useGamcDistricts();
+  const [districtCode, setDistrictCode] = useState("");
+  const [locationMessage, setLocationMessage] = useState("");
+  const [districtLayerError, setDistrictLayerError] = useState(false);
+  const didFitDistrictsRef = useRef(false);
   const [gamcTheme, setGamcTheme] = useState("");
   const [gamcServices, setGamcServices] = useState([]);
   const [enabledIds, setEnabledIds] = useState(() => new Set());
   const enabledRef = useRef(enabledIds);
   const servicesRef = useRef(gamcServices);
+  const districtResolvedRef = useRef(onDistrictResolved);
+  districtResolvedRef.current = onDistrictResolved;
   enabledRef.current = enabledIds;
   servicesRef.current = gamcServices;
 
@@ -104,22 +116,36 @@ export default function CochabambaMap({
     }
   }, [gamcServices, isAdvanced]);
 
-  useEffect(() => {
+  const focusDistrict = (code) => {
+    setDistrictCode(code);
     const map = mapRef.current;
-    if (!map || !mapEpoch || didFitDistrictsRef.current) return;
-    const districts = gamcServices.find((s) => s.id === "limite_distritos");
-    if (!districts?.bounds) return;
-    didFitDistrictsRef.current = true;
-    const { south, west, north, east } = districts.bounds;
-    map.fitBounds([[south, west], [north, east]], { padding: [24, 24] });
-  }, [gamcServices, mapEpoch]);
+    if (!map || !districts.length) return;
+    const selected = code ? districts.filter((d) => d.code === code) : districts;
+    const bounds = selected.map((d) => [[d.bounds.south, d.bounds.west], [d.bounds.north, d.bounds.east]]).flat();
+    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24] });
+  };
 
   useEffect(() => {
-    const map = mapRef.current;
-    const b = userPoint?.bounds;
-    if (!map || !mapEpoch || !b) return;
-    map.fitBounds([[b.south, b.west], [b.north, b.east]], { padding: [24, 24], maxZoom: 14 });
-  }, [userPoint, mapEpoch]);
+    if (!mapRef.current || !districts.length || didFitDistrictsRef.current || userPoint) return;
+    const bounds = districts.flatMap((d) => [[d.bounds.south, d.bounds.west], [d.bounds.north, d.bounds.east]]);
+    mapRef.current.fitBounds(bounds, { padding: [24, 24] });
+    didFitDistrictsRef.current = true;
+  }, [districts, mapEpoch]);
+
+  useEffect(() => {
+    if (!userPoint || !canUseLeaflet || !districts.length) return;
+    let cancelled = false;
+    setDistrictCode("");
+    setLocationMessage("Identificando tu distrito…");
+    fetchDistrictAt(userPoint.lat, userPoint.lon).then((district) => {
+      if (cancelled) return;
+      districtResolvedRef.current?.(district);
+      if (!district) { setLocationMessage("La ubicación está fuera de los distritos municipales de Cochabamba."); return; }
+      setDistrictCode(district.code);
+      setLocationMessage(`Tu ubicación: Distrito ${district.code.replace(/^D/, "")} · ${district.comuna}`);
+    }).catch(() => { if (!cancelled) setLocationMessage("Ubicación marcada. No se pudo consultar el distrito; puedes elegirlo en la lista."); });
+    return () => { cancelled = true; };
+  }, [userPoint, districts, canUseLeaflet]);
 
   const queryGamc = useCallback(async (e) => {
     const map = mapRef.current;
@@ -156,15 +182,15 @@ export default function CochabambaMap({
   useEffect(() => {
     if (!canUseLeaflet || !containerRef.current) return;
     if (!mapRef.current) {
-      const map = L.map(containerRef.current, { center: [-17.40, -66.16], zoom: 12, zoomControl: true });
+      const map = L.map(containerRef.current, { center: [-17.68, -65.95], zoom: 8, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(map);
-      map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [16, 16] });
+      map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [24, 24] });
       map.on("click", (evt) => {
         pickRef.current?.(evt.latlng.lat, evt.latlng.lng, "mapa");
-        queryRef.current?.(evt);
+        if (!guided) queryRef.current?.(evt);
       });
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
@@ -174,17 +200,20 @@ export default function CochabambaMap({
     const layer = layerRef.current;
     if (layer) {
       layer.clearLayers();
-
       if (userPoint && Number.isFinite(userPoint.lat) && Number.isFinite(userPoint.lon)) {
+        if (userPoint.source === "GPS" && Number.isFinite(userPoint.accuracy) && userPoint.accuracy > 0) {
+          L.circle([userPoint.lat, userPoint.lon], { radius: userPoint.accuracy, color: "var(--cielo-oscuro)", fillOpacity: 0.12, weight: 1 }).addTo(layer);
+        }
         const pin = L.circleMarker([userPoint.lat, userPoint.lon], {
           radius: 8,
-          fillColor: "#7E57C2",
-          color: "#4A148C",
+          fillColor: "var(--dorado)",
+          color: "var(--tinta)",
           weight: 3,
-          fillOpacity: 0.9,
+          fillOpacity: 1,
         });
-        pin.bindTooltip(userPoint.district || "Distrito detectado", { permanent: true, direction: "bottom" });
+        if (!guided) pin.bindTooltip("Tu ubicación seleccionada", { permanent: true, direction: "bottom" });
         pin.addTo(layer);
+        mapRef.current.setView([userPoint.lat, userPoint.lon], userPoint.accuracy > 1000 ? 13 : 16);
       }
     }
   }, [canUseLeaflet, userPoint]);
@@ -202,6 +231,10 @@ export default function CochabambaMap({
     gamcServices.forEach((svc) => {
       if (!wanted.has(svc.service_id) || wmsRef.current[svc.service_id]) return;
       const layer = L.tileLayer.wms(GAMC_WMS_PATH, wmsTileOptions(svc));
+      if (svc.id === "limite_distritos") {
+        layer.on("tileerror", () => setDistrictLayerError(true));
+        layer.on("tileload", () => setDistrictLayerError(false));
+      }
       layer.addTo(map);
       wmsRef.current[svc.service_id] = layer;
     });
@@ -232,55 +265,68 @@ export default function CochabambaMap({
     });
   };
 
-  const resetDistrictsView = () => {
+  const fitPeriurbanos = () => {
     const map = mapRef.current;
-    if (!map) return;
-    map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [16, 16] });
+    const svc =
+      gamcServices.find((s) => s.id === "periurbanos_categorizado") || gamcServices[0];
+    if (!map || !svc?.bounds) return;
+    const { south, west, north, east } = svc.bounds;
+    map.fitBounds(
+      [
+        [south, west],
+        [north, east],
+      ],
+      { padding: [24, 24], maxZoom: 13 }
+    );
+    if (!enabledIds.has(svc.service_id)) {
+      setEnabledIds((prev) => new Set(prev).add(svc.service_id));
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
+    <div className={`${guided ? "flow-location-map" : "tarpuy-card-physical"} overflow-hidden flex flex-col`}>
       <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px] sm:max-w-xs">
-          <MapPin className="w-4 h-4 text-[#0284C7] shrink-0" />
-          <CommunitySearchCombobox
-            selectedZoneId={activeZoneId}
-            selectedCommunityName={selectedCommunityName}
-            onSelectCommunity={onSelectCommunity}
-            variant="light"
-          />
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={resetDistrictsView}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition cursor-pointer shadow-sm"
-          >
-            <span>Ver todo Cochabamba</span>
-          </button>
-          <button
-            type="button"
-            onClick={onDetectGps}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#7E57C2] hover:bg-[#6A1B9A] text-white text-xs font-bold transition cursor-pointer shadow-sm"
-          >
-            <LocateFixed className="w-3.5 h-3.5 shrink-0" />
-            <span>Obtener mi ubicación (GPS)</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          {!guided && <button type="button" onClick={onDetectGps} className="tarpuy-btn-physical tarpuy-btn-physical--primary px-5 py-3 flex items-center justify-center gap-3">
+            <LocateFixed className="w-6 h-6" aria-hidden="true" /><span>Ubícame</span>
+          </button>}
+          {!guided && canUseLeaflet && gamcServices.length > 0 ? (
+            <button
+              type="button"
+              onClick={fitPeriurbanos}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5 shrink-0 text-[var(--cielo-oscuro)]" />
+              <span>Ver periurbanos</span>
+            </button>
+          ) : null}
         </div>
       </div>
 
+      <div className="px-4 py-3 border-b border-slate-200 space-y-2">
+        <p className="text-sm font-semibold">Encuentra tu distrito con tu ubicación o elígelo por su número.</p>
+        <label className="flex flex-wrap items-center gap-3 text-sm font-semibold">
+          {guided ? "Tu distrito" : "Distritos municipales"}
+          <select aria-label="Distrito municipal" value={districtCode} onChange={(e) => { focusDistrict(e.target.value); const district = districts.find(d=>d.code === e.target.value); if (district) onChooseDistrict?.(district); }} disabled={!districts.length || !canUseLeaflet}
+            className="min-h-14 min-w-0 max-w-full flex-1 rounded-2xl border-2 border-[var(--tinta)] bg-white px-3 text-base font-bold">
+            <option value="">{districts.length ? "Todos los distritos" : "Catálogo no disponible"}</option>
+            {districts.map((d) => <option key={d.code} value={d.code}>{d.name} · {d.comuna}</option>)}
+          </select>
+        </label>
+        {!guided && <p className="text-xs text-slate-600">Límites municipales del GAMC. Elegir un distrito acerca el mapa; las recomendaciones agrícolas siguen referidas a la zona piloto seleccionada.</p>}
+        {locationMessage && <p role="status" className={guided && locationMessage.startsWith("Tu ubicación:") ? "sr-only" : "text-sm text-slate-600"}>{locationMessage}</p>}
+        {guided && <button className="flow-primary w-full" disabled={!userPoint} onClick={onContinue}>Ver clima →</button>}
+        {userPoint?.source === "GPS" && Number.isFinite(userPoint.accuracy) && <p className="text-sm text-slate-600" role="status">Precisión del dispositivo: ±{Math.round(userPoint.accuracy)} m.{userPoint.accuracy > 200 ? " Es aproximada. Toca el mapa para corregir tu parcela." : " Puedes ajustar el punto tocando el mapa."}</p>}
+
+        {districtLayerError && <p role="status" className="text-sm text-amber-900">No se pudieron cargar los límites distritales. Revisa la conexión y la configuración del servicio GAMC.</p>}
+      </div>
       <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} relative w-full bg-slate-900`}>
         {canUseLeaflet ? (
           <>
             <div ref={containerRef} className="w-full h-full z-10" />
-            {gamcServices.length > 0 ? (
-              <p className="absolute bottom-2 left-2 z-20 max-w-[60%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
-                Haz clic sobre el mapa para consultar atributos · GetFeatureInfo
-              </p>
-            ) : null}
-            {gamcServices.length > 0 ? (
-              <div className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-[#0284C7]">Capas GAMC</p>
+            {!guided && gamcServices.length > 0 ? (
+              <details className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] max-h-[80%] overflow-auto rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
+                <summary className="text-xs font-bold text-[var(--cielo-oscuro)] cursor-pointer">Capas del mapa</summary>
                 <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2">{gamcTheme}</p>
                 <div className="mt-2 space-y-2">
                   {gamcServices.map((svc) => {
@@ -289,11 +335,11 @@ export default function CochabambaMap({
                       <label key={svc.service_id} className="flex items-start gap-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          className="mt-0.5 accent-[#0284C7]"
+                          className="mt-0.5 accent-[var(--cielo-oscuro)]"
                           checked={on}
                           onChange={() => toggleService(svc.service_id)}
                         />
-                        <span className="text-xs font-semibold text-[#0B2545] leading-snug">{svc.title}</span>
+                        <span className="text-xs font-semibold text-[var(--tinta)] leading-snug">{svc.title}</span>
                       </label>
                     );
                   })}
@@ -313,17 +359,16 @@ export default function CochabambaMap({
                       ))}
                     </ul>
                   ))}
-              </div>
+              </details>
             ) : null}
           </>
         ) : (
           <div className="w-full h-full relative flex items-center justify-center p-4 select-none">
-            <span className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold">
-              Mapa municipal sin conexión a internet
-            </span>
+            <p role="status" className="text-center text-sm text-white">Los límites de distritos necesitan conexión a internet.</p>
           </div>
         )}
       </div>
+
       {geoStatus ? <p className="sr-only">{geoStatus}</p> : null}
     </div>
   );

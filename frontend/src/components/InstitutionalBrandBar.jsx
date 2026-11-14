@@ -1,27 +1,43 @@
 import React from "react";
+import { EtiquetaLogo } from "./ui/TarpuyBaseComponents.jsx";
+
+/**
+ * TARPUY NASA COCHABAMBA — LOGOS INSTITUCIONALES EN ETIQUETA CREMA (FASE 2)
+ * =========================================================================
+ * Conserva exactamente los dos logos ("NASA International Space Apps Challenge"
+ * y "Alcaldía de Cochabamba") con sus proporciones y colores originales,
+ * siempre juntos, dentro de su etiqueta crema (--tarjeta) con borde (--tinta)
+ * y esquinas redondeadas, visibles también al imprimir.
+ */
 
 export default function InstitutionalBrandBar({ variant = "header" }) {
   if (variant === "footer") {
     return (
-      <footer className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center justify-center gap-4">
+      <footer className="tarpuy-card-physical p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <EtiquetaLogo>
           <img
             src="/logos/nasa-space-apps.png"
             alt="NASA International Space Apps Challenge"
-            className="h-12 w-auto object-contain rounded-lg bg-white p-1 border border-slate-200"
+            className="h-12 w-auto object-contain"
+          />
+          <span
+            className="h-8 w-0.5"
+            style={{ backgroundColor: "var(--piedra)" }}
+            aria-hidden="true"
           />
           <img
             src="/logos/alcaldia-cochabamba-escudo.jpg"
             alt="Alcaldía de Cochabamba"
-            className="h-12 w-auto object-contain rounded-lg bg-white p-1 border border-slate-200"
+            className="h-12 w-auto object-contain"
           />
-        </div>
-        <div className="text-center md:text-right text-xs text-slate-600 space-y-0.5">
-          <p className="font-bold text-slate-800">
-            NASA International Space Apps Challenge • Alcaldía de Cochabamba (GAMC)
+        </EtiquetaLogo>
+
+        <div className="text-center md:text-right space-y-0.5">
+          <p className="font-extrabold" style={{ color: "var(--tinta)", fontSize: "var(--font-size-body-min)" }}>
+            NASA International Space Apps Challenge · Alcaldía de Cochabamba
           </p>
-          <p className="text-[11px] text-slate-500">
-            Datos Abiertos NASA Earth Observation • Gobierno Autónomo Municipal de Cochabamba
+          <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+            Datos Abiertos NASA Earth Observation · Gobierno Autónomo Municipal de Cochabamba
           </p>
         </div>
       </footer>
@@ -29,23 +45,22 @@ export default function InstitutionalBrandBar({ variant = "header" }) {
   }
 
   return (
-    <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-2xl shadow-sm border border-emerald-200 shrink-0">
+    <EtiquetaLogo>
       <img
         src="/logos/nasa-space-apps.png"
         alt="NASA International Space Apps Challenge"
         className="h-9 sm:h-10 w-auto object-contain"
       />
-      <div className="h-7 w-px bg-slate-200" aria-hidden="true" />
-      <img
-        src="/logos/alcaldia-cochabamba-celeste.png"
-        alt="Alcaldía de Cochabamba"
-        className="h-9 sm:h-10 w-9 sm:w-10 object-cover rounded-lg"
+      <span
+        className="h-7 w-0.5"
+        style={{ backgroundColor: "var(--piedra)" }}
+        aria-hidden="true"
       />
       <img
         src="/logos/alcaldia-cochabamba-escudo.jpg"
-        alt="Escudo Alcaldía de Cochabamba"
-        className="h-9 sm:h-10 w-auto object-contain rounded"
+        alt="Alcaldía de Cochabamba"
+        className="h-9 sm:h-10 w-auto object-contain"
       />
-    </div>
+    </EtiquetaLogo>
   );
 }

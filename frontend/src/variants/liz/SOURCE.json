@@ -1,0 +1,27 @@
+{
+  "branch": "origin/Liz",
+  "commit": "5b5e98b532bc983fe54fcf9673d629095ee60d63",
+  "files": [
+    "components/ProducerMode.jsx",
+    "components/alerts/DayForecastModal.jsx",
+    "components/alerts/EarlyWarningBanner.jsx",
+    "components/alerts/WeatherPictograms.jsx",
+    "components/illustrations/TarpuyIllustrations.jsx",
+    "components/personality/ElementosContextualesFase1C.jsx",
+    "components/personality/PatronesYSellos.jsx",
+    "components/personality/PersonajeGuia.jsx",
+    "components/ui/FeedbackSystem.jsx",
+    "components/ui/TarpuyBaseComponents.jsx",
+    "data/guiaVozYTono.js",
+    "data/saberesDelDia.js",
+    "features/producer/CropCalendarBar.jsx",
+    "features/producer/FarmPictograms.jsx",
+    "features/producer/PrioritySelectorGrid.jsx",
+    "features/producer/RotationCard.jsx",
+    "features/producer/calendarHelpers.js",
+    "services/narration.js",
+    "styles/tokens.css",
+    "utils/quechuaI18n.js"
+  ],
+  "note": "Original branch files kept unchanged. Shared live API data and current speech callbacks supplied by App."
+}

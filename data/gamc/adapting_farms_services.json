@@ -14,32 +14,25 @@
       "bounds": {
         "south": -17.52,
         "west": -66.36,
-        "north": -17.30,
+        "north": -17.3,
         "east": -65.92
       },
       "legend_classes": [
-        { "id": "crecimiento", "label": "Periurbanos en crecimiento", "color": "#7CB342" },
-        { "id": "consolidados", "label": "Periurbanos consolidados", "color": "#E57373" },
-        { "id": "otros", "label": "otros", "color": "#9E9E9E" }
-      ]
-    },
-    {
-      "id": "drenaje_e_influencia",
-      "service_id": "d4cea6e3-fc7f-482a-94ad-bd377df78886",
-      "title": "Drenaje e Influencia",
-      "short_title": "Drenaje",
-      "description": "Red de drenaje e influencia hídrica municipal (atributos: Tipo y Clasificación: Princ. Tributarios, Quebradas).",
-      "layers": "",
-      "enabled_by_default": true,
-      "bounds": {
-        "south": -17.53119,
-        "west": -66.280703,
-        "north": -17.257306,
-        "east": -66.06952
-      },
-      "legend_classes": [
-        { "id": "tributarios", "label": "Princ. Tributarios", "color": "#0288D1" },
-        { "id": "quebradas", "label": "Quebradas", "color": "#4FC3F7" }
+        {
+          "id": "crecimiento",
+          "label": "Periurbanos en crecimiento",
+          "color": "#7CB342"
+        },
+        {
+          "id": "consolidados",
+          "label": "Periurbanos consolidados",
+          "color": "#E57373"
+        },
+        {
+          "id": "otros",
+          "label": "otros",
+          "color": "#9E9E9E"
+        }
       ]
     },
     {
@@ -58,7 +51,38 @@
         "east": -66.06952
       },
       "legend_classes": [
-        { "id": "distrito", "label": "Límite de distrito", "color": "#7E57C2" }
+        {
+          "id": "distrito",
+          "label": "Límite de distrito",
+          "color": "#7E57C2"
+        }
+      ]
+    },
+    {
+      "id": "drenaje_e_influencia",
+      "service_id": "d4cea6e3-fc7f-482a-94ad-bd377df78886",
+      "title": "Drenaje e Influencia",
+      "short_title": "Drenaje",
+      "description": "Red de drenaje e influencia hídrica municipal (atributos: Tipo y Clasificación: Princ. Tributarios, Quebradas).",
+      "layers": "",
+      "enabled_by_default": true,
+      "bounds": {
+        "south": -17.53119,
+        "west": -66.280703,
+        "north": -17.257306,
+        "east": -66.06952
+      },
+      "legend_classes": [
+        {
+          "id": "tributarios",
+          "label": "Princ. Tributarios",
+          "color": "#0288D1"
+        },
+        {
+          "id": "quebradas",
+          "label": "Quebradas",
+          "color": "#4FC3F7"
+        }
       ]
     }
   ]
