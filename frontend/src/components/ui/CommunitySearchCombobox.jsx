@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect, useId } from "react";
 import { Search, MapPin, ChevronDown, Check, X } from "lucide-react";
-import { searchCommunities, searchDistricts } from "../../utils/geoUtils.js";
+import { searchDistricts } from "../../utils/geoUtils.js";
 import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 
 const REGION_STYLE = {
-  "Valle Alto": "bg-sky-100 text-sky-900",
-  "Zona Alta": "bg-indigo-100 text-indigo-900",
-  "Cono Sur": "bg-amber-100 text-amber-900",
-  Cercado: "bg-violet-100 text-violet-900",
+  "Tunari": "bg-emerald-100 text-emerald-900",
+  "Molle": "bg-indigo-100 text-indigo-900",
+  "Alejo Calatayud": "bg-amber-100 text-amber-900",
+  "Valle Hermoso": "bg-sky-100 text-sky-900",
+  "Itocta": "bg-purple-100 text-purple-900",
+  "Adela Zamudio": "bg-rose-100 text-rose-900",
+  "Tamborada": "bg-orange-100 text-orange-900",
 };
 
 export default function CommunitySearchCombobox({
@@ -15,7 +18,7 @@ export default function CommunitySearchCombobox({
   selectedCommunityName = "",
   onSelectCommunity,
   variant = "sidebar",
-  placeholder = "Buscar comunidad o pueblo...",
+  placeholder = "Buscar distrito (ej. Distrito 9, Itocta)...",
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -25,10 +28,7 @@ export default function CommunitySearchCombobox({
   const listId = useId();
 
   const districts = useGamcDistricts();
-  const results = [
-    ...searchDistricts(districts, open ? query : ""),
-    ...searchCommunities(open ? query : ""),
-  ];
+  const results = searchDistricts(districts, open ? query : "");
   const isSidebar = variant === "sidebar";
 
   useEffect(() => {
@@ -135,24 +135,15 @@ export default function CommunitySearchCombobox({
               const selected =
                 item.name === selectedCommunityName || (!selectedCommunityName && item.zoneId === selectedZoneId);
               const highlighted = idx === highlightIdx;
-              const groupLabel = item.isDistrict
-                ? idx === 0 && "Distritos de Cochabamba"
-                : (idx === 0 || results[idx - 1].isDistrict) && "Comunidades";
               return (
-                <React.Fragment key={item.id}>
-                  {groupLabel ? (
-                    <li role="presentation" className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                      {groupLabel}
-                    </li>
-                  ) : null}
-                <li role="option" aria-selected={selected}>
+                <li key={item.id} role="option" aria-selected={selected}>
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => choose(item)}
                     className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 text-xs transition cursor-pointer ${
                       selected
-                        ? "bg-sky-50 text-[#0B2545] font-bold"
+                        ? "bg-purple-50 text-[#0B2545] font-bold"
                         : highlighted
                         ? "bg-slate-100 text-[#0B2545]"
                         : "hover:bg-slate-50 text-slate-800"
@@ -160,21 +151,19 @@ export default function CommunitySearchCombobox({
                   >
                     <span className="flex items-center gap-1.5 min-w-0">
                       {selected ? (
-                        <Check className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-[#7E57C2] shrink-0" />
                       ) : (
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       )}
-                      <span className="truncate">{item.name}</span>
+                      <span className="truncate font-semibold">{item.name}</span>
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${REGION_STYLE[item.region] || "bg-slate-100 text-slate-700"}`}>
-                        {item.region}
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${REGION_STYLE[item.comuna] || "bg-purple-100 text-purple-800"}`}>
+                        Comuna {item.comuna}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{item.alt}</span>
                     </span>
                   </button>
                 </li>
-                </React.Fragment>
               );
             })
           )}
