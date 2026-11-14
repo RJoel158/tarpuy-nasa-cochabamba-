@@ -9,7 +9,7 @@ def _load_dotenv(path: Path) -> None:
     """Load KEY=VALUE pairs from .env without overriding existing process env."""
     if not path.is_file():
         return
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    for raw in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -20,6 +20,7 @@ def _load_dotenv(path: Path) -> None:
             os.environ[key] = value
 
 
+_load_dotenv(Path(__file__).resolve().parent / ".env")
 _load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
