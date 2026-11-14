@@ -384,6 +384,25 @@
 }
 
 /* =====================================================================
+ * RESPETO A PREFERS-REDUCED-MOTION (Cero animaciones que distraigan)
+ * ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .tarpuy-speaker-wave-1,
+  .tarpuy-speaker-wave-2 {
+    animation: none !important;
+  }
+}
+
+/* =====================================================================
  * 8. IMPRESIÓN (@media print): Blanco y negro con bordes y patrones
  * ===================================================================== */
 @media print {

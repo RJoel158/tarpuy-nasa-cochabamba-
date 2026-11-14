@@ -10,6 +10,33 @@ import {
   CATALOGO_ILUSTRACIONES,
   IlustracionTarpuy,
 } from "../illustrations/TarpuyIllustrations.jsx";
+import {
+  PersonajeGuia,
+  GloboHabla,
+  GuiaConGlobo,
+  POSES_PERSONAJE_GUIA,
+} from "../personality/PersonajeGuia.jsx";
+import {
+  PatronPantalla,
+  CATALOGO_PATRONES_PANTALLA,
+  SelloCartilla,
+  CATALOGO_SELLOS_CARTILLA,
+} from "../personality/PatronesYSellos.jsx";
+import {
+  PaisajePorHora,
+  ZONAS_PAISAJE,
+  MOMENTOS_DIA,
+  MiChacra,
+  ETAPAS_MI_CHACRA,
+  CULTIVOS_MI_CHACRA,
+  TarjetaSaberDelDia,
+  BotonSonido,
+} from "../personality/ElementosContextualesFase1C.jsx";
+import {
+  PROPUESTAS_NOMBRE_PERSONAJE,
+  REGLAS_VOZ_Y_TONO,
+} from "../../data/guiaVozYTono.js";
+import { SABERES_DEL_DIA_EJEMPLO } from "../../data/saberesDelDia.js";
 
 /**
  * PÁGINA TEMPORAL DE PRUEBA — FASE 1 + FASE 1B (SISTEMA VISUAL Y PALETA COMPLETA)
@@ -91,6 +118,14 @@ export default function PaginaTemporalFase1({ onClosePreview }) {
   const [altavozSonando, setAltavozSonando] = useState(true);
   const [modoVista, setModoVista] = useState("facil"); // 'facil' | 'avanzado'
   const [contadorToques, setContadorToques] = useState(0);
+  const [nombreElegido, setNombreElegido] = useState(PROPUESTAS_NOMBRE_PERSONAJE[0].nombre);
+  const [zonaPaisaje, setZonaPaisaje] = useState("valle");
+  const [momentoPaisaje, setMomentoPaisaje] = useState("amanecer");
+  const [cultivoChacra, setCultivoChacra] = useState("papa");
+  const [etapaChacra, setEtapaChacra] = useState("brote");
+  const [indiceSaber, setIndiceSaber] = useState(0);
+  const [verQuechuaSaber, setVerQuechuaSaber] = useState(false);
+  const [sonidoActivo, setSonidoActivo] = useState(true);
 
   return (
     <div
@@ -493,6 +528,298 @@ export default function PaginaTemporalFase1({ onClosePreview }) {
               </span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <SeparadorAndino />
+
+      {/* =================================================================
+       * FASE 1C: PERSONALIDAD (Personaje Guía, Globo, Voz, Patrones, Sellos)
+       * ================================================================= */}
+      <section className="tarpuy-card-physical p-6 sm:p-8 space-y-6">
+        <div className="space-y-1">
+          <h2 className="tarpuy-subtitle">
+            7. Fase 1C (Parte 1) · Personaje Guía (8 Poses) y Globo de Habla
+          </h2>
+          <p className="tarpuy-body" style={{ color: "var(--tinta-suave)" }}>
+            Una vecina mayor de confianza que señala lo importante y acompaña con globos cortos. Elige entre los 3 nombres propuestos:
+          </p>
+        </div>
+
+        {/* Selector de los 3 nombres propuestos */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {PROPUESTAS_NOMBRE_PERSONAJE.map((propuesta) => {
+            const activo = nombreElegido === propuesta.nombre;
+            return (
+              <button
+                key={propuesta.id}
+                type="button"
+                onClick={() => setNombreElegido(propuesta.nombre)}
+                aria-pressed={activo}
+                className={`p-4 rounded-2xl text-left cursor-pointer transition-colors ${
+                  activo ? "tarpuy-btn-physical--pressed" : ""
+                }`}
+                style={{
+                  backgroundColor: activo ? "var(--dorado-suave)" : "var(--arena)",
+                  border: "var(--border-width-thick) solid var(--tinta)",
+                }}
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="font-extrabold text-xl">{propuesta.nombre}</span>
+                  {propuesta.requiereValidacionHablanteNativo && (
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs font-extrabold"
+                      style={{
+                        backgroundColor: "var(--ladrillo-suave)",
+                        color: "var(--ladrillo-oscuro)",
+                        border: "1.5px solid var(--tinta)",
+                      }}
+                    >
+                      Validar quechua nativo
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                  {propuesta.explicacion}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ejemplo activo de Guía + Globo de Habla */}
+        <GuiaConGlobo
+          pose="saludo"
+          nombre={nombreElegido}
+          tono="recomendado"
+          texto="Buen día. Hoy no hace falta regar; la tierra de tu parcela sigue húmeda."
+        />
+
+        {/* Catálogo de las 8 poses reutilizables */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
+          {POSES_PERSONAJE_GUIA.map((p) => (
+            <div
+              key={p.id}
+              className="p-4 rounded-2xl flex flex-col items-center text-center justify-between gap-3"
+              style={{
+                backgroundColor: "var(--arena)",
+                border: "var(--border-width-medium) solid var(--tinta)",
+              }}
+            >
+              <PersonajeGuia
+                pose={p.id}
+                nombre={nombreElegido}
+                mostrarEtiquetaNombre={true}
+                size={104}
+              />
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-lg">{p.nombre}</h3>
+                <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                  {p.funcion}
+                </p>
+              </div>
+              <GloboHabla
+                direccionCola="arriba"
+                tono={p.id === "alerta" ? "cuidado" : "normal"}
+                texto={p.fraseEjemplo}
+                className="w-full"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECCIÓN 8: VOZ Y TONO + PATRONES CON SENTIDO + SELLOS */}
+      <section className="tarpuy-card-physical p-6 sm:p-8 space-y-8">
+        <div className="space-y-4">
+          <h2 className="tarpuy-subtitle">
+            8. Guía de Voz y Tono (Como habla una vecina, nunca lenguaje de sistema)
+          </h2>
+          <div className="space-y-3">
+            {REGLAS_VOZ_Y_TONO.map((item) => (
+              <div
+                key={item.regla}
+                className="p-4 rounded-2xl space-y-2"
+                style={{
+                  backgroundColor: "var(--arena)",
+                  border: "var(--border-width-medium) solid var(--tinta)",
+                }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-extrabold">{item.regla}</span>
+                  <span
+                    className="px-2.5 py-0.5 rounded-full text-xs font-extrabold"
+                    style={{
+                      backgroundColor: "var(--ladrillo-suave)",
+                      color: "var(--ladrillo-oscuro)",
+                      border: "1.5px solid var(--tinta)",
+                    }}
+                  >
+                    Quechua: validar con hablante nativo
+                  </span>
+                </div>
+                <p className="text-sm font-bold" style={{ color: "var(--alerta-critico-oscuro)" }}>
+                  Evitar: «{item.mal}»
+                </p>
+                <p className="font-extrabold">
+                  Español cercano: «{item.bienEs}»
+                </p>
+                <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                  Quechua Cochabamba (propuesta): «{item.bienQu}»
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Patrones con sentido fijo por pantalla */}
+        <div className="space-y-4">
+          <h3 className="tarpuy-subtitle">
+            Patrones Andinos con Uso Fijo por Pantalla (Nunca sobre texto)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CATALOGO_PATRONES_PANTALLA.map((pat) => (
+              <div
+                key={pat.id}
+                className="p-4 rounded-2xl space-y-2"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  border: "var(--border-width-medium) solid var(--tinta)",
+                }}
+              >
+                <span className="font-extrabold block">{pat.nombre}</span>
+                <p className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+                  {pat.descripcion}
+                </p>
+                <PatronPantalla tipo={pat.id} mostrarEtiquetaUso={true} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sellos tipo cartilla */}
+        <div className="space-y-4">
+          <h3 className="tarpuy-subtitle">
+            Sellos de Cartilla en Ladrillo y Dorado (Sin puntos, niveles ni rankings)
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            {CATALOGO_SELLOS_CARTILLA.map((sello) => (
+              <SelloCartilla
+                key={sello.id}
+                texto={sello.texto}
+                subtitulo={sello.subtitulo}
+                color={sello.color}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN 9: PARTE 2 (COMPONENTES CON PROPS DE EJEMPLO Y TODO-FUNCIONALIDAD) */}
+      <section className="tarpuy-card-physical p-6 sm:p-8 space-y-8">
+        <div className="space-y-1">
+          <h2 className="tarpuy-subtitle">
+            9. Fase 1C (Parte 2) · Paisaje por Hora, Mi Chacra, Saber del Día y Botón Sonido
+          </h2>
+          <p className="tarpuy-body" style={{ color: "var(--tinta-suave)" }}>
+            Maquetados como componentes visuales con props de ejemplo y marcados con <code>TODO-FUNCIONALIDAD</code> para que el equipo los conecte.
+          </p>
+        </div>
+
+        {/* 6. Paisaje por hora y zona */}
+        <div className="space-y-4">
+          <h3 className="font-extrabold text-xl">
+            Paisaje por Hora y Zona (de noche incluye luna y escarcha)
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {ZONAS_PAISAJE.map((z) => (
+              <BotonGrande
+                key={z.id}
+                variante={zonaPaisaje === z.id ? "primario" : "secundario"}
+                texto={z.nombre}
+                onClick={() => setZonaPaisaje(z.id)}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {MOMENTOS_DIA.map((m) => (
+              <BotonGrande
+                key={m.id}
+                variante={momentoPaisaje === m.id ? "agua" : "secundario"}
+                texto={m.nombre}
+                onClick={() => setMomentoPaisaje(m.id)}
+              />
+            ))}
+          </div>
+          <PaisajePorHora momento={momentoPaisaje} zona={zonaPaisaje} />
+        </div>
+
+        {/* 7. Mi Chacra */}
+        <div className="space-y-4">
+          <h3 className="font-extrabold text-xl">
+            Mi Chacra (recibe <code>cultivo</code> y <code>etapa</code> por prop)
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {CULTIVOS_MI_CHACRA.map((c) => (
+              <BotonGrande
+                key={c.id}
+                variante={cultivoChacra === c.id ? "primario" : "secundario"}
+                ilustracionId={c.id}
+                texto={c.nombre}
+                onClick={() => setCultivoChacra(c.id)}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ETAPAS_MI_CHACRA.map((e) => (
+              <BotonGrande
+                key={e.id}
+                variante={etapaChacra === e.id ? "agua" : "secundario"}
+                ilustracionId={e.dibujoId}
+                texto={e.nombre}
+                onClick={() => setEtapaChacra(e.id)}
+              />
+            ))}
+          </div>
+          <MiChacra cultivo={cultivoChacra} etapa={etapaChacra} />
+        </div>
+
+        {/* 8. Saber del día + 9. Botón Sonido */}
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-extrabold text-xl">
+              Saber del Día y Botón de Sonido
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              <BotonGrande
+                variante="secundario"
+                texto="Otro consejo"
+                onClick={() =>
+                  setIndiceSaber((i) => (i + 1) % SABERES_DEL_DIA_EJEMPLO.length)
+                }
+              />
+              <BotonGrande
+                variante="secundario"
+                texto={verQuechuaSaber ? "Ver en Español" : "Ver en Quechua"}
+                onClick={() => setVerQuechuaSaber((q) => !q)}
+              />
+              <BotonSonido
+                activo={sonidoActivo}
+                onToggle={() => setSonidoActivo((s) => !s)}
+              />
+            </div>
+          </div>
+
+          <TarjetaSaberDelDia
+            titulo={SABERES_DEL_DIA_EJEMPLO[indiceSaber].tituloEs}
+            texto={SABERES_DEL_DIA_EJEMPLO[indiceSaber].textoEs}
+            textoQuechua={SABERES_DEL_DIA_EJEMPLO[indiceSaber].textoQu}
+            dibujoId={SABERES_DEL_DIA_EJEMPLO[indiceSaber].dibujoId}
+            pendienteValidacionComunidad={
+              SABERES_DEL_DIA_EJEMPLO[indiceSaber].pendienteValidacionComunidad
+            }
+            mostrarQuechua={verQuechuaSaber}
+          />
         </div>
       </section>
     </div>
