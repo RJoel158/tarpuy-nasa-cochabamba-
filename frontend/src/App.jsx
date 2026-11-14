@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LocateFixed } from "lucide-react";
+import { locateDevice } from "./services/locationService.js";
 import Navbar from "./components/layout/Navbar.jsx";
+const LizComparison = React.lazy(() => import("./components/LizComparison.jsx"));
+import { IlustracionTarpuy } from "./components/illustrations/TarpuyIllustrations.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
-import FarmerOverview from "./features/producer/FarmerOverview.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
-import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
+import { FeedbackHost, AlertsModal } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone } from "./utils/geoUtils.js";
 import {
   fetchZones,
@@ -24,7 +26,9 @@ import { tr } from "./utils/quechuaI18n.js";
 export default function App() {
   const initialSnapRef = useRef(loadDeviceSnapshotSync());
   const initialSnap = initialSnapRef.current;
-  const [activeView, setActiveView] = useState("clima");
+  const [activeView, setActiveView] = useState("mapa");
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [appMode, setAppMode] = useState("facil");
   const isAdvanced = appMode === "avanzado";
   const [zones, setZones] = useState([]);
@@ -46,6 +50,8 @@ export default function App() {
   );
   const [voiceLang, setVoiceLang] = useState("es");
   const [audioLoading, setAudioLoading] = useState(false);
+  const [gpsNotice, setGpsNotice] = useState(null);
+  const gpsAttemptRef = useRef(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
@@ -223,40 +229,44 @@ export default function App() {
   };
 
   const handleSelectCommunity = (comm) => {
+    gpsAttemptRef.current += 1;
+    setGpsNotice(null);
     setCommunityName(comm.name);
     setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name });
     applyZoneChange(comm.zoneId);
-    simulateProcess(`Ubicando comunidad: ${comm.name}...`, 460, () => {
-      pushToast(`Comunidad: ${comm.name}`, `${comm.region} · ${comm.alt}`, "success");
-    });
   };
 
-  const handlePickMapPoint = (lat, lon, source = "mapa") => {
+  const handlePickMapPoint = (lat, lon, source = "mapa", accuracy = null) => {
+    gpsAttemptRef.current += 1;
+    setGpsNotice(null);
     const nearest = findNearestZone(lat, lon);
-    setCommunityName(nearest.zone.name);
-    setUserPoint({ lat, lon, source });
+    setCommunityName(source.startsWith("Distrito ") ? source.replace(" · centro aproximado", "") : "Punto seleccionado");
+    setUserPoint({ lat, lon, source, accuracy });
     applyZoneChange(nearest.zone.id);
-    simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
-      pushToast(`Zona: ${nearest.zone.name}`, `A ${nearest.distanceKm} km (${source})`, "success");
-    });
+    setActiveProcess(null);
   };
 
   const handleDetectGps = () => {
+    const attempt = ++gpsAttemptRef.current;
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setActiveView("mapa");
-      pushToast("Elige en el mapa", "Toca tu comunidad para ubicarte", "warning");
+      setGpsNotice({ title: "GPS no disponible", detail: "Puedes tocar tu parcela en el mapa o elegir tu distrito.", loading: false });
       return;
     }
-    setActiveProcess({ label: "Buscando tu GPS...", pct: 35 });
-    navigator.geolocation.getCurrentPosition(
-      (pos) => handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS"),
-      () => {
-        setActiveProcess(null);
-        setActiveView("mapa");
-        pushToast("GPS no disponible", "Toca tu comunidad en el mapa", "warning");
-      },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
-    );
+    setGpsNotice({ title: "Buscando tu ubicación", detail: "Permite el acceso a tu ubicación si el navegador te lo pide.", loading: true });
+    locateDevice(navigator.geolocation, {
+      isCurrent:()=>attempt === gpsAttemptRef.current,
+      onRetry:(accuracy)=>setGpsNotice({title:accuracy ? "Mejorando la precisión" : "Reintentando ubicación",detail:accuracy ? `La primera lectura tiene un margen de ±${Math.round(accuracy)} metros. Buscando una mejor.` : "El dispositivo no respondió. Intentando de nuevo sin usar una ubicación antigua.",loading:true}),
+    }).then((pos)=>{
+      if (!pos || attempt !== gpsAttemptRef.current) return;
+      setActiveView("mapa");
+      handlePickMapPoint(pos.coords.latitude,pos.coords.longitude,"GPS",pos.coords.accuracy);
+      if(pos.coords.accuracy > 200) setGpsNotice({title:"Ubicación aproximada",detail:`El dispositivo informa ±${Math.round(pos.coords.accuracy)} metros de precisión. El círculo azul muestra ese margen. Toca el mapa para marcar tu parcela con más precisión.`,loading:false});
+    }).catch((error)=>{
+      if(attempt !== gpsAttemptRef.current) return;
+      setActiveView("mapa");
+      setGpsNotice({title:error.code===1 ? "Activa el permiso de ubicación" : "No pudimos ubicarte",detail:error.code===1 ? "Permite la ubicación en tu navegador o elige tu distrito en el mapa." : "No obtuvimos una ubicación válida. Intenta otra vez o toca tu parcela en el mapa.",loading:false,retry:error.code!==1});
+    });
   };
 
   const handleChangeCrop = (id) => {
@@ -315,8 +325,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
-      <Navbar
+    <div className={`tarpuy-shell ${activeView === "mapa" && !isAdvanced ? "flow-map-stage" : ""} min-h-screen bg-[var(--papel)] text-slate-900 flex flex-col lg:flex-row`}>
+      {locationConfirmed && (activeView !== "mapa" || isAdvanced) && <Navbar
+        compact={!isAdvanced}
         activeView={activeView}
         onChangeView={setActiveView}
         appMode={appMode}
@@ -338,19 +349,19 @@ export default function App() {
         cachedCount={cachedCount}
         dbStats={dbStats}
         syncStatus={syncStatus}
-      />
+      />}
 
       <div className="flex-1 min-w-0 flex flex-col justify-between pb-28 lg:pb-8">
         <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
-          {!isAdvanced && activeView === "clima" && <FarmerOverview
-            community={communityName} zone={currentZone}
-            crop={crops.find((crop) => crop.crop_id === cropId)} cropId={cropId}
-            lang={voiceLang} offline={forceOffline || !isOnline} saved={dbStats}
-            onPlant={() => setActiveView("siembra")} onMap={() => setActiveView("mapa")}
-            speaking={isSpeaking} onSave={handleDownloadBundle} onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
-          />}
+          {!isAdvanced && activeView !== "mapa" && <div className="flex flex-wrap justify-between items-center gap-3 border-b border-slate-200 pb-3"><strong className="text-lg">Tarpuy</strong><div className="flex gap-3"><button className="flow-link" onClick={()=>handleChangeVoiceLang(voiceLang === "qu" ? "es" : "qu")}>{voiceLang === "qu" ? "Qhichwa" : "Castellano"}</button>{activeView !== "clima" && <button className="flow-link" onClick={()=>setNotificationsOpen(true)}>Avisos ({alertBulletin?.active_alerts?.length || 0})</button>}</div></div>}
           {loading && !recData ? (
             <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
+          ) : !isAdvanced && ["clima","siembra"].includes(activeView) ? (
+            <React.Suspense fallback={<p role="status">Cargando la propuesta de Liz…</p>}>
+              <LizComparison screen={activeView}
+                weatherProps={{bulletin:alertBulletin?.zone_id === zoneId ? alertBulletin : null,zoneName:communityName,onSpeak:handleSpeak,activeAudioKey,voiceLang,isAdvanced:false,onOpenMap:()=>setActiveView("mapa"),onDetectGps:handleDetectGps}}
+                sowingProps={{zone:currentZone,activeZoneId:zoneId,crops,cropId,onChangeCrop:handleChangeCrop,priorities,onChangePriorities:handleChangePriorities,irrigation,onChangeIrrigation:handleChangeIrrigation,equipment,onChangeEquipment:handleChangeEquipment,strategies:recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : [],onSpeak:handleSpeak,activeAudioKey,isCalculating:isCalculating || loading,isAdvanced:false,lang:voiceLang,onDetectGps:handleDetectGps,onOpenMap:()=>setActiveView("mapa")}}/>
+            </React.Suspense>
           ) : activeView === "clima" ? (
             <div className="space-y-6">
               <EarlyWarningBanner
@@ -364,7 +375,7 @@ export default function App() {
                 onDetectGps={handleDetectGps}
               />
               <div className="flex justify-end">
-                <button type="button" onClick={() => setActiveView("siembra")} className="w-full sm:w-auto min-h-16 inline-flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
+                <button type="button" onClick={() => setActiveView("siembra")} className="w-full sm:w-auto min-h-16 inline-flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[var(--cielo-oscuro)] hover:bg-[var(--cielo-presionado)] text-white text-sm font-bold cursor-pointer">
                   <span>{tr(voiceLang, "seeWhatToPlantIn")} {communityName || currentZone?.name || ""}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -393,12 +404,21 @@ export default function App() {
               onOpenMap={() => setActiveView("mapa")}
             />
           ) : activeView === "mapa" ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
+              {!isAdvanced && <header className="flow-map-search flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0"><IlustracionTarpuy id="mano_siembra" size={36}/><div><h1 className="font-extrabold text-2xl leading-none">Tarpuy</h1><p className="text-xs text-slate-600 mt-1">Tu chacra empieza aquí</p></div></div>
+                <button type="button" onClick={handleDetectGps} className="min-h-12 px-3 rounded-2xl bg-[var(--hoja-oscura)] text-white font-bold inline-flex items-center gap-2 shrink-0"><LocateFixed className="w-5 h-5" aria-hidden="true"/>Ubícame</button>
+              </header>}
+              {isAdvanced &&
               <div className="border-b border-stone-200 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">{tr(voiceLang, "mapSubtitle")}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cielo-oscuro)]">{tr(voiceLang, "mapSubtitle")}</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">{tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}</h2>
-              </div>
+              </div>}
               <CochabambaMap
+                guided={!isAdvanced}
+                onDistrictResolved={(district)=>setCommunityName(district ? `Distrito ${district.code.replace(/^D/, "")} · ${district.comuna}` : "Punto seleccionado")}
+                onContinue={()=>{processTimersRef.current.forEach(clearTimeout);setActiveProcess(null);setToasts([]);setLocationConfirmed(true);setActiveView("clima");}}
+                onChooseDistrict={(district)=>handlePickMapPoint(district.center.lat,district.center.lon,`${district.name} · centro aproximado`)}
                 zones={zones}
                 activeZoneId={zoneId}
                 onSelectZone={handleSelectZone}
@@ -412,6 +432,7 @@ export default function App() {
                 tall={true}
                 isAdvanced={isAdvanced}
               />
+
               {isAdvanced && currentZone?.soil_context ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
                   <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
@@ -425,12 +446,12 @@ export default function App() {
           )}
         </main>
 
-        <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4">
+        <footer className={`${!isAdvanced ? "hidden" : ""} max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4`}>
           <InstitutionalBrandBar variant="footer" />
         </footer>
       </div>
       {audioLoading && (
-        <div className="fixed bottom-20 lg:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 rounded-xl bg-[#0B2545] text-white p-4 shadow-lg flex items-center gap-3">
+        <div className="fixed bottom-20 lg:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 rounded-xl bg-[var(--tinta)] text-white p-4 shadow-lg flex items-center gap-3">
           <span aria-hidden="true" className="h-5 w-5 shrink-0 rounded-full border-2 border-white/30 border-t-white animate-spin motion-reduce:animate-none" />
           <div role="status" aria-live="polite" className="flex-1 text-sm">
             <p className="font-bold">Preparando audio completo…</p>
@@ -439,11 +460,20 @@ export default function App() {
           <button type="button" onClick={handleStopAudio} className="min-h-11 px-3 rounded-lg border border-white/40 text-sm">Cancelar</button>
         </div>
       )}
-      {!audioLoading && <FeedbackHost
+      {gpsNotice && <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 bg-[var(--tinta)]/25">
+        <section role="status" aria-live="polite" className="w-full max-w-md rounded-3xl border-2 border-[var(--tinta)] bg-[var(--tarjeta)] p-6 sm:p-8 shadow-xl text-center space-y-4">
+          <LocateFixed className={`w-12 h-12 mx-auto text-[var(--hoja-oscura)] ${gpsNotice.loading ? "animate-pulse motion-reduce:animate-none" : ""}`} aria-hidden="true" />
+          <h2 className="text-2xl font-extrabold">{gpsNotice.title}</h2>
+          <p className="text-lg text-slate-600">{gpsNotice.detail}</p>
+          <>{gpsNotice.retry && <button type="button" className="flow-primary w-full" onClick={handleDetectGps}>Reintentar</button>}<button type="button" className="flow-secondary w-full" onClick={()=>{gpsAttemptRef.current+=1;setGpsNotice(null);}}>{gpsNotice.loading ? "Cancelar" : "Ver en el mapa"}</button></>
+        </section>
+      </div>}
+      {!audioLoading && !gpsNotice && <FeedbackHost
         activeProcess={activeProcess}
         toasts={toasts}
         onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
       />}
+      <AlertsModal open={notificationsOpen} onClose={()=>setNotificationsOpen(false)} alerts={alertBulletin?.zone_id === zoneId ? alertBulletin.active_alerts || [] : []} zoneName={communityName} lang={voiceLang}/>
     </div>
   );
 }

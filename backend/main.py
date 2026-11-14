@@ -162,6 +162,10 @@ def create_app(
     def gamc_services() -> dict[str, Any]:
         return gamc_proxy.list_services()
 
+    @app.get("/api/gamc/districts")
+    def gamc_districts() -> dict[str, Any]:
+        return gamc_proxy.list_districts()
+
     @app.get("/api/gamc/wms")
     def gamc_wms(request: Request) -> Response:
         query = dict(request.query_params)

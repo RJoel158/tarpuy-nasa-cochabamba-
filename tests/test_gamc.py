@@ -156,3 +156,20 @@ def test_gamc_wms_rejects_oversized_width():
         },
     )
     assert res.status_code == 400
+def test_district_catalog_matches_municipal_layer():
+    from fastapi.testclient import TestClient
+    from backend.main import app
+
+    client = TestClient(app)
+    response = client.get("/api/gamc/districts")
+    assert response.status_code == 200
+    districts = response.json()["districts"]
+    assert len(districts) == 15
+    assert len({d["code"] for d in districts}) == len(districts)
+    assert len({d["color"] for d in districts}) == len(districts)
+    for district in districts:
+        bounds, center = district["bounds"], district["center"]
+        assert bounds["south"] <= center["lat"] <= bounds["north"]
+        assert bounds["west"] <= center["lon"] <= bounds["east"]
+    services = client.get("/api/gamc/services").json()["services"]
+    assert any(s["id"] == "limite_distritos" and s["simple_mode"] for s in services)

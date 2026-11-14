@@ -21,7 +21,8 @@ SAFE_GRADIO_PATH_RE = re.compile(r"^/tmp/gradio/[a-zA-Z0-9_./-]+_(?:quh|spa)\.wa
 
 def clean_quechua_for_tts(text: str) -> str:
     """Normalize punctuation and symbols for South Bolivian Quechua VITS vocabulary."""
-    cleaned = text.replace("->", ", chanta ").replace("—", ", ").replace("¡", "").replace("!", ".")
+    cleaned = text.replace("’", "'").replace("‘", "'").replace("ʼ", "'")
+    cleaned = cleaned.replace("->", ", chanta ").replace("—", ", ").replace("¡", "").replace("!", ".")
     return re.sub(r"[\s]+", " ", cleaned).strip()[:480]
 
 

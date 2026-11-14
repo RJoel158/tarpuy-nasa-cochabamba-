@@ -39,8 +39,8 @@ const BADGE_STYLES = {
   soil: "bg-emerald-50 text-emerald-950 border-emerald-200",
   warning: "bg-amber-50 text-amber-950 border-amber-200",
   danger: "bg-rose-50 text-rose-950 border-rose-200",
-  nasa: "bg-[#0B3D91]/10 text-[#0B3D91] border-[#0B3D91]/30",
-  gamc: "bg-[#009FE3]/10 text-[#007cb3] border-[#009FE3]/30",
+  nasa: "bg-[var(--cielo-oscuro)]/10 text-[var(--cielo-oscuro)] border-[var(--cielo-oscuro)]/30",
+  gamc: "bg-[var(--hoja-oscura)]/10 text-[var(--hoja-oscura)] border-[var(--hoja-oscura)]/30",
 };
 
 export function Badge({ children, variant = "default", className = "" }) {

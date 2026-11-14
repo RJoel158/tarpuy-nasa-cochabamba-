@@ -22,6 +22,25 @@
         { "id": "consolidados", "label": "Periurbanos consolidados", "color": "#E57373" },
         { "id": "otros", "label": "otros", "color": "#9E9E9E" }
       ]
+    },
+    {
+      "id": "limite_distritos",
+      "service_id": "7eb13092-bf0e-493b-aae6-03c43eedda2c",
+      "title": "Límite de Distritos",
+      "short_title": "Distritos",
+      "description": "Límites de los distritos municipales de Cochabamba (atributos: Distrito y Comuna).",
+      "layers": "",
+      "enabled_by_default": true,
+      "simple_mode": true,
+      "bounds": {
+        "south": -17.53119,
+        "west": -66.280703,
+        "north": -17.257306,
+        "east": -66.06952
+      },
+      "legend_classes": [
+        { "id": "distrito", "label": "Límite de distrito", "color": "#7E57C2" }
+      ]
     }
   ]
 }

@@ -1,0 +1,5 @@
+/* Keep Liz's original files intact; retain the contextual alert entry only. */
+.liz-preview[data-screen="clima"] button[aria-label="Ver avisos"],
+.liz-preview[data-screen="clima"] button[aria-label="Willaykunata qhaway"] {
+  display: none;
+}

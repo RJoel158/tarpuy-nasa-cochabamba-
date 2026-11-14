@@ -7,12 +7,12 @@ export const MONTH_FULL = [
 
 const SHORT_NAMES = {
   maiz_valle: { es: "Maíz", qu: "Sara" },
-  papa_huaycha: { es: "Papa", qu: "Akshu" },
-  avena_vicia: { es: "Avena", qu: "Avena" },
+  papa_huaycha: { es: "Papa", qu: "Papa" },
+  avena_vicia: { es: "Avena", qu: "Avenawan wikawan" },
   mulch_residue: { es: "Chala", qu: "Chhalla" },
   bare_soil_fallow: { es: "Pelada", qu: "Q'ara" },
   alfalfa: { es: "Alfalfa", qu: "Alfalfa" },
-  haba: { es: "Haba", qu: "Jawasa" },
+  haba: { es: "Haba", qu: "Hawas" },
   tarwi: { es: "Tarwi", qu: "Tarwi" },
   quinua: { es: "Quinua", qu: "Kinwa" },
   cebada: { es: "Cebada", qu: "Siwara" },

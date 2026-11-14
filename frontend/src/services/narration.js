@@ -9,7 +9,7 @@ const dateLabel = (value) => {
 
 export function buildStrategyNarration(strategy = {}, lang = "es", indicators = []) {
   const sequence = strategy.crop_sequence || [];
-  if (!sequence.length) return lang === "qu" ? "Mana tarpuy yachay kanchu." : "Falta el calendario de esta alternativa.";
+  if (!sequence.length) return lang === "qu" ? "Mana tarpuy willakuy kanchu." : "Falta el calendario de esta alternativa.";
   const groups = [];
   for (let month = 0; month < 12; month++) {
     const cell = resolveMonthCell(month, sequence, indicators, lang);
@@ -35,7 +35,7 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
     // Quechua templates are drafts pending review by a Cochabamba speaker.
     const quRange = group.start === group.end ? `${MONTH_FULL[group.start]} killapi`
       : `${MONTH_FULL[group.start]} killamanta ${MONTH_FULL[group.end]} killakama`;
-    return lang === "qu" ? `${quRange}, ${group.shortWord}. ${reason}`.trim()
+    return lang === "qu" ? `${quRange}, ${group.shortWord}${reason ? `, ${reason.charAt(0).toLowerCase()}${reason.slice(1)}` : "."}`.trim()
       : `${range}, ${name}. ${reason}`.trim();
   });
   const overlapping = Array.from({ length: 12 }, (_, i) => i + 1).some((month) => sequence.filter((crop) =>
@@ -43,8 +43,8 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
   ).length > 1);
   if (lang === "qu") return [
     ...stages,
-    ...(overlapping ? ["Wakin tarpuy killakuna tinkunakunku. Manaraq tarpuspa, yachaqwan tapurikuy."] : []),
-    "Manaraq tarpuspa, allpata, yakuta qhaway.",
+    ...(overlapping ? ["Wakin tarpuy killakuna tinkunakunku. Yachaqwan tapurikuy."] : []),
+    "Manaraq tarpuspa, allpata yakuta qhaway.",
   ].join(" ");
   return [
     ...stages,

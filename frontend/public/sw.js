@@ -1,5 +1,10 @@
-const CACHE_NAME = "tarpuy-nasa-v6";
+const CACHE_NAME = "tarpuy-nasa-v7";
 const STATIC_ASSETS = [
+  "/fonts/atkinson-hyperlegible-0.ttf",
+  "/fonts/atkinson-hyperlegible-1.ttf",
+  "/fonts/nunito-0.ttf",
+  "/fonts/nunito-1.ttf",
+  "/fonts/nunito-2.ttf",
   "/",
   "/index.html",
   "/manifest.json",
