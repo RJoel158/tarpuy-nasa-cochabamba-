@@ -726,68 +726,137 @@ export default function TechnicalMode({
               </div>
             ) : null}
 
-            {/* Tabla mensual de 12 meses (visible al activar showTable o siempre al imprimir) */}
+            {/* Tabla mensual de 12 meses: en móvil como lista de tarjetas simples (1 por mes), en escritorio como tabla */}
             {showTable ? (
               <div
-                className="overflow-x-auto pt-4"
-                style={{ borderTop: "var(--tarpuy-border-thin) solid var(--tinta)" }}
+                className="pt-4 space-y-4"
+                style={{ borderTop: "1.5px solid var(--tinta)" }}
               >
-                <table
-                  className="w-full text-left border-collapse"
-                  style={{
-                    color: "var(--tinta)",
-                    fontSize: "1rem",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        backgroundColor: "var(--arena)",
-                        borderBottom: "var(--tarpuy-border-medium) solid var(--tinta)",
-                      }}
-                    >
-                      <th className="py-3 px-3 font-extrabold">Mes</th>
-                      <th className="py-3 px-3 font-extrabold">Lluvia (mm)</th>
-                      <th className="py-3 px-3 font-extrabold">T. Mínima (°C)</th>
-                      <th className="py-3 px-3 font-extrabold">Humedad SMAP</th>
-                      <th className="py-3 px-3 font-extrabold">Verdor NDVI</th>
-                      <th className="py-3 px-3 font-extrabold">Días Helada</th>
-                      <th className="py-3 px-3 font-extrabold">Estado del suelo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {indicators.map((m) => (
-                      <tr
-                        key={m.month}
+                {/* Vista móvil (< md): Lista de tarjetas simples por mes sin scroll horizontal */}
+                <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {indicators.map((m) => {
+                    const smapPct = Math.round(
+                      m.soil_moisture_index > 1
+                        ? m.soil_moisture_index
+                        : (m.soil_moisture_index || 0) * 100
+                    );
+                    return (
+                      <div
+                        key={`card-${m.month}`}
+                        className="p-4 rounded-2xl space-y-2.5"
                         style={{
                           backgroundColor: m.bare_soil_flag
                             ? "var(--tierra-suave)"
-                            : "var(--tarjeta)",
-                          borderBottom: "1.5px solid var(--piedra)",
+                            : "var(--arena)",
                         }}
                       >
-                        <td className="py-2.5 px-3 font-extrabold">
-                          {m.month_name || `Mes ${m.month}`}
-                        </td>
-                        <td className="py-2.5 px-3 font-bold">{m.precip_mm} mm</td>
-                        <td className="py-2.5 px-3 font-mono font-bold">{m.temp_min_c}°C</td>
-                        <td className="py-2.5 px-3 font-mono font-bold">
-                          {Math.round(
-                            m.soil_moisture_index > 1
-                              ? m.soil_moisture_index
-                              : (m.soil_moisture_index || 0) * 100
-                          )}
-                          %
-                        </td>
-                        <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
-                        <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
-                        <td className="py-2.5 px-3 font-extrabold">
-                          {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
-                        </td>
+                        <div className="flex items-center justify-between gap-2">
+                          <strong className="font-bold text-lg" style={{ color: "var(--tinta)" }}>
+                            {m.month_name || `Mes ${m.month}`}
+                          </strong>
+                          <span
+                            className="px-2.5 py-0.5 rounded-full text-sm font-bold"
+                            style={{
+                              backgroundColor: "var(--tarjeta)",
+                              color: "var(--tinta)",
+                            }}
+                          >
+                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Lluvia:
+                            </span>
+                            <strong className="font-bold text-base">{m.precip_mm} mm</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              T. Mínima:
+                            </span>
+                            <strong className="font-bold text-base">{m.temp_min_c}°C</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Humedad SMAP:
+                            </span>
+                            <strong className="font-bold text-base">{smapPct}%</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Verdor NDVI / Helada:
+                            </span>
+                            <strong className="font-bold text-base">
+                              {m.ndvi_mean} · {m.frost_risk_days ?? 0} d
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Vista escritorio (>= md): Tabla completa */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table
+                    className="w-full text-left border-collapse"
+                    style={{
+                      color: "var(--tinta)",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: "var(--arena)",
+                          borderBottom: "var(--tarpuy-border-medium) solid var(--tinta)",
+                        }}
+                      >
+                        <th className="py-3 px-3 font-extrabold">Mes</th>
+                        <th className="py-3 px-3 font-extrabold">Lluvia (mm)</th>
+                        <th className="py-3 px-3 font-extrabold">T. Mínima (°C)</th>
+                        <th className="py-3 px-3 font-extrabold">Humedad SMAP</th>
+                        <th className="py-3 px-3 font-extrabold">Verdor NDVI</th>
+                        <th className="py-3 px-3 font-extrabold">Días Helada</th>
+                        <th className="py-3 px-3 font-extrabold">Estado del suelo</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {indicators.map((m) => (
+                        <tr
+                          key={m.month}
+                          style={{
+                            backgroundColor: m.bare_soil_flag
+                              ? "var(--tierra-suave)"
+                              : "var(--tarjeta)",
+                            borderBottom: "1.5px solid var(--piedra)",
+                          }}
+                        >
+                          <td className="py-2.5 px-3 font-extrabold">
+                            {m.month_name || `Mes ${m.month}`}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold">{m.precip_mm} mm</td>
+                          <td className="py-2.5 px-3 font-mono font-bold">{m.temp_min_c}°C</td>
+                          <td className="py-2.5 px-3 font-mono font-bold">
+                            {Math.round(
+                              m.soil_moisture_index > 1
+                                ? m.soil_moisture_index
+                                : (m.soil_moisture_index || 0) * 100
+                            )}
+                            %
+                          </td>
+                          <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
+                          <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
+                          <td className="py-2.5 px-3 font-extrabold">
+                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : null}
           </section>

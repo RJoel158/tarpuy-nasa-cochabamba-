@@ -180,13 +180,13 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
         <button
           type="button"
           onClick={() => setShowGlossary((p) => !p)}
-          className="no-print min-h-[56px] inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-extrabold cursor-pointer transition-all"
+          className="no-print min-h-[64px] w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-2xl font-bold cursor-pointer transition-all"
           style={{
             backgroundColor: showGlossary ? "var(--dorado-suave)" : "var(--arena)",
             color: "var(--tinta)",
-            border: "var(--tarpuy-border-thin) solid var(--tinta)",
+            border: "2px solid var(--tinta)",
             boxShadow: "0 3px 0 0 var(--tinta)",
-            fontSize: "1rem",
+            fontSize: "1.05rem",
           }}
         >
           <IlustracionTarpuy id="cartilla_grafico" size={28} />
@@ -332,11 +332,12 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
           <button
             type="button"
             onClick={() => setShowTechDetailsInEasy((prev) => !prev)}
-            className="w-full min-h-[56px] px-4 py-3 rounded-2xl font-extrabold flex items-center justify-between gap-3 cursor-pointer"
+            className="w-full min-h-[64px] px-4 py-3 rounded-2xl font-bold flex items-center justify-between gap-3 cursor-pointer"
             style={{
               backgroundColor: "var(--arena)",
               color: "var(--tinta)",
-              border: "var(--tarpuy-border-thin) solid var(--tinta)",
+              border: "2px solid var(--tinta)",
+              boxShadow: "0 3px 0 0 var(--tinta)",
               fontSize: "var(--tarpuy-text-body-min)",
             }}
           >
@@ -345,7 +346,7 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
                 ? "Ocultar fuentes técnicas detalladas"
                 : "Ver fuentes técnicas completas (NASA POWER, SMAP, SoilGrids)"}
             </span>
-            {showTechDetailsInEasy ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+            {showTechDetailsInEasy ? <ChevronUp className="w-6 h-6 shrink-0" /> : <ChevronDown className="w-6 h-6 shrink-0" />}
           </button>
         </div>
       ) : null}

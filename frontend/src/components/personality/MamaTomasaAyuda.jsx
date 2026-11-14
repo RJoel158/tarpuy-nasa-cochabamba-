@@ -220,9 +220,11 @@ export default function MamaTomasaAyuda({
   return (
     <div className="no-print">
       {/* =====================================================================
-       * 1. BOTÓN FIJO DE MAMÁ TOMASA A UN COSTADO (>= 76 px, con semáforo y expresión)
+       * 1. BOTÓN FIJO COMPACTO DE MAMÁ TOMASA
+       *    - En móvil: solo el medallón de Mamá Tomasa (64x64 px) con punto de semáforo
+       *    - En escritorio: versión compacta y discreta a un costado
        * ===================================================================== */}
-      <div className="fixed bottom-24 right-3 lg:bottom-6 lg:right-6 z-40">
+      <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] right-3 lg:bottom-5 lg:right-5 z-40">
         <button
           ref={triggerBtnRef}
           type="button"
@@ -234,17 +236,18 @@ export default function MamaTomasaAyuda({
               ? "Mamá Tomasa willasunki. Ñit'iy qhawanapaq"
               : "Mamá Tomasa te cuenta. Toca aquí para abrir el semáforo de consejos"
           }
-          className="tarpuy-btn-physical relative flex items-center gap-3 px-4 py-2.5 cursor-pointer text-left"
+          className="tarpuy-btn-physical relative flex items-center justify-center lg:justify-start gap-2 w-16 h-16 lg:w-auto lg:h-auto p-1.5 lg:px-3 lg:py-1.5 rounded-full lg:rounded-2xl cursor-pointer text-left"
           style={{
-            minHeight: "78px",
+            minHeight: "64px",
+            minWidth: "64px",
             backgroundColor: abierto ? "var(--dorado)" : "var(--dorado-suave)",
             color: "var(--tinta)",
             border: "2px solid var(--tinta)",
           }}
         >
-          {/* Punto del semáforo arriba a la izquierda */}
+          {/* Punto del semáforo arriba a la izquierda (en móvil solo círculo, en escritorio con palabra) */}
           <span
-            className="absolute -top-2.5 -left-2 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 font-bold text-xs"
+            className="absolute -top-1.5 -left-1 lg:-top-2 lg:-left-1.5 w-5 h-5 lg:w-auto lg:h-auto lg:px-2 lg:py-0.5 rounded-full inline-flex items-center justify-center gap-1 font-bold text-[11px]"
             style={{
               backgroundColor: semPrincipal.colorFuerte,
               color: semPrincipal.textoSobreFuerte,
@@ -252,16 +255,16 @@ export default function MamaTomasaAyuda({
             }}
           >
             <span
-              className="w-2.5 h-2.5 rounded-full inline-block"
+              className="w-2 h-2 rounded-full inline-block shrink-0"
               style={{ backgroundColor: "var(--tarjeta)" }}
             />
-            <span>{semPrincipal.palabraCorta}</span>
+            <span className="hidden lg:inline">{semPrincipal.palabraCorta}</span>
           </span>
 
-          {/* Globito con número si hay varios puntos */}
+          {/* Globito compacto con número si hay varios puntos */}
           {badgeCount > 0 && (
             <span
-              className="absolute -top-2.5 -right-2 min-w-[28px] h-7 px-2 rounded-full flex items-center justify-center font-bold text-sm"
+              className="absolute -top-1.5 -right-1 lg:-top-2 lg:-right-1.5 min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center font-bold text-xs"
               style={{
                 backgroundColor: "var(--tarjeta)",
                 color: "var(--tinta)",
@@ -273,20 +276,21 @@ export default function MamaTomasaAyuda({
           )}
 
           {/* Mamá Tomasa con su expresión de la Fase 1 */}
-          <div className="shrink-0 -my-1">
+          <div className="shrink-0 flex items-center justify-center">
             <PersonajeGuia
               pose={pose}
-              size={64}
+              size={48}
               mostrarEtiquetaNombre={false}
             />
           </div>
 
-          <div className="pr-1 leading-tight">
-            <span className="block font-bold text-base sm:text-lg">
-              {isQu ? "Mamá Tomasa" : "Mamá Tomasa"}
+          {/* Etiqueta corta solo en escritorio para que en móvil solo se vea Mamá Tomasa */}
+          <div className="hidden lg:block pr-1 leading-tight">
+            <span className="block font-bold text-sm">
+              Mamá Tomasa
             </span>
             <span
-              className="block text-sm font-medium mt-0.5"
+              className="block text-xs font-medium"
               style={{ color: "var(--tinta-suave)" }}
             >
               {abierto
@@ -294,7 +298,7 @@ export default function MamaTomasaAyuda({
                   ? "Wisq'ay"
                   : "Cerrar"
                 : isQu
-                ? "Semáforo qhaway"
+                ? "Semáforo"
                 : "Ver semáforo"}
             </span>
           </div>
@@ -318,7 +322,7 @@ export default function MamaTomasaAyuda({
             aria-modal="true"
             aria-labelledby="mama-tomasa-dialog-title"
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full lg:w-[500px] lg:mr-6 lg:mb-28 max-h-[75vh] lg:max-h-[78vh] flex flex-col rounded-t-3xl lg:rounded-3xl overflow-hidden"
+            className="relative w-full lg:w-[500px] lg:mr-6 lg:mb-28 max-h-[70vh] lg:max-h-[78vh] flex flex-col rounded-t-3xl lg:rounded-3xl overflow-hidden"
             style={{
               backgroundColor: "var(--tarjeta)",
               border: "2px solid var(--tinta)",

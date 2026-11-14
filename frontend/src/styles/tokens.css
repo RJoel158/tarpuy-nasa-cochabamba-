@@ -224,8 +224,15 @@
 }
 
 /* =====================================================================
- * SUPERFICIES LIMPIAS Y TRANQUILAS
+ * SUPERFICIES LIMPIAS Y TRANQUILAS + REGLAS MÓVILES (320px–430px)
  * ===================================================================== */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+
 .tarpuy-page-surface {
   background-color: var(--papel);
   background-image: none;
@@ -233,30 +240,46 @@
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-min);
   line-height: var(--line-height-body);
+  overflow-x: hidden;
+}
+
+/* Nada de texto más pequeño de 14 px (0.875rem), ni siquiera en detalles */
+.tarpuy-page-surface .text-xs {
+  font-size: 0.875rem !important;
+  line-height: 1.35 !important;
 }
 
 .tarpuy-title {
   font-family: var(--font-family-display);
-  font-size: var(--font-size-title);
+  font-size: clamp(1.75rem, 5.2vw, var(--font-size-title));
   line-height: var(--line-height-title);
   color: var(--tinta);
   font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .tarpuy-subtitle {
   font-family: var(--font-family-display);
-  font-size: var(--font-size-subtitle);
+  font-size: clamp(1.375rem, 4.2vw, var(--font-size-subtitle));
   line-height: 1.3;
   color: var(--tinta);
   font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .tarpuy-body {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body);
+  font-size: clamp(1.125rem, 3.8vw, var(--font-size-body));
   line-height: var(--line-height-body);
   color: var(--tinta);
   font-weight: 400;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+  .tarpuy-body {
+    max-width: 40ch;
+  }
 }
 
 /* =====================================================================

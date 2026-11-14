@@ -346,172 +346,172 @@ export default function App() {
         syncStatus={syncStatus}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col justify-between pb-32 lg:pb-8">
-        <div>
-          <CabeceraNavegacion
-            activeView={activeView}
-            onChangeView={setActiveView}
-            appMode={appMode}
-            onChangeAppMode={handleChangeAppMode}
-            zoneId={zoneId}
-            onSelectZone={handleSelectZone}
-            selectedCommunityName={communityName}
-            onSelectCommunity={handleSelectCommunity}
-            onDetectGps={handleDetectGps}
-            voiceLang={voiceLang}
-            onChangeVoiceLang={handleChangeVoiceLang}
-            isSpeaking={isSpeaking}
-            onSpeakGuide={handleSpeakGuide}
-            onStopAudio={handleStopAudio}
-            isOnline={isOnline}
-            forceOffline={forceOffline}
-            onToggleOffline={handleToggleOffline}
-            onDownloadBundle={handleDownloadBundle}
-            cachedCount={cachedCount}
-            dbStats={dbStats}
-            syncStatus={syncStatus}
-          />
-          <main
-            id="tarpuy-main-view"
-            data-producer-mode={!isAdvanced}
-            className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-4 sm:py-6 space-y-8"
-          >
-          {loading && !recData ? (
-            <p className="py-12 text-center font-extrabold" style={{ color: "var(--tinta-suave)" }}>
-              Cargando datos...
-            </p>
-          ) : activeView === "clima" ? (
-            <div className="space-y-8">
-              {/* 1. EL MENSAJE DEL DÍA + PAISAJE + 2. HOY + 3. LA SEMANA + 6. DETALLE PLEGADO */}
-              <EarlyWarningBanner
-                bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
-                zoneName={communityName || currentZone?.name}
-                onSpeak={handleSpeak}
-                activeAudioKey={activeAudioKey}
-                voiceLang={voiceLang}
-                isAdvanced={isAdvanced}
-                onOpenMap={() => setActiveView("mapa")}
-                onDetectGps={handleDetectGps}
-              />
-
-              {/* 4. LA PARCELA + MI CHACRA (Fase 1C) */}
-              <FarmerOverview
-                community={communityName}
-                zone={currentZone}
-                crop={crops.find((crop) => crop.crop_id === cropId)}
-                cropId={cropId}
-                lang={voiceLang}
-                offline={forceOffline || !isOnline}
-                saved={dbStats}
-                onPlant={() => setActiveView("siembra")}
-                onMap={() => setActiveView("mapa")}
-                speaking={isSpeaking}
-                onSave={handleDownloadBundle}
-                onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
-              />
-
-              <div className="flex justify-end">
-                <BotonGrande
-                  variante="primario"
-                  ilustracionId="mano_siembra"
-                  texto={`${tr(voiceLang, "seeWhatToPlantIn")} ${communityName || currentZone?.name || ""}`}
-                  onClick={() => setActiveView("siembra")}
-                  className="w-full sm:w-auto"
-                />
-              </div>
-            </div>
-          ) : activeView === "siembra" ? (
-            <ProducerMode key={zoneId}
-              zone={currentZone}
-              activeZoneId={zoneId}
-              crops={crops}
-              cropId={cropId}
-              onChangeCrop={handleChangeCrop}
-              priorities={priorities}
-              onChangePriorities={handleChangePriorities}
-              irrigation={irrigation}
-              onChangeIrrigation={handleChangeIrrigation}
-              equipment={equipment}
-              onChangeEquipment={handleChangeEquipment}
-              strategies={recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : []}
-              onSpeak={handleSpeak}
-              activeAudioKey={activeAudioKey}
-              isCalculating={isCalculating}
-              isAdvanced={isAdvanced}
-              lang={voiceLang}
+      <div className="flex-1 min-w-0 flex flex-col justify-between pb-48 lg:pb-8">
+          <div>
+            <CabeceraNavegacion
+              activeView={activeView}
+              onChangeView={setActiveView}
+              appMode={appMode}
+              onChangeAppMode={handleChangeAppMode}
+              zoneId={zoneId}
+              onSelectZone={handleSelectZone}
+              selectedCommunityName={communityName}
+              onSelectCommunity={handleSelectCommunity}
               onDetectGps={handleDetectGps}
-              onOpenMap={() => setActiveView("mapa")}
+              voiceLang={voiceLang}
+              onChangeVoiceLang={handleChangeVoiceLang}
+              isSpeaking={isSpeaking}
+              onSpeakGuide={handleSpeakGuide}
+              onStopAudio={handleStopAudio}
+              isOnline={isOnline}
+              forceOffline={forceOffline}
+              onToggleOffline={handleToggleOffline}
+              onDownloadBundle={handleDownloadBundle}
+              cachedCount={cachedCount}
+              dbStats={dbStats}
+              syncStatus={syncStatus}
             />
-          ) : activeView === "mapa" ? (
-            <div className="space-y-8">
-              <div className="px-1">
-                <span
-                  className="inline-block text-sm font-medium mb-1"
-                  style={{ color: "var(--tinta-suave)" }}
-                >
-                  {tr(voiceLang, "mapSubtitle")}
-                </span>
-                <h2
-                  className="font-bold tracking-tight"
-                  style={{
-                    fontFamily: "var(--tarpuy-font-display)",
-                    fontSize: "var(--tarpuy-text-title)",
-                    lineHeight: "var(--tarpuy-line-title)",
-                    color: "var(--tinta)",
-                  }}
-                >
-                  {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
-                </h2>
-              </div>
-              <CochabambaMap
-                zones={zones}
-                activeZoneId={zoneId}
-                onSelectZone={handleSelectZone}
-                selectedCommunityName={communityName}
-                onSelectCommunity={handleSelectCommunity}
-                userPoint={userPoint}
-                onPickMapPoint={handlePickMapPoint}
-                onDetectGps={handleDetectGps}
-                forceOffline={forceOffline}
-                isOnline={isOnline}
-                tall={true}
-                lang={voiceLang}
-                isAdvanced={isAdvanced}
-                onSpeak={handleSpeak}
-                activeAudioKey={activeAudioKey}
-              />
-            </div>
-          ) : (
-            <TechnicalMode
-              zone={currentZone}
-              strategies={recData?.strategies || []}
-              provenance={recData?.data_provenance}
-              bulletin={alertBulletin}
-              isAdvanced={isAdvanced}
-              lang={voiceLang}
-            />
-          )}
-        </main>
-        </div>
-
-        <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
-          <InstitutionalBrandBar variant="footer" />
-          <div className="no-print flex justify-start">
-            <button
-              type="button"
-              onClick={() => setShowFase1Preview(true)}
-              className="tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 text-sm cursor-pointer"
+            <main
+              id="tarpuy-main-view"
+              data-producer-mode={!isAdvanced}
+              className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-4 sm:py-6 space-y-8"
             >
-              Ver prueba Fase 1
-            </button>
+              {loading && !recData ? (
+                <p className="py-12 text-center font-extrabold" style={{ color: "var(--tinta-suave)" }}>
+                  Cargando datos...
+                </p>
+              ) : activeView === "clima" ? (
+                <div className="space-y-8">
+                  {/* 1. EL MENSAJE DEL DÍA + PAISAJE + 2. HOY + 3. LA SEMANA + 6. DETALLE PLEGADO */}
+                  <EarlyWarningBanner
+                    bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
+                    zoneName={communityName || currentZone?.name}
+                    onSpeak={handleSpeak}
+                    activeAudioKey={activeAudioKey}
+                    voiceLang={voiceLang}
+                    isAdvanced={isAdvanced}
+                    onOpenMap={() => setActiveView("mapa")}
+                    onDetectGps={handleDetectGps}
+                  />
+
+                  {/* 4. LA PARCELA + MI CHACRA (Fase 1C) */}
+                  <FarmerOverview
+                    community={communityName}
+                    zone={currentZone}
+                    crop={crops.find((crop) => crop.crop_id === cropId)}
+                    cropId={cropId}
+                    lang={voiceLang}
+                    offline={forceOffline || !isOnline}
+                    saved={dbStats}
+                    onPlant={() => setActiveView("siembra")}
+                    onMap={() => setActiveView("mapa")}
+                    speaking={isSpeaking}
+                    onSave={handleDownloadBundle}
+                    onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
+                  />
+
+                  <div className="flex justify-end">
+                    <BotonGrande
+                      variante="primario"
+                      ilustracionId="mano_siembra"
+                      texto={`${tr(voiceLang, "seeWhatToPlantIn")} ${communityName || currentZone?.name || ""}`}
+                      onClick={() => setActiveView("siembra")}
+                      className="w-full sm:w-auto"
+                    />
+                  </div>
+                </div>
+              ) : activeView === "siembra" ? (
+                <ProducerMode key={zoneId}
+                  zone={currentZone}
+                  activeZoneId={zoneId}
+                  crops={crops}
+                  cropId={cropId}
+                  onChangeCrop={handleChangeCrop}
+                  priorities={priorities}
+                  onChangePriorities={handleChangePriorities}
+                  irrigation={irrigation}
+                  onChangeIrrigation={handleChangeIrrigation}
+                  equipment={equipment}
+                  onChangeEquipment={handleChangeEquipment}
+                  strategies={recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : []}
+                  onSpeak={handleSpeak}
+                  activeAudioKey={activeAudioKey}
+                  isCalculating={isCalculating}
+                  isAdvanced={isAdvanced}
+                  lang={voiceLang}
+                  onDetectGps={handleDetectGps}
+                  onOpenMap={() => setActiveView("mapa")}
+                />
+              ) : activeView === "mapa" ? (
+                <div className="space-y-8">
+                  <div className="px-1">
+                    <span
+                      className="inline-block text-sm font-medium mb-1"
+                      style={{ color: "var(--tinta-suave)" }}
+                    >
+                      {tr(voiceLang, "mapSubtitle")}
+                    </span>
+                    <h2
+                      className="font-bold tracking-tight"
+                      style={{
+                        fontFamily: "var(--tarpuy-font-display)",
+                        fontSize: "var(--tarpuy-text-title)",
+                        lineHeight: "var(--tarpuy-line-title)",
+                        color: "var(--tinta)",
+                      }}
+                    >
+                      {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
+                    </h2>
+                  </div>
+                  <CochabambaMap
+                    zones={zones}
+                    activeZoneId={zoneId}
+                    onSelectZone={handleSelectZone}
+                    selectedCommunityName={communityName}
+                    onSelectCommunity={handleSelectCommunity}
+                    userPoint={userPoint}
+                    onPickMapPoint={handlePickMapPoint}
+                    onDetectGps={handleDetectGps}
+                    forceOffline={forceOffline}
+                    isOnline={isOnline}
+                    tall={true}
+                    lang={voiceLang}
+                    isAdvanced={isAdvanced}
+                    onSpeak={handleSpeak}
+                    activeAudioKey={activeAudioKey}
+                  />
+                </div>
+              ) : (
+                <TechnicalMode
+                  zone={currentZone}
+                  strategies={recData?.strategies || []}
+                  provenance={recData?.data_provenance}
+                  bulletin={alertBulletin}
+                  isAdvanced={isAdvanced}
+                  lang={voiceLang}
+                />
+              )}
+            </main>
           </div>
-        </footer>
+
+          <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
+            <InstitutionalBrandBar variant="footer" />
+            <div className="no-print flex justify-start">
+              <button
+                type="button"
+                onClick={() => setShowFase1Preview(true)}
+                className="tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 text-sm cursor-pointer"
+              >
+                Ver prueba Fase 1
+              </button>
+            </div>
+          </footer>
+        </div>
+        <FeedbackHost
+          activeProcess={activeProcess}
+          toasts={toasts}
+          onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
+        />
       </div>
-      <FeedbackHost
-        activeProcess={activeProcess}
-        toasts={toasts}
-        onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
-      />
-    </div>
-  );
+      );
 }

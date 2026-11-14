@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v6";
+const CACHE_NAME = "tarpuy-nasa-v7";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -63,11 +63,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets & navigation: cache-first, fallback to network
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
+  // Navigation (HTML): network-first so updates show immediately, fallback to cache when offline
+  if (req.mode === "navigate" || url.pathname === "/" || url.pathname === "/index.html") {
+    event.respondWith(
+      fetch(req)
         .then((res) => {
           if (res && res.status === 200) {
             const copy = res.clone();
@@ -75,11 +74,22 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => {
-          if (req.mode === "navigate") {
-            return caches.match("/index.html");
-          }
-        });
+        .catch(() => caches.match(req).then((r) => r || caches.match("/index.html")))
+    );
+    return;
+  }
+
+  // Static assets: cache-first, fallback to network
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      if (cached) return cached;
+      return fetch(req).then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        }
+        return res;
+      });
     })
   );
 });

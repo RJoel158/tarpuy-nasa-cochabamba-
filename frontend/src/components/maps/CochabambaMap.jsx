@@ -366,9 +366,9 @@ export default function CochabambaMap({
       {/* Patrón fijo de Mapa: Caminos y zig-zag de aguayo */}
       <PatronPantalla tipo="caminos" />
 
-      {/* 4. BARRA SUPERIOR DEL MAPA: Buscador + Botón gigante "¿Dónde estoy?" (GPS) */}
-      <div className="tarpuy-card-physical p-5 space-y-4">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      {/* 4. BARRA SUPERIOR DEL MAPA: Buscador de comunidad */}
+      <div className="tarpuy-card-physical p-4 sm:p-5 space-y-3">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <div className="flex-1">
             <CommunitySearchCombobox
               selectedZoneId={activeZoneId}
@@ -378,21 +378,25 @@ export default function CochabambaMap({
             />
           </div>
 
-          <BotonGrande
-            variante="primario"
-            ilustracionId="pin_ubicacion"
-            texto={qu ? "¿Maypitaq kachkani? (GPS)" : "¿Dónde estoy?"}
-            onClick={handleDondeEstoy}
-            className="text-xl px-7"
-          />
+          <div className="hidden md:block">
+            <BotonGrande
+              variante="primario"
+              ilustracionId="pin_ubicacion"
+              texto={qu ? "¿Maypitaq kachkani? (GPS)" : "¿Dónde estoy?"}
+              onClick={handleDondeEstoy}
+              className="text-xl px-7"
+            />
+          </div>
         </div>
       </div>
 
-      {/* 1. MAPA BASE CÁLIDO (con controles +/- de 58 px y pines grandes por zona) */}
+      {/* 1. MAPA BASE CÁLIDO (45% a 60% de la altura en celular, con controles +/- de 58 px) */}
       <div className="tarpuy-card-physical overflow-hidden">
         <div
           className={`tarpuy-warm-map ${
-            tall ? "h-96 sm:h-[460px]" : "h-80 sm:h-96"
+            tall
+              ? "h-[52vh] min-h-[300px] max-h-[460px] sm:h-[460px]"
+              : "h-[48vh] min-h-[280px] sm:h-96"
           } relative w-full`}
           style={{ backgroundColor: "var(--arena)" }}
         >
@@ -478,88 +482,96 @@ export default function CochabambaMap({
           )}
         </div>
 
-        {/* 5. LEYENDA MÍNIMA CON DIBUJOS (No texto técnico) */}
+        {/* En celular: Botón gigante "¿Dónde estoy?" justo debajo del mapa (zona del pulgar) */}
         <div
-          className="p-4 flex flex-wrap items-center justify-center gap-4 text-base font-extrabold"
+          className="md:hidden p-3.5"
+          style={{
+            backgroundColor: "var(--tarjeta)",
+            borderTop: "1.5px solid var(--tinta)",
+          }}
+        >
+          <BotonGrande
+            variante="primario"
+            ilustracionId="pin_ubicacion"
+            texto={qu ? "¿Maypitaq kachkani? (GPS)" : "¿Dónde estoy?"}
+            onClick={handleDondeEstoy}
+            className="w-full text-xl justify-center"
+          />
+        </div>
+
+        {/* 5. LEYENDA CON BOTONES GRANDES (>= 64 px) PARA ELEGIR ZONA DIRECTO */}
+        <div
+          className="p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-base font-bold"
           style={{
             backgroundColor: "var(--arena)",
-            borderTop: "var(--border-width-thick) solid var(--tinta)",
+            borderTop: "1.5px solid var(--tinta)",
           }}
         >
           <button
             type="button"
             onClick={() => onSelectZone("tapacari_zona_andina")}
-            className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
+            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
             style={{
               backgroundColor:
                 activeZoneId === "tapacari_zona_andina"
                   ? "var(--piedra-suave)"
                   : "var(--tarjeta)",
-              border: "var(--border-width-medium) solid var(--tinta)",
+              border: "2px solid var(--tinta)",
+              boxShadow:
+                activeZoneId === "tapacari_zona_andina" ? "none" : "0 3px 0 var(--tinta)",
             }}
           >
             <span
-              className="w-5 h-5 rounded-full inline-block"
-              style={{ backgroundColor: "var(--piedra)", border: "2px solid var(--tinta)" }}
+              className="w-4 h-4 rounded-full inline-block shrink-0"
+              style={{ backgroundColor: "var(--piedra)", border: "1.5px solid var(--tinta)" }}
             />
-            <IlustracionTarpuy id="helada" size={30} />
+            <IlustracionTarpuy id="helada" size={28} />
             <span>Tapacarí (Altura y frío)</span>
           </button>
 
           <button
             type="button"
             onClick={() => onSelectZone("punata_valle_alto")}
-            className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
+            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
             style={{
               backgroundColor:
                 activeZoneId === "punata_valle_alto"
                   ? "var(--dorado-suave)"
                   : "var(--tarjeta)",
-              border: "var(--border-width-medium) solid var(--tinta)",
+              border: "2px solid var(--tinta)",
+              boxShadow:
+                activeZoneId === "punata_valle_alto" ? "none" : "0 3px 0 var(--tinta)",
             }}
           >
             <span
-              className="w-5 h-5 rounded-full inline-block"
-              style={{ backgroundColor: "var(--dorado)", border: "2px solid var(--tinta)" }}
+              className="w-4 h-4 rounded-full inline-block shrink-0"
+              style={{ backgroundColor: "var(--dorado)", border: "1.5px solid var(--tinta)" }}
             />
-            <IlustracionTarpuy id="riego_gravedad" size={30} />
+            <IlustracionTarpuy id="riego_gravedad" size={28} />
             <span>Punata (Valle y acequia)</span>
           </button>
 
           <button
             type="button"
             onClick={() => onSelectZone("mizque_cono_sur")}
-            className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
+            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
             style={{
               backgroundColor:
                 activeZoneId === "mizque_cono_sur"
                   ? "var(--hoja-suave)"
                   : "var(--tarjeta)",
-              border: "var(--border-width-medium) solid var(--tinta)",
+              border: "2px solid var(--tinta)",
+              boxShadow:
+                activeZoneId === "mizque_cono_sur" ? "none" : "0 3px 0 var(--tinta)",
             }}
           >
             <span
-              className="w-5 h-5 rounded-full inline-block"
-              style={{ backgroundColor: "var(--hoja)", border: "2px solid var(--tinta)" }}
+              className="w-4 h-4 rounded-full inline-block shrink-0"
+              style={{ backgroundColor: "var(--hoja)", border: "1.5px solid var(--tinta)" }}
             />
-            <IlustracionTarpuy id="planta_crecida" size={30} />
-            <span>Mizque / Trópico (Vegetación)</span>
+            <IlustracionTarpuy id="planta_crecida" size={28} />
+            <span>Mizque / Trópico</span>
           </button>
-
-          <span
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl"
-            style={{
-              backgroundColor: "var(--ladrillo-suave)",
-              border: "var(--border-width-medium) solid var(--tinta)",
-            }}
-          >
-            <span
-              className="w-5 h-5 rounded-full inline-block"
-              style={{ backgroundColor: "var(--ladrillo)", border: "2px solid var(--tinta)" }}
-            />
-            <IlustracionTarpuy id="pin_ubicacion" size={30} />
-            <span>{qu ? "Kaypi kachkanki" : "Estás aquí"}</span>
-          </span>
         </div>
       </div>
 

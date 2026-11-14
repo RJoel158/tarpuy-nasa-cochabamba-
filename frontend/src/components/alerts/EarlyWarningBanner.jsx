@@ -365,20 +365,25 @@ export default function EarlyWarningBanner({
               <h2 className="tarpuy-title">{primaryAlert.cleanTitle}</h2>
             </div>
 
-            {/* Botón de altavoz grande dentro de la misma tarjeta */}
-            <div className="shrink-0 flex flex-col items-center gap-2">
+            {/* Botón de altavoz grande en la zona inferior/pulgar de la tarjeta */}
+            <div className="shrink-0 w-full md:w-auto flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center gap-3">
               <BotonAltavoz
                 sonando={estaHablandoAlerta}
                 mostrarTexto={true}
                 etiqueta={tr(voiceLang, "listenBtn")}
                 onClick={handleListen}
+                className="w-full sm:w-auto justify-center"
               />
               {alerts.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="font-bold text-base underline cursor-pointer py-1"
-                  style={{ color: "var(--tinta)" }}
+                  className="min-h-[56px] px-4 py-2 rounded-2xl font-bold text-base underline cursor-pointer text-center"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    color: "var(--tinta)",
+                    border: "1.5px solid var(--tinta)",
+                  }}
                 >
                   {tr(voiceLang, "seeAlerts")} ({alerts.length})
                 </button>
@@ -395,49 +400,68 @@ export default function EarlyWarningBanner({
       <PatronPantalla tipo="ondas" />
 
       {/* ===================================================================
-       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno)
+       * 2. HOY (En 3 dibujos en fila en móvil y escritorio, con 1 palabra cada uno)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "weatherToday")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="tarpuy-subtitle">
-            {isQu ? "Kunan p'unchaw (Hoy)" : "El clima de hoy en 3 miradas"}
+            {isQu ? "Kunan p'unchaw (Hoy)" : "Hoy"}
           </h3>
           <span className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
             {shortZone}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
           {hoyTresTarjetas.map((item) => (
             <article
               key={item.id}
-              className="tarpuy-card-physical p-6 flex flex-col items-center text-center justify-between gap-4"
+              className="tarpuy-card-physical p-2.5 sm:p-6 flex flex-col items-center text-center justify-between gap-2 sm:gap-4"
               style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <span
-                className="text-sm font-medium"
+                className="text-sm font-medium leading-tight"
                 style={{ color: "var(--tinta-suave)" }}
               >
                 {item.etiqueta}
               </span>
 
-              {/* Dibujo grande arriba en fondo suave sin borde grueso */}
+              {/* Dibujo grande arriba en fondo suave */}
               <div
-                className="w-24 h-24 rounded-full flex items-center justify-center shrink-0"
+                className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shrink-0"
                 style={{ backgroundColor: item.bg }}
               >
-                <IlustracionTarpuy id={item.dibujoId} size={68} />
+                <IlustracionTarpuy id={item.dibujoId} size={52} />
               </div>
 
-              {/* UNA palabra grande en negrita (la explicación larga está en Mamá Tomasa) */}
-              <h4 className="tarpuy-title">{item.palabra}</h4>
+              {/* UNA palabra grande en negrita */}
+              <h4
+                className="font-bold leading-tight break-words"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(1.05rem, 4.2vw, 1.65rem)",
+                  color: "var(--tinta)",
+                }}
+              >
+                {item.palabra}
+              </h4>
 
-              {/* Los números pequeños abajo como apoyo sin encerrar en otra caja */}
+              {/* Números de apoyo (>= 14 px) */}
               <span
-                className="text-sm font-normal pt-1"
+                className="hidden md:block text-sm font-normal pt-1"
                 style={{ color: "var(--tinta-suave)" }}
               >
                 {item.apoyoNumerico}
+              </span>
+              <span
+                className="md:hidden text-sm font-medium"
+                style={{ color: "var(--tinta-suave)" }}
+              >
+                {item.id === "temperatura"
+                  ? `${cur.temp_c}°C`
+                  : item.id === "lluvia"
+                  ? `${pred.total_precip_7d_mm} mm`
+                  : `${days[0]?.wind_kmh ?? 12} km/h`}
               </span>
             </article>
           ))}
@@ -445,7 +469,7 @@ export default function EarlyWarningBanner({
       </section>
 
       {/* ===================================================================
-       * 3. LA SEMANA (Tira de 7 casillas interactivas limpias)
+       * 3. LA SEMANA (Tira de 7 casillas grandes tocables, sin requerir scroll horizontal)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -462,7 +486,7 @@ export default function EarlyWarningBanner({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           {days.map((d) => {
             const dv = describeDayVisual(d, voiceLang);
             const bgCasilla =
@@ -479,9 +503,9 @@ export default function EarlyWarningBanner({
                 key={d.date}
                 type="button"
                 onClick={() => setSelectedDay(d)}
-                className="tarpuy-btn-physical p-4 flex flex-col items-center justify-between gap-3 text-center cursor-pointer"
+                className="tarpuy-btn-physical last:col-span-2 sm:last:col-span-1 p-3.5 sm:p-4 flex flex-col items-center justify-between gap-2.5 text-center cursor-pointer"
                 style={{
-                  minHeight: "184px",
+                  minHeight: "172px",
                   backgroundColor: bgCasilla,
                   color: "var(--tinta)",
                 }}
@@ -499,13 +523,13 @@ export default function EarlyWarningBanner({
                   <WeatherIllustration kind={dv.kind} className="w-13 h-13" />
                 </div>
 
-                {/* Palabra de estado + números de apoyo sin sub-cajas */}
+                {/* Palabra de estado + números de apoyo (>= 14 px) */}
                 <div className="space-y-0.5 w-full">
-                  <span className="block text-base font-bold">
+                  <span className="block text-base font-bold leading-snug">
                     {dv.word}
                   </span>
                   <span
-                    className="block text-xs font-normal"
+                    className="block text-sm font-normal"
                     style={{ color: "var(--tinta-suave)" }}
                   >
                     {d.temp_min_c}° / {d.temp_max_c}°C
