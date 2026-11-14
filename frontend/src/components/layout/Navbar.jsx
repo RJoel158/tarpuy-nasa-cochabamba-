@@ -1,17 +1,18 @@
 import React from "react";
 import { CloudSun, Sprout, MapPin, Database, BarChart3, Volume2, Square, Download, Wifi, WifiOff, LocateFixed } from "lucide-react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
+import { tr } from "../../utils/quechuaI18n.js";
 
 const NAV_ITEMS = [
-  { id: "clima", label: "Clima hoy", Icon: CloudSun },
-  { id: "siembra", label: "Qué sembrar", Icon: Sprout },
-  { id: "mapa", label: "Mapa", Icon: MapPin },
-  { id: "datos", label: "Datos NASA", Icon: Database },
+  { id: "clima", key: "navWeather", Icon: CloudSun },
+  { id: "siembra", key: "navPlant", Icon: Sprout },
+  { id: "mapa", key: "navMap", Icon: MapPin },
+  { id: "datos", key: "navNasa", Icon: Database },
 ];
 
 const MODE_OPTIONS = [
-  { id: "facil", label: "Modo Fácil", short: "Fácil", Icon: Sprout, activeCls: "bg-emerald-600 text-white shadow-xs" },
-  { id: "avanzado", label: "Modo Avanzado", short: "Avanzado", Icon: BarChart3, activeCls: "bg-[#009FE3] text-white shadow-xs" },
+  { id: "facil", key: "easyMode", shortKey: "easyShort", Icon: Sprout, activeCls: "bg-emerald-600 text-white shadow-xs" },
+  { id: "avanzado", key: "advMode", shortKey: "advShort", Icon: BarChart3, activeCls: "bg-[#009FE3] text-white shadow-xs" },
 ];
 
 const SHORT_ZONES = [
@@ -30,7 +31,7 @@ export default function Navbar({
   selectedCommunityName = "Punata",
   onSelectCommunity,
   onDetectGps,
-  voiceLang = "qu",
+  voiceLang = "es",
   onChangeVoiceLang,
   isSpeaking = false,
   onSpeakGuide,
@@ -60,13 +61,13 @@ export default function Navbar({
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight text-white">Tarpuy Cochabamba</h1>
-              <p className="text-xs text-sky-300/90">Guía agrícola por satélite</p>
+              <p className="text-xs text-sky-300/90">{tr(voiceLang, "subtitle")}</p>
             </div>
           </div>
 
           {/* Easy vs Advanced Mode Switcher */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Nivel de detalle</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{tr(voiceLang, "detailLevel")}</span>
             <div className="grid grid-cols-2 gap-1 rounded-lg bg-black/25 p-1 text-[11px]">
               {MODE_OPTIONS.map((m) => (
                 <button
@@ -79,7 +80,7 @@ export default function Navbar({
                   }`}
                 >
                   <m.Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span>{m.label}</span>
+                  <span>{tr(voiceLang, m.key)}</span>
                 </button>
               ))}
             </div>
@@ -87,7 +88,7 @@ export default function Navbar({
 
           {/* Single Community Switcher */}
           <div className="space-y-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Comunidad</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{tr(voiceLang, "community")}</span>
             <CommunitySearchCombobox
               selectedZoneId={zoneId}
               selectedCommunityName={selectedCommunityName}
@@ -116,14 +117,14 @@ export default function Navbar({
               className="w-full mt-1.5 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-sky-300 bg-white/5 hover:bg-white/15 border border-white/10 transition cursor-pointer"
             >
               <LocateFixed className="w-3.5 h-3.5 shrink-0" />
-              <span>Detectar mi ubicación (GPS)</span>
+              <span>{tr(voiceLang, "detectGps")}</span>
             </button>
           </div>
 
           {/* Decentralized Screens (3 in Fácil, 4 in Avanzado) */}
           <nav className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">Secciones</span>
-            {visibleNavItems.map(({ id, label, Icon }) => (
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">{tr(voiceLang, "sections")}</span>
+            {visibleNavItems.map(({ id, key, Icon }) => (
               <button
                 key={id}
                 type="button"
@@ -135,20 +136,21 @@ export default function Navbar({
                 }`}
               >
                 <Icon className={`w-4 h-4 shrink-0 ${activeView === id ? "text-[#009FE3]" : ""}`} />
-                <span>{label}</span>
+                <span>{tr(voiceLang, key)}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        {/* Audio & Offline Controls */}
+        {/* Language / Audio & Offline Controls */}
         <div className="space-y-3 pt-4 border-t border-white/10 text-xs">
           <div className="flex rounded-lg bg-black/25 p-1">
-            {[{ id: "qu", label: "Qhichwa" }, { id: "es", label: "Castellano" }].map((l) => (
+            {[{ id: "es", label: "Castellano" }, { id: "qu", label: "Qhichwa" }].map((l) => (
               <button
                 key={l.id}
                 type="button"
                 onClick={() => onChangeVoiceLang(l.id)}
+                aria-pressed={voiceLang === l.id}
                 className={`flex-1 py-1.5 rounded-md font-semibold transition cursor-pointer ${
                   voiceLang === l.id ? "bg-[#009FE3] text-white shadow-xs" : "text-slate-300 hover:text-white"
                 }`}
@@ -166,26 +168,26 @@ export default function Navbar({
             }`}
           >
             {isSpeaking ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
-            <span>{isSpeaking ? "Detener audio" : "Escuchar guía"}</span>
+            <span>{isSpeaking ? tr(voiceLang, "stopAudio") : tr(voiceLang, "listenGuide")}</span>
           </button>
 
           <div className="flex items-center justify-between gap-2 text-[11px] text-slate-300 pt-1">
             <button type="button" onClick={onToggleOffline} className="inline-flex items-center gap-1 hover:text-white cursor-pointer">
               {onlineActive ? <Wifi className="w-3.5 h-3.5 text-emerald-400" /> : <WifiOff className="w-3.5 h-3.5 text-amber-400" />}
-              <span>{onlineActive ? "Con red" : "Sin red"}</span>
+              <span>{onlineActive ? tr(voiceLang, "online") : tr(voiceLang, "offline")}</span>
             </button>
             <button type="button" onClick={onDownloadBundle} className="inline-flex items-center gap-1 hover:text-white font-semibold cursor-pointer">
               <Download className="w-3.5 h-3.5 text-amber-300" />
-              <span>Actualizar ({dbStats?.sizeKb ? `${dbStats.sizeKb} KB` : cachedCount})</span>
+              <span>{tr(voiceLang, "refreshCopy")} ({dbStats?.sizeKb ? `${dbStats.sizeKb} KB` : cachedCount})</span>
             </button>
           </div>
           <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5 flex items-center gap-2 text-[11px]">
             <Database className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <div className="min-w-0 leading-tight">
               <p className="font-semibold text-emerald-300 truncate">
-                Autoguardado · {dbStats?.records ? "1 registro" : "en espera"}
+                {tr(voiceLang, "autoSaveTitle")}
               </p>
-              <p className="text-slate-300 truncate">{syncStatus || "Base local automática"}</p>
+              <p className="text-slate-300 truncate">{syncStatus || tr(voiceLang, "autoSaveDefault")}</p>
             </div>
           </div>
         </div>
@@ -209,23 +211,31 @@ export default function Navbar({
                   key={m.id}
                   type="button"
                   onClick={() => onChangeAppMode?.(m.id)}
-                  aria-label={m.label}
+                  aria-label={tr(voiceLang, m.key)}
                   aria-pressed={appMode === m.id}
                   className={`px-2 py-1 rounded-md font-bold transition cursor-pointer ${
                     appMode === m.id ? m.activeCls : "text-slate-300"
                   }`}
                 >
-                  {m.short}
+                  {tr(voiceLang, m.shortKey)}
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => onChangeVoiceLang(voiceLang === "qu" ? "es" : "qu")}
+              aria-label="Cambiar idioma Castellano o Qhichwa"
+              className="px-2 py-1 rounded-lg bg-white/15 text-white font-bold text-[11px] shrink-0 cursor-pointer"
+            >
+              {voiceLang === "qu" ? "QU" : "ES"}
+            </button>
             <button
               type="button"
               onClick={isSpeaking ? onStopAudio : onSpeakGuide}
               className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1 shrink-0 cursor-pointer"
             >
               {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
-              <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
+              <span>{tr(voiceLang, "listenBtn")}</span>
             </button>
           </div>
         </div>
@@ -256,7 +266,7 @@ export default function Navbar({
       </header>
 
       <nav className={`lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid text-[11px] ${visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
-        {visibleNavItems.map(({ id, label, Icon }) => (
+        {visibleNavItems.map(({ id, key, Icon }) => (
           <button
             key={id}
             type="button"
@@ -264,7 +274,7 @@ export default function Navbar({
             className={`py-2.5 flex flex-col items-center gap-1 ${activeView === id ? "text-[#0284C7] font-bold" : "text-slate-500"}`}
           >
             <Icon className="w-4 h-4" />
-            <span>{label}</span>
+            <span>{tr(voiceLang, key)}</span>
           </button>
         ))}
       </nav>

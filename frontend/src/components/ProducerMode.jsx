@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Printer, Loader2, LocateFixed, MapPin, Award, Sprout, AlertTriangle } from "lucide-react";
 import PrioritySelectorGrid from "../features/producer/PrioritySelectorGrid.jsx";
 import RotationCard from "../features/producer/RotationCard.jsx";
+import { tr } from "../utils/quechuaI18n.js";
 
 export default function ProducerMode({
   zone,
@@ -20,6 +21,7 @@ export default function ProducerMode({
   activeAudioKey,
   isCalculating = false,
   isAdvanced = false,
+  lang = "es",
   onDetectGps,
   onOpenMap,
 }) {
@@ -35,6 +37,10 @@ export default function ProducerMode({
   const shownStrategy = isAdvanced ? (ordered[selectedIdx] || ordered[0]) : ordered[0];
 
   const tabLabel = (s, idx) => {
+    if (lang === "qu") {
+      if (s.strategy_type === "current_baseline") return "3. Q'ara allpa saqiy (manchay)";
+      return idx === 0 ? "1. Aswan allin" : "2. Iskay ñiqin";
+    }
     if (s.strategy_type === "current_baseline") return "3. Dejar tierra pelada (riesgo)";
     return idx === 0 ? "1. Mejor opción" : "2. Segunda opción";
   };
@@ -44,8 +50,10 @@ export default function ProducerMode({
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Plan de rotación · {zone?.name || currentZoneId}</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">¿Qué conviene sembrar?</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">
+            {tr(lang, "rotationSubtitle")} · {zone?.name || currentZoneId}
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">{tr(lang, "rotationTitle")}</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -55,7 +63,7 @@ export default function ProducerMode({
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
           >
             <LocateFixed className="w-3.5 h-3.5" />
-            <span>Mi GPS</span>
+            <span>{tr(lang, "myGps")}</span>
           </button>
           <button
             type="button"
@@ -63,7 +71,7 @@ export default function ProducerMode({
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer"
           >
             <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span>Mapa</span>
+            <span>{tr(lang, "map")}</span>
           </button>
           <a
             href={`/api/poster/${currentZoneId}`}
@@ -72,7 +80,7 @@ export default function ProducerMode({
             className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
           >
             <Printer className="w-3.5 h-3.5 text-amber-700" />
-            <span>Cartilla</span>
+            <span>{tr(lang, "posterBtn")}</span>
           </a>
         </div>
       </div>
@@ -89,13 +97,14 @@ export default function ProducerMode({
         equipment={equipment}
         onChangeEquipment={onChangeEquipment}
         isAdvanced={isAdvanced}
+        lang={lang}
       />
 
       {/* Single Best Card in Fácil / 3-Option Tabs in Avanzado */}
       {isCalculating ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
           <Loader2 className="w-6 h-6 text-[#0284C7] animate-spin" />
-          <p className="text-sm font-bold text-[#0B2545]">Calculando mejor siembra...</p>
+          <p className="text-sm font-bold text-[#0B2545]">{tr(lang, "calculating")}</p>
         </div>
       ) : ordered.length > 0 && shownStrategy ? (
         <div className="space-y-4">
@@ -131,6 +140,7 @@ export default function ProducerMode({
             onSpeak={onSpeak}
             activeAudioKey={activeAudioKey}
             isAdvanced={isAdvanced}
+            lang={lang}
           />
         </div>
       ) : null}

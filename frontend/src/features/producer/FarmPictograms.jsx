@@ -130,9 +130,9 @@ const WATER_SVG = {
   ),
   deficit_auxiliary: (
     <>
-      <circle cx="22" cy="26" r="12" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2.8" />
-      <path d="M22 20v6l4 3" stroke="#0B2545" strokeWidth="2.6" strokeLinecap="round" />
-      <path d="M40 16c4 5 7 9 7 13a7 7 0 1 1-14 0c0-4 3-8 7-13z" fill="#0284C7" />
+      <circle cx="19" cy="28" r="10.5" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2.6" />
+      <path d="M19 22v6l4 2.5" stroke="#0B2545" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M40 16c4 5 6.5 8.5 6.5 12a6.5 6.5 0 1 1-13 0c0-3.5 2.5-7 6.5-12z" fill="#0284C7" />
     </>
   ),
   full_canal_well: (
@@ -181,8 +181,10 @@ const CHECK_SVG = {
   water: <path d="M24 8c6 8 11 14 11 20a11 11 0 1 1-22 0c0-6 5-12 11-20z" fill="#0284C7" />,
   soil: (
     <>
-      <path d="M8 34c7-4 25-4 32 0v6H8z" fill="#78350F" />
-      <path d="M24 32V16m0 4c-6-4-10 0-10 0s4 4 10 0zm0-2c6-4 10 0 10 0s-4 4-10 0z" stroke="#16A34A" strokeWidth="2.4" fill="#22C55E" strokeLinejoin="round" />
+      <path d="M8 36c7-3 25-3 32 0v6H8z" fill="#78350F" />
+      <path d="M24 31V15" stroke="#15803D" strokeWidth="2.6" strokeLinecap="round" />
+      <ellipse cx="18.5" cy="18.5" rx="4.5" ry="2.6" transform="rotate(-20 18.5 18.5)" fill="#22C55E" />
+      <ellipse cx="29.5" cy="18.5" rx="4.5" ry="2.6" transform="rotate(20 29.5 18.5)" fill="#16A34A" />
     </>
   ),
   frost: (
@@ -193,8 +195,10 @@ const CHECK_SVG = {
   ),
   erosion: (
     <>
-      <path d="M8 38L40 24v16H8z" fill="#A16207" />
-      <path d="M24 30V14m0 5l-6-4m6 4l6-4M24 30l-4 6m4-6l4 6" stroke="#16A34A" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M8 40L40 28v14H8z" fill="#A16207" />
+      <path d="M25 27V11" stroke="#15803D" strokeWidth="2.6" strokeLinecap="round" />
+      <ellipse cx="20" cy="15" rx="4" ry="2.4" transform="rotate(-25 20 15)" fill="#22C55E" />
+      <ellipse cx="30" cy="15" rx="4" ry="2.4" transform="rotate(25 30 15)" fill="#16A34A" />
     </>
   ),
 };

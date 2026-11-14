@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Volume2, LocateFixed, MapPin, Bell, ArrowRight } from "lucide-react";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
+import DayForecastModal from "./DayForecastModal.jsx";
+import { tr } from "../../utils/quechuaI18n.js";
 import {
   WeatherIllustration,
   VisualMeter3,
@@ -19,12 +21,13 @@ export default function EarlyWarningBanner({
   zoneName = "",
   onSpeak,
   activeAudioKey,
-  voiceLang = "qu",
+  voiceLang = "es",
   isAdvanced = false,
   onOpenMap,
   onDetectGps,
 }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   if (!bulletin || !bulletin.current_conditions) return null;
   const cur = bulletin.current_conditions;
@@ -34,9 +37,10 @@ export default function EarlyWarningBanner({
   const zId = bulletin.zone_id || "punata_valle_alto";
   const aKey = `alert_${zId}_${voiceLang}`;
   const shortZone = (zoneName || zId).split("—")[0].split("-")[0].trim();
+  const isQu = voiceLang === "qu";
 
   const handleListen = () => {
-    if (voiceLang === "qu") {
+    if (isQu) {
       onSpeak?.(bulletin.alerts_spoken_qu || "", "qu", aKey, `alert_${zId}`);
     } else {
       const msg = bulletin.alerts_spoken_es || pred.plain_prediction_es || "";
@@ -44,20 +48,21 @@ export default function EarlyWarningBanner({
     }
   };
 
-  const primaryAlert = cleanAlertForFarmer(alerts[0]) || {
+  const primaryAlert = cleanAlertForFarmer(alerts[0], voiceLang) || {
     kind: "stable",
-    bannerPill: "BUEN TIEMPO",
+    bannerPill: isQu ? "ALLIN PACHA" : "BUEN TIEMPO",
     badgeClass: "bg-emerald-100 text-emerald-800",
     borderClass: "border-emerald-300 border-l-emerald-600",
     bgClass: "bg-emerald-50/60",
-    cleanTitle: "Tiempo tranquilo en tu zona",
-    action: "Condiciones estables para tu chacra esta semana.",
+    cleanTitle: isQu ? "Llaqtaykipi pachaqa allillan kachkan" : "Tiempo tranquilo en tu zona",
+    action: isQu ? "Allin pacha chakraykipi llamk'anapaq." : "Condiciones estables para tu chacra esta semana.",
   };
+
   const weatherCards = [
-    { key: "temp", category: "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c), techText: `Hoy: ${cur.temp_c}°C · Mín 7d: ${pred.min_temp_7d_c}°C · Máx: ${pred.max_temp_7d_c}°C` },
-    { key: "soil", category: "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct), techText: `Humedad suelo: ${cur.soil_moisture_top_pct}% · Aire: ${cur.humidity_pct}%` },
-    { key: "rain", category: "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm), isRain: true, techText: `Acumulado 7d: ${pred.total_precip_7d_mm} mm` },
-    { key: "sun", category: "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm), techText: `Evaporación ET0: ${pred.total_et0_7d_mm} mm · Balance: ${pred.net_water_balance_7d_mm} mm` },
+    { key: "temp", category: isQu ? "CHIRI Q'UÑI" : "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c, voiceLang), techText: `${cur.temp_c}°C · Mín: ${pred.min_temp_7d_c}°C · Máx: ${pred.max_temp_7d_c}°C` },
+    { key: "soil", category: isQu ? "ALLPAYKI" : "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct, voiceLang), techText: `${cur.soil_moisture_top_pct}% · ${cur.humidity_pct}%` },
+    { key: "rain", category: isQu ? "PARA 7 P'UNCHAW" : "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm, voiceLang), isRain: true, techText: `${pred.total_precip_7d_mm} mm` },
+    { key: "sun", category: isQu ? "INTI WAN CH'AKI" : "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm, voiceLang), techText: `ET0: ${pred.total_et0_7d_mm} mm · Bal: ${pred.net_water_balance_7d_mm} mm` },
   ];
 
   return (
@@ -65,34 +70,24 @@ export default function EarlyWarningBanner({
       {/* Screen Header */}
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Próximos 7 días</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">Clima hoy · {shortZone}</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">{tr(voiceLang, "next7Days")}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">
+            {tr(voiceLang, "weatherToday")} · {shortZone}
+          </h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onDetectGps}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer"
-          >
+          <button type="button" onClick={onDetectGps} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold transition cursor-pointer">
             <LocateFixed className="w-3.5 h-3.5" />
-            <span>Mi GPS</span>
+            <span>{tr(voiceLang, "myGps")}</span>
           </button>
-          <button
-            type="button"
-            onClick={onOpenMap}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer"
-          >
+          <button type="button" onClick={onOpenMap} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer">
             <MapPin className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span>Mapa</span>
+            <span>{tr(voiceLang, "map")}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer"
-          >
+          <button type="button" onClick={() => setModalOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-[#0B2545] border border-slate-300 text-xs font-bold transition cursor-pointer">
             <Bell className="w-3.5 h-3.5 text-amber-600" />
-            <span>Ver avisos ({alerts.length})</span>
+            <span>{tr(voiceLang, "seeAlerts")}</span>
           </button>
           <button
             type="button"
@@ -104,7 +99,7 @@ export default function EarlyWarningBanner({
             }`}
           >
             <Volume2 className={`w-3.5 h-3.5 ${activeAudioKey === aKey ? "text-sky-300" : "text-[#0284C7]"}`} />
-            <span>{voiceLang === "qu" ? "Qhichwa" : "Escuchar"}</span>
+            <span>{tr(voiceLang, "listenBtn")}</span>
           </button>
         </div>
       </div>
@@ -121,7 +116,7 @@ export default function EarlyWarningBanner({
             </span>
             <h3 className="text-base sm:text-lg font-bold text-[#0B2545] leading-snug">{primaryAlert.cleanTitle}</h3>
             <p className="text-xs sm:text-sm text-slate-700 leading-snug">
-              <strong className="text-[#0B2545]">Qué hacer hoy:</strong> {primaryAlert.action}
+              <strong className="text-[#0B2545]">{tr(voiceLang, "doToday")}</strong> {primaryAlert.action}
             </p>
           </div>
         </div>
@@ -131,7 +126,7 @@ export default function EarlyWarningBanner({
             onClick={() => setModalOpen(true)}
             className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-[#0284C7] cursor-pointer shrink-0 self-start sm:self-center"
           >
-            <span>Ver {alerts.length} avisos con dibujos</span>
+            <span>{tr(voiceLang, "seeAlerts")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         ) : null}
@@ -161,7 +156,7 @@ export default function EarlyWarningBanner({
               </div>
               {c.isRain ? (
                 <div className="space-y-2">
-                  <RainDropsVisual count={c.drops} />
+                  <RainDropsVisual count={c.drops} lang={voiceLang} />
                   <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
                 </div>
               ) : (
@@ -172,30 +167,41 @@ export default function EarlyWarningBanner({
         })}
       </div>
 
-      {/* Graphical 7-Day Forecast Cards */}
+      {/* Interactive Graphical 7-Day Forecast Cards */}
       <div className="space-y-3">
-        <h3 className="text-base font-bold text-[#0B2545]">Pronóstico día por día</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-bold text-[#0B2545]">{tr(voiceLang, "dayByDay")}</h3>
+          <span className="text-xs text-[#0284C7] font-semibold">{tr(voiceLang, "tapForDetail")}</span>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           {days.map((d) => {
-            const dv = describeDayVisual(d);
+            const dv = describeDayVisual(d, voiceLang);
             const tone = TONE_CLASSES[dv.tone] || TONE_CLASSES.emerald;
             return (
-              <div key={d.date} className="p-3 bg-white border border-slate-200 rounded-2xl flex flex-col justify-between gap-2">
-                <div className="flex items-center justify-between gap-1">
+              <button
+                key={d.date}
+                type="button"
+                onClick={() => setSelectedDay(d)}
+                className="p-3 bg-white hover:bg-sky-50/70 hover:border-[#0284C7] border border-slate-200 rounded-2xl flex flex-col justify-between gap-2 text-left transition cursor-pointer group"
+              >
+                <div className="flex items-center justify-between gap-1 w-full">
                   <span className="text-xs font-bold text-[#0B2545]">{d.day_label}</span>
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${tone.badge}`}>{dv.word}</span>
+                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${tone.badge}`}>{dv.word}</span>
                 </div>
-                <WeatherIllustration kind={dv.kind} className="w-11 h-11 mx-auto my-0.5" />
-                <div className="space-y-1">
-                  <RainDropsVisual count={dv.drops} text={dv.rainText} />
-                  <p className="text-[11px] font-medium text-slate-600 truncate">{dv.nightText}</p>
+                <WeatherIllustration kind={dv.kind} className="w-11 h-11 mx-auto my-0.5 group-hover:scale-105 transition-transform" />
+                <div className="space-y-1 w-full">
+                  <RainDropsVisual count={dv.drops} text={dv.rainText} lang={voiceLang} compact={true} />
+                  <p className="text-[11px] font-medium text-slate-600 leading-tight">{dv.nightText}</p>
                   {isAdvanced ? (
                     <p className="text-[10px] font-mono text-slate-500 leading-snug pt-0.5 border-t border-slate-100">
-                      {d.temp_min_c}° / {d.temp_max_c}°C · {d.precip_mm} mm ({d.precip_prob_pct}%)
+                      {d.temp_min_c}°/{d.temp_max_c}° · {d.precip_mm}mm
                     </p>
                   ) : null}
+                  <span className="block text-[10px] font-bold text-[#0284C7] pt-0.5 group-hover:underline">
+                    {tr(voiceLang, "tapForDetail")} →
+                  </span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -206,7 +212,17 @@ export default function EarlyWarningBanner({
         onClose={() => setModalOpen(false)}
         alerts={alerts}
         zoneName={shortZone}
+        lang={voiceLang}
         onListen={handleListen}
+      />
+
+      <DayForecastModal
+        day={selectedDay}
+        dv={selectedDay ? describeDayVisual(selectedDay, voiceLang) : null}
+        zoneName={shortZone}
+        lang={voiceLang}
+        onClose={() => setSelectedDay(null)}
+        onSpeak={onSpeak}
       />
     </div>
   );
