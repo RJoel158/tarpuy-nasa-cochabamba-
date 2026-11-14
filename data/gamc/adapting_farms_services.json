@@ -1,0 +1,27 @@
+{
+  "theme": "Adapting Farms with NASA Data - Agrotecnología y Gestión del Agua para Agricultores",
+  "source": "Alcaldía de Cochabamba — Recursos GAMC / GeoServer WMS proxy",
+  "wms_version": "1.1.1",
+  "services": [
+    {
+      "id": "periurbanos_categorizado",
+      "service_id": "c52066a1-32fd-4925-81e0-c2dcb8f4238f",
+      "title": "Periurbanos · Categorizado",
+      "short_title": "Periurbanos",
+      "description": "Clasificación de periurbanos en crecimiento, consolidados y otros en el área metropolitana de Cochabamba.",
+      "layers": "",
+      "enabled_by_default": true,
+      "bounds": {
+        "south": -17.52,
+        "west": -66.36,
+        "north": -17.30,
+        "east": -65.92
+      },
+      "legend_classes": [
+        { "id": "crecimiento", "label": "Periurbanos en crecimiento", "color": "#7CB342" },
+        { "id": "consolidados", "label": "Periurbanos consolidados", "color": "#E57373" },
+        { "id": "otros", "label": "otros", "color": "#9E9E9E" }
+      ]
+    }
+  ]
+}

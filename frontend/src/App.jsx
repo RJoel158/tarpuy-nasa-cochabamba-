@@ -393,6 +393,7 @@ export default function App() {
                 forceOffline={forceOffline}
                 isOnline={isOnline}
                 tall={true}
+                isAdvanced={isAdvanced}
               />
               {isAdvanced && currentZone?.soil_context ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">

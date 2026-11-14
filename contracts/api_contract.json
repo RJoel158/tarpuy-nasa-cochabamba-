@@ -82,6 +82,43 @@
         }
       }
     },
+    "/api/gamc/services": {
+      "method": "GET",
+      "summary": "List classified GAMC WMS services for the Adapting Farms theme",
+      "description": "Returns the local catalog of municipal GeoServer layers (service_id, legend classes, bounds) without exposing the proxy API key.",
+      "parameters": [],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    },
+    "/api/gamc/wms": {
+      "method": "GET",
+      "summary": "Read-only WMS proxy to GAMC GeoServer (GetMap, GetLegendGraphic, GetFeatureInfo, GetCapabilities)",
+      "description": "Forwards allow-listed WMS parameters and injects the municipal API key server-side. service_id must exist in data/gamc/adapting_farms_services.json.",
+      "parameters": [
+        {
+          "name": "service_id",
+          "in": "query",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "REQUEST",
+          "in": "query",
+          "required": true,
+          "type": "string",
+          "enum": ["GetMap", "GetLegendGraphic", "GetFeatureInfo", "GetCapabilities"]
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "image/png"
+      }
+    },
     "/api/poster/{zone_id}": {
       "method": "GET",
       "summary": "Generate visual printable cartilla/poster metadata",

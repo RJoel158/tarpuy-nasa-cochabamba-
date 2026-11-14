@@ -82,7 +82,8 @@ class RequestGuardMiddleware(BaseHTTPMiddleware):
                 content={"detail": f"Payload too large: exceeds {self.max_body_bytes} bytes"},
             )
 
-        if self.enabled and self.rate_limit_per_minute > 0:
+        skip_rate_limit = request.method == "GET" and request.url.path.rstrip("/") == "/api/gamc/wms"
+        if self.enabled and self.rate_limit_per_minute > 0 and not skip_rate_limit:
             client_ip = request.client.host if request.client else "127.0.0.1"
             now = time.monotonic()
             window_start = now - 60.0
