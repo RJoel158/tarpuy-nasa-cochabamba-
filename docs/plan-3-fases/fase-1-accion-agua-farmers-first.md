@@ -1,6 +1,6 @@
 # Fase 1 — Acción de agua Farmers First
 
-**Estado:** pendiente de ejecución (solo plan)  
+**Estado:** implementada; pendiente de validación de campo, pronunciación y recorrido móvil. Ver [resultados](./fase-1-resultados.md).  
 **Prioridad:** alta — cierra el hueco más visible para productor con baja alfabetización digital  
 **Depende de:** capas GAMC ya integradas (Distritos, Drenaje); boletín `engine/alerts.py`; `fetchDrainageAt` en frontend  
 **Verificación previa:** [00-verificacion-requisitos.md](./00-verificacion-requisitos.md)

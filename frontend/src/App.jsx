@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import Navbar from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
+import FarmerWaterActionCard from "./components/alerts/FarmerWaterActionCard.jsx";
 import FarmerOverview from "./features/producer/FarmerOverview.jsx";
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
@@ -9,7 +10,7 @@ import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone, districtToCommunity } from "./utils/geoUtils.js";
-import { fetchDistrictAt, fetchGamcDistricts } from "./services/gamcClient.js";
+import { fetchDistrictAt, fetchGamcDistricts, fetchDrainageAt } from "./services/gamcClient.js";
 import {
   fetchZones,
   fetchCrops,
@@ -49,6 +50,17 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
+  const [drainage, setDrainage] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    setDrainage(null);
+    if (userPoint && !forceOffline && isOnline) {
+      fetchDrainageAt(userPoint.lat, userPoint.lon)
+        .then((value) => { if (!cancelled) setDrainage(value); })
+        .catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [userPoint, forceOffline, isOnline]);
   const [toasts, setToasts] = useState([]);
   const [activeProcess, setActiveProcess] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -190,6 +202,7 @@ export default function App() {
     pushToast(`Voz (${lang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo aviso", "info");
     const cb = {
       clipKey,
+      neuralOnly: key.startsWith("water_"),
       onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); },
       onError: () => {
         setActiveAudioKey(null);
@@ -208,6 +221,7 @@ export default function App() {
   };
 
   const handleSelectZone = (newZoneId) => {
+    setUserPoint(null);
     applyZoneChange(newZoneId);
     const geo = ZONE_GEO_CATALOG.find((z) => z.id === newZoneId);
     if (geo?.name) setCommunityName(geo.name);
@@ -364,6 +378,12 @@ export default function App() {
 
       <div className="flex-1 min-w-0 flex flex-col justify-between pb-28 lg:pb-8">
         <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+          {activeView === "clima" && <FarmerWaterActionCard
+            bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
+            drainage={drainage} district={userPoint?.district} lang={voiceLang}
+            onSpeak={handleSpeak} activeAudioKey={activeAudioKey}
+            onPlant={() => setActiveView("siembra")} advanced={isAdvanced}
+          />}
           {!isAdvanced && activeView === "clima" && <FarmerOverview
             community={communityName} zone={currentZone}
             crop={crops.find((crop) => crop.crop_id === cropId)} cropId={cropId}
@@ -375,7 +395,7 @@ export default function App() {
             <p className="py-12 text-center text-stone-500 text-sm">Cargando datos...</p>
           ) : activeView === "clima" ? (
             <div className="space-y-6">
-              <EarlyWarningBanner
+              {isAdvanced && <EarlyWarningBanner
                 bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
                 zoneName={communityName || currentZone?.name}
                 onSpeak={handleSpeak}
@@ -384,7 +404,7 @@ export default function App() {
                 isAdvanced={isAdvanced}
                 onOpenMap={() => setActiveView("mapa")}
                 onDetectGps={handleDetectGps}
-              />
+              />}
               <div className="flex justify-end">
                 <button type="button" onClick={() => setActiveView("siembra")} className="w-full sm:w-auto min-h-16 inline-flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
                   <span>{tr(voiceLang, "seeWhatToPlantIn")} {communityName || currentZone?.name || ""}</span>

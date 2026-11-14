@@ -166,6 +166,10 @@ async function speakNeuralVoice(text, cfg, callbacks = {}) {
     }
   } catch {}
   if (session !== playbackSession) return false;
+  if (callbacks.neuralOnly) {
+    callbacks.onError?.(new Error("Native audio unavailable"));
+    return false;
+  }
   onEngine?.("browser_fallback");
   return speakText(text, { lang: cfg.isSpanish ? "es-BO" : "qu-BO",
     rate: cfg.fallbackRate, pitch: cfg.fallbackPitch, ...callbacks });

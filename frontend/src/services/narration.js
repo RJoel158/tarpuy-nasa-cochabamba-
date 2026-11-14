@@ -1,4 +1,10 @@
 import { MONTH_FULL, shortCropWord } from "../features/producer/calendarHelpers.js";
+import { waterActionText } from "../utils/quechuaI18n.js";
+
+export function buildWaterActionNarration(action, lang = "es") {
+  const text = waterActionText(action, lang);
+  return `${text.heading}. ${text.title}. ${text.message} ${text.scope}`;
+}
 
 const number = (value) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) ? Number(value) : null;
 const spokenNumber = (value) => value.toLocaleString("es-BO", { maximumFractionDigits: 1 });

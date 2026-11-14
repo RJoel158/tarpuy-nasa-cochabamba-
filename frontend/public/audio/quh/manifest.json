@@ -1,7 +1,7 @@
 {
   "model": "facebook/mms-tts-quh (Meta AI South Bolivian Quechua VITS)",
   "language_iso": "quh",
-  "clip_count": 15,
+  "clip_count": 22,
   "clips": {
     "guide_punata_valle_alto": {"url": "/audio/quh/guide_punata_valle_alto.wav", "text": "Allillanchu, Punata - Jatun Qhiswa. Satelite qhawasqanmanjina jallp'anchikta waqaychasun. Allin muyuy: Allinchasqa Muyuy: Sara , chanta Avenawan Wikawan qapuq forraje. Sara tukukuptin, avenata wikawan chapuspa tarpuna. Chayqa chiripi wayramanta jallp'ata jark'an, baka uñakunapaq mikhunata qun, jallp'atataq wanuwan junt'achin.", "sha256": "48c5205f6db20f80138c1390f703c9d7bf6d034cca130dadbad7832fe3cfa28d"},
     "alert_punata_valle_alto": {"url": "/audio/quh/alert_punata_valle_alto.wav", "text": "Allillanchu. Kay semanapaq willakuy: Ruphay Allpata Ch'akichishan. Mana Qasa Kanchu Kay Semana. Para P'unchawkuna Hamushan. Allpata qhorawan p'istuy.", "sha256": "8632ee551e006e97c8d450cd15c118c27d1bfcc6254ea801099bf41a45d13cdc"},
@@ -17,6 +17,13 @@
     "alert_mizque_cono_sur": {"url": "/audio/quh/alert_mizque_cono_sur.wav", "text": "Allillanchu. Kay semanapaq willakuy: Ruphay Allpata Ch'akichishan. Sinchi Wayra Hamushan. Mana Qasa Kanchu Kay Semana. Allpata qhorawan p'istuy.", "sha256": "7df844ca1c512d6bc2f0643c04ad957ed67a5b6bfe297909e16f06ef6bbf67fa"},
     "strat_mizque_strat_baseline": {"url": "/audio/quh/strat_mizque_strat_baseline.wav", "text": "Mizquepi jallp'ata ruphaypi q'alata saqeptiyki, intiq ruphaynin allpata ruphachin, kachi llimphitataq lluqsichimun. Jallp'a wañupun.", "sha256": "a09a9528b8e14eeac1e0e29e3ba7f54f15fffad24d9bdda09bd8410f20df405b"},
     "strat_mizque_strat_drought_cover_mulch": {"url": "/audio/quh/strat_mizque_strat_drought_cover_mulch.wav", "text": "Avenawan wikawan jallp'ata qhataykuspaqa, allpa chirillapuni kashan, intip ruphaynin mana phatachinchu, yakutataq sumaqta waqaychan.", "sha256": "5aabbd97611aa0b20e4ac5fda2f88bd632a936c2c470722e20de692dc3f61298"},
-    "strat_mizque_strat_agroforestry_alfalfa_grain": {"url": "/audio/quh/strat_mizque_strat_agroforestry_alfalfa_grain.wav", "text": "Wachukunapi alfalfata kinwawan sarawan tarpuspa, wayra ruphayta jark'anchik, uywakunapaq q'omer qhurata sapa p'unchay jurq'unchik.", "sha256": "8a4df82a50af8cd9a9c57e2dde6058d9d654fc36bdd667d7dfbb89fdbc8b7b57"}
+    "strat_mizque_strat_agroforestry_alfalfa_grain": {"url": "/audio/quh/strat_mizque_strat_agroforestry_alfalfa_grain.wav", "text": "Wachukunapi alfalfata kinwawan sarawan tarpuspa, wayra ruphayta jark'anchik, uywakunapaq q'omer qhurata sapa p'unchay jurq'unchik.", "sha256": "8a4df82a50af8cd9a9c57e2dde6058d9d654fc36bdd667d7dfbb89fdbc8b7b57"},
+    "water_frost": {"url": "/audio/quh/water_frost.wav", "text": "Chakrayki kunan. SUYAY. Chiri tuta hamun: mallkikunata p'istuy; ama paqarin yakuchaychu. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "a6a7ca2f51247d287d8af44fb0ffbfdafcdc8ff251cbf07a73eb3c0d226005b8"},
+    "water_rain": {"url": "/audio/quh/water_rain.wav", "text": "Chakrayki kunan. YAKUMANTA QHAWAKUY. Sinchi para hamun: surk'akunata pichay; ama yarq'ata hunt'achiychu. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "0ca65a841c77ae9c3bec09af7606a1017f726d3fb66af288c29954d10d2c657c"},
+    "water_drainage": {"url": "/audio/quh/water_drainage.wav", "text": "Chakrayki kunan. YAKUMANTA QHAWAKUY. Allpa ch'aran, yakup purinan qayllapi: surk'akunata pichay, yaku lluqsinanpaq. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "3a4e0dd2dc9a8c7a914ba11368c4674c089bcbe2ff40f8fc8f52bf7c1a1aeb51"},
+    "water_dry": {"url": "/audio/quh/water_dry.wav", "text": "Chakrayki kunan. YAKUCHAY. Allpa ch'aki: yarq'a yakuta mañakuy utaq inti yaykuqtin yakuchay; ñawpaqta sap'ita qhaway. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "eef5ae974e7c3d70059e3b029b1f729b725666162dfee66a4ef63eaadc039ec2"},
+    "water_missing": {"url": "/audio/quh/water_missing.wav", "text": "Chakrayki kunan. SUYAY. Mana tukuy yachay kanchu: manaraq yakuchaspa allpata qhaway. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "a646f1fd80e774a7eb4a6b3adfb79538790e315376f604392c9dfbddc1b85d6c"},
+    "water_check": {"url": "/audio/quh/water_check.wav", "text": "Chakrayki kunan. SUYAY. Yakup purinan qayllapi: manaraq yakuchaspa allpata, yarq'ata qhaway. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "27d0e36922ccc8e2b939979a67ba4e09dd9e75493e58fbaa4e293a0cc35d1043"},
+    "water_stable": {"url": "/audio/quh/water_stable.wav", "text": "Chakrayki kunan. SUYAY. Yaku allillan: paqarin chakrata qhaway. Llaqtapa yachaynin. Chakraykipa allpanta qhaway.", "sha256": "070ade7254d92f766b28fdfd0d7a4acdee33941876b1ef03ac169b95d251837f"}
   }
 }
