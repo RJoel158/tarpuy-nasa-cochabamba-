@@ -40,7 +40,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
     { key: "erosion", name: tr(lang, "windRainCheck"), val: tl.erosion || "yellow" },
   ];
 
-  const primaryText = buildStrategyNarration(strategy, lang);
+  const primaryText = buildStrategyNarration(strategy, lang, indicators);
 
 
   return (
@@ -65,6 +65,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       {/* Concise Plain Explanation (prioritizes active language) */}
       <div className="space-y-1.5 text-sm text-slate-800 bg-slate-50 rounded-xl p-4 border border-slate-200">
         <p className="leading-relaxed font-medium text-[#0B2545]">{primaryText}</p>
+        {isQu && <p className="text-xs text-slate-600 mt-2">Guion quechua pendiente de revisión por un hablante de Cochabamba.</p>}
 
       </div>
 
@@ -96,7 +97,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <button
           type="button"
-          onClick={() => onSpeak(buildStrategyNarration(strategy, "qu"), "qu", qKey, `strat_${strategy.strategy_id}`)}
+          onClick={() => onSpeak(buildStrategyNarration(strategy, "qu", indicators), "qu", qKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeAudioKey === qKey ? "bg-[#0B2545] text-white border-[#081B33]" : "bg-sky-50 hover:bg-sky-100 text-[#0B2545] border-sky-300"
           }`}
@@ -106,7 +107,7 @@ export default function RotationCard({ strategy = {}, index = 1, indicators = []
         </button>
         <button
           type="button"
-          onClick={() => onSpeak(buildStrategyNarration(strategy, "es"), "es", esKey, `strat_${strategy.strategy_id}`)}
+          onClick={() => onSpeak(buildStrategyNarration(strategy, "es", indicators), "es", esKey, `strat_${strategy.strategy_id}`)}
           className={`py-3 px-4 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeAudioKey === esKey ? "bg-stone-800 text-white border-stone-900" : "bg-white hover:bg-stone-100 text-stone-900 border-stone-300"
           }`}
