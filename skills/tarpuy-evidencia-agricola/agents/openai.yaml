@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ciencia de datos y agronomía"
+  short_description: "Rastrear evidencia y evaluar rotaciones por zona"
+  default_prompt: "Usa $tarpuy-evidencia-agricola para rastrear evidencia y evaluar rotaciones por zona en Tarpuy."

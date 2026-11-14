@@ -1,0 +1,4 @@
+interface:
+  display_name: "Emprendimiento y piloto"
+  short_description: "Diseñar un piloto medible con productores locales"
+  default_prompt: "Usa $tarpuy-piloto para diseñar un piloto medible con productores locales en Tarpuy."

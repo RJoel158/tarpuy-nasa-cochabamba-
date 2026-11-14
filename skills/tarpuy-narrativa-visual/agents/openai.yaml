@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arte y storytelling"
+  short_description: "Crear escenas y recursos visuales para contar la demo"
+  default_prompt: "Usa $tarpuy-narrativa-visual para crear escenas y recursos visuales para contar la demo en Tarpuy."

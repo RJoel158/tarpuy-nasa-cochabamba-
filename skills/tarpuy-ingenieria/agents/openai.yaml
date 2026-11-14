@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ingeniería y desarrollo"
+  short_description: "Implementar y probar cambios de extremo a extremo"
+  default_prompt: "Usa $tarpuy-ingenieria para implementar y probar cambios de extremo a extremo en Tarpuy."

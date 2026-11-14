@@ -1,0 +1,4 @@
+interface:
+  display_name: "Comunicación y pitch"
+  short_description: "Explicar el producto a productores, técnicos y jurado"
+  default_prompt: "Usa $tarpuy-comunicacion para explicar el producto a productores, técnicos y jurado en Tarpuy."

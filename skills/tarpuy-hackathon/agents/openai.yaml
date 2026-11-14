@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aprendizaje y primer hackathon"
+  short_description: "Planear, practicar y cerrar una demo individual"
+  default_prompt: "Usa $tarpuy-hackathon para planear, practicar y cerrar una demo individual en Tarpuy."
