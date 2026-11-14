@@ -370,7 +370,7 @@ export default function App() {
 
       <div className="flex-1 min-w-0 flex flex-col justify-between pb-28 lg:pb-8">
         <main data-producer-mode={!isAdvanced} className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 space-y-6">
-          {activeView === "clima" && <FarmerWaterActionCard
+          {isAdvanced && activeView === "clima" && <FarmerWaterActionCard
             bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
             drainage={waterLocation?.point === userPoint ? waterLocation?.drainage : null}
             district={waterLocation?.point === userPoint ? waterLocation?.district : null}
@@ -383,6 +383,13 @@ export default function App() {
           ) : !isAdvanced && ["clima","siembra"].includes(activeView) ? (
             <React.Suspense fallback={<p role="status">Cargando la propuesta de Liz…</p>}>
               <LizComparison screen={activeView}
+                waterPanel={<FarmerWaterActionCard
+                  bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null}
+                  drainage={waterLocation?.point === userPoint ? waterLocation?.drainage : null}
+                  district={waterLocation?.point === userPoint ? waterLocation?.district : null}
+                  lang={voiceLang} onSpeak={handleSpeak} activeAudioKey={activeAudioKey}
+                  onPlant={() => setActiveView("siembra")} advanced={false}
+                />}
                 weatherProps={{bulletin:alertBulletin?.zone_id === zoneId ? alertBulletin : null,zoneName:communityName,onSpeak:handleSpeak,activeAudioKey,voiceLang,isAdvanced:false,onOpenMap:()=>setActiveView("mapa"),onDetectGps:handleDetectGps}}
                 sowingProps={{zone:currentZone,activeZoneId:zoneId,crops,cropId,onChangeCrop:handleChangeCrop,priorities,onChangePriorities:handleChangePriorities,irrigation,onChangeIrrigation:handleChangeIrrigation,equipment,onChangeEquipment:handleChangeEquipment,strategies:recData?.zone_id === zoneId && recData?.current_crop_id === cropId ? recData.strategies || [] : [],onSpeak:handleSpeak,activeAudioKey,isCalculating:isCalculating || loading,isAdvanced:false,lang:voiceLang,onDetectGps:handleDetectGps,onOpenMap:()=>setActiveView("mapa")}}/>
             </React.Suspense>
