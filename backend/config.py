@@ -21,6 +21,7 @@ def _load_dotenv(path: Path) -> None:
 
 
 _load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+_load_dotenv(Path(__file__).resolve().parent / ".env")
 
 
 @dataclass(frozen=True)
