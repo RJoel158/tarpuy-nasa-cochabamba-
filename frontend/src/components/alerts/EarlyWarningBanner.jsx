@@ -1,22 +1,18 @@
 import React, { useState } from "react";
-import { CloudRain, ThermometerSnowflake, Volume2, AlertTriangle, CheckCircle2, LocateFixed, MapPin, Bell } from "lucide-react";
+import { Volume2, LocateFixed, MapPin, Bell, ArrowRight } from "lucide-react";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
-
-const DAY_TAG = {
-  frost_risk: "text-rose-700 bg-rose-50",
-  chill_caution: "text-amber-800 bg-amber-50",
-  rain_window: "text-sky-800 bg-sky-50",
-  dry_wind: "text-orange-800 bg-orange-50",
-  stable: "text-slate-600 bg-slate-100",
-};
-
-const DAY_WORD = {
-  frost_risk: "Helada",
-  chill_caution: "Frío",
-  rain_window: "Lluvia",
-  dry_wind: "Viento",
-  stable: "Normal",
-};
+import {
+  WeatherIllustration,
+  VisualMeter3,
+  RainDropsVisual,
+  TONE_CLASSES,
+  describeTempCard,
+  describeSoilCard,
+  describeRainCard,
+  describeSunCard,
+  describeDayVisual,
+  cleanAlertForFarmer,
+} from "./WeatherPictograms.jsx";
 
 export default function EarlyWarningBanner({
   bulletin,
@@ -47,7 +43,21 @@ export default function EarlyWarningBanner({
     }
   };
 
-  const topAlert = alerts[0];
+  const primaryAlert = cleanAlertForFarmer(alerts[0]) || {
+    kind: "stable",
+    bannerPill: "BUEN TIEMPO",
+    badgeClass: "bg-emerald-100 text-emerald-800",
+    borderClass: "border-emerald-300 border-l-emerald-600",
+    bgClass: "bg-emerald-50/60",
+    cleanTitle: "Tiempo tranquilo en tu zona",
+    action: "Condiciones estables para tu chacra esta semana.",
+  };
+  const weatherCards = [
+    { key: "temp", category: "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c) },
+    { key: "soil", category: "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct) },
+    { key: "rain", category: "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm), isRain: true },
+    { key: "sun", category: "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm) },
+  ];
 
   return (
     <div className="space-y-5">
@@ -98,75 +108,85 @@ export default function EarlyWarningBanner({
         </div>
       </div>
 
-      {/* 4 Concise Key Numbers */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 bg-white border border-slate-200 rounded-xl divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
-        <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500">Temperatura</span>
-          <p className="text-3xl font-bold text-[#0B2545] mt-1">{cur.temp_c}°C</p>
-          <span className="text-xs text-slate-500">Mín: {pred.min_temp_7d_c}°C</span>
+      {/* Top Graphical Warning Banner (Semáforo del Campo) */}
+      <div className={`rounded-2xl border border-l-4 ${primaryAlert.borderClass} ${primaryAlert.bgClass} p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+          <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+            <WeatherIllustration kind={primaryAlert.kind} className="w-12 h-12" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${primaryAlert.badgeClass}`}>
+              {primaryAlert.bannerPill}
+            </span>
+            <h3 className="text-base sm:text-lg font-bold text-[#0B2545] leading-snug">{primaryAlert.cleanTitle}</h3>
+            <p className="text-xs sm:text-sm text-slate-700 leading-snug">
+              <strong className="text-[#0B2545]">Qué hacer hoy:</strong> {primaryAlert.action}
+            </p>
+          </div>
         </div>
-        <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500">Humedad tierra</span>
-          <p className="text-3xl font-bold text-[#0B2545] mt-1">{cur.soil_moisture_top_pct}%</p>
-          <span className="text-xs text-slate-500">Aire: {cur.humidity_pct}%</span>
-        </div>
-        <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500">Lluvia 7 días</span>
-          <p className="text-3xl font-bold text-[#0284C7] mt-1">{pred.total_precip_7d_mm} mm</p>
-          <span className="text-xs text-slate-500">Acumulado semanal</span>
-        </div>
-        <div className="p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500">Sol que seca</span>
-          <p className="text-3xl font-bold text-amber-700 mt-1">{pred.total_et0_7d_mm} mm</p>
-          <span className="text-xs text-slate-500">Balance: {pred.net_water_balance_7d_mm} mm</span>
-        </div>
-      </div>
-
-      {/* Single Concise Tip Bar (Replaces Stacked Alert Clutter) */}
-      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs sm:text-sm text-slate-800 flex items-center gap-2 min-w-0 flex-1">
-          {topAlert?.severity === "info" ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-          ) : (
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-          )}
-          <span className="truncate font-medium">
-            {topAlert?.action_es || "Condiciones estables para tu terreno esta semana."}
-          </span>
-        </p>
         {alerts.length > 0 ? (
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="text-xs font-bold text-[#0284C7] hover:text-[#0369A1] cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-[#0284C7] cursor-pointer shrink-0 self-start sm:self-center"
           >
-            Ver detalles ({alerts.length}) →
+            <span>Ver {alerts.length} avisos con dibujos</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         ) : null}
       </div>
 
-      {/* 7-Day Forecast Strip */}
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-[#0B2545]">Pronóstico 7 días</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
-          {days.map((d) => (
-            <div key={d.date} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-xs font-bold text-[#0B2545]">{d.day_label}</span>
-                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${DAY_TAG[d.day_status] || DAY_TAG.stable}`}>
-                  {DAY_WORD[d.day_status] || "Normal"}
-                </span>
+      {/* 4 Graphical Weather Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {weatherCards.map((c) => {
+          const tone = TONE_CLASSES[c.tone] || TONE_CLASSES.sky;
+          return (
+            <div key={c.key} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <WeatherIllustration kind={c.kind} className="w-12 h-12 shrink-0" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">{c.category}</span>
+                </div>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tone.badge}`}>{c.badge}</span>
               </div>
-              <div className="flex items-center gap-1 text-sm font-bold text-slate-800">
-                <ThermometerSnowflake className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                <span>{d.temp_min_c}° / {d.temp_max_c}°</span>
+              <div>
+                <p className="text-lg font-bold text-[#0B2545] leading-tight">{c.title}</p>
+                <p className="text-xs text-slate-600 mt-0.5">{c.advice}</p>
               </div>
-              <div className="flex items-center gap-1 text-xs text-slate-600">
-                <CloudRain className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                <span>{d.precip_mm} mm ({d.precip_prob_pct}%)</span>
-              </div>
+              {c.isRain ? (
+                <div className="space-y-2">
+                  <RainDropsVisual count={c.drops} />
+                  <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+                </div>
+              ) : (
+                <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+              )}
             </div>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Graphical 7-Day Forecast Cards */}
+      <div className="space-y-3">
+        <h3 className="text-base font-bold text-[#0B2545]">Pronóstico día por día</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+          {days.map((d) => {
+            const dv = describeDayVisual(d);
+            const tone = TONE_CLASSES[dv.tone] || TONE_CLASSES.emerald;
+            return (
+              <div key={d.date} className="p-3 bg-white border border-slate-200 rounded-2xl flex flex-col justify-between gap-2">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs font-bold text-[#0B2545]">{d.day_label}</span>
+                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${tone.badge}`}>{dv.word}</span>
+                </div>
+                <WeatherIllustration kind={dv.kind} className="w-11 h-11 mx-auto my-0.5" />
+                <div className="space-y-1">
+                  <RainDropsVisual count={dv.drops} text={dv.rainText} />
+                  <p className="text-[11px] font-medium text-slate-600 truncate">{dv.nightText}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
