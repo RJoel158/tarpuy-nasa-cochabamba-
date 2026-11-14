@@ -1,6 +1,7 @@
 import React from "react";
 import { Loader2, CheckCircle2, AlertTriangle, Info, X, Volume2 } from "lucide-react";
 import { WeatherIllustration, cleanAlertForFarmer } from "../alerts/WeatherPictograms.jsx";
+import { tr } from "../../utils/quechuaI18n.js";
 
 const TOAST_STYLE = {
   success: { border: "border-l-emerald-600", Icon: CheckCircle2, color: "text-emerald-700" },
@@ -68,14 +69,14 @@ export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast
   );
 }
 
-export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListen }) {
+export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = "es", onListen }) {
   if (!open) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Avisos para tu chacra"
+      aria-label={tr(lang, "alertsModalTitle")}
       className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -85,13 +86,13 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
       >
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0284C7]">Detalle de la semana</p>
-            <h3 className="text-base font-bold text-[#0B2545]">Avisos · {zoneName}</h3>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0284C7]">{tr(lang, "alertsModalSub")}</p>
+            <h3 className="text-base font-bold text-[#0B2545]">{tr(lang, "seeAlerts")} · {zoneName}</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={tr(lang, "closeBtn")}
             className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -100,7 +101,7 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
 
         <div className="p-5 space-y-3 overflow-y-auto">
           {alerts.map((al) => {
-            const vis = cleanAlertForFarmer(al);
+            const vis = cleanAlertForFarmer(al, lang);
             if (!vis) return null;
             return (
               <div
@@ -108,7 +109,7 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
                 className={`p-3.5 rounded-2xl border border-l-4 ${vis.borderClass} ${vis.bgClass} flex items-start gap-3`}
               >
                 <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                  <WeatherIllustration kind={vis.kind} className="w-11 h-11" />
+                  <WeatherIllustration kind={vis.kind} animated={true} className="w-11 h-11" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -119,7 +120,7 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
                   </div>
                   <p className="text-sm font-bold text-[#0B2545] leading-snug">{vis.cleanTitle}</p>
                   <div className="bg-white/90 border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-700 leading-relaxed">
-                    <strong className="text-[#0B2545]">Qué hacer en tu chacra:</strong> {vis.action}
+                    <strong className="text-[#0B2545]">{tr(lang, "doToday")}</strong> {vis.action}
                   </div>
                 </div>
               </div>
@@ -134,14 +135,14 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold cursor-pointer"
           >
             <Volume2 className="w-3.5 h-3.5" />
-            <span>Escuchar</span>
+            <span>{tr(lang, "listenBtn")}</span>
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold cursor-pointer"
           >
-            Cerrar
+            {tr(lang, "closeBtn")}
           </button>
         </div>
       </div>

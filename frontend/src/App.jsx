@@ -18,6 +18,7 @@ import {
 } from "./services/apiClient.js";
 import { loadDeviceSnapshotSync, getDeviceDbStats } from "./services/embeddedDb.js";
 import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
+import { tr } from "./utils/quechuaI18n.js";
 
 export default function App() {
   const initialSnapRef = useRef(loadDeviceSnapshotSync());
@@ -42,7 +43,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState(
     initialSnap?.sizeKb ? `Base local (${initialSnap.sizeKb} KB)` : "Sincronizando base local..."
   );
-  const [voiceLang, setVoiceLang] = useState("qu");
+  const [voiceLang, setVoiceLang] = useState("es");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(null);
@@ -292,6 +293,17 @@ export default function App() {
     );
   };
 
+  const handleChangeVoiceLang = (nextLang) => {
+    if (nextLang === voiceLang) return;
+    handleStopAudio();
+    setVoiceLang(nextLang);
+    pushToast(
+      nextLang === "qu" ? "Simi: Qhichwa (Cochabamba)" : "Idioma: Castellano",
+      nextLang === "qu" ? "Qillqakuna, uyarinapas qhichwapi" : "Textos y voz en castellano",
+      "info"
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
       <Navbar
@@ -305,7 +317,7 @@ export default function App() {
         onSelectCommunity={handleSelectCommunity}
         onDetectGps={handleDetectGps}
         voiceLang={voiceLang}
-        onChangeVoiceLang={setVoiceLang}
+        onChangeVoiceLang={handleChangeVoiceLang}
         isSpeaking={isSpeaking}
         onSpeakGuide={handleSpeakGuide}
         onStopAudio={handleStopAudio}
@@ -336,7 +348,7 @@ export default function App() {
               />
               <div className="flex justify-end">
                 <button type="button" onClick={() => setActiveView("siembra")} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold cursor-pointer">
-                  <span>Ver qué sembrar en {currentZone?.name || "tu zona"}</span>
+                  <span>{tr(voiceLang, "seeWhatToPlantIn")} {communityName || currentZone?.name || ""}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -359,14 +371,15 @@ export default function App() {
               activeAudioKey={activeAudioKey}
               isCalculating={isCalculating}
               isAdvanced={isAdvanced}
+              lang={voiceLang}
               onDetectGps={handleDetectGps}
               onOpenMap={() => setActiveView("mapa")}
             />
           ) : activeView === "mapa" ? (
             <div className="space-y-6">
               <div className="border-b border-stone-200 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Ubicación y suelo</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Mapa de comunidades · {currentZone?.name || ""}</h2>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">{tr(voiceLang, "mapSubtitle")}</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">{tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}</h2>
               </div>
               <CochabambaMap
                 zones={zones}
