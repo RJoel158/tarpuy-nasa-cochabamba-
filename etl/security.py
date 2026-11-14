@@ -4,7 +4,12 @@ import hashlib
 import math
 from urllib.parse import urlsplit
 
-ALLOWED_NASA_HOSTS: frozenset[str] = frozenset({"power.larc.nasa.gov"})
+ALLOWED_NASA_HOSTS: frozenset[str] = frozenset({
+    "power.larc.nasa.gov",
+    "api.open-meteo.com",
+    "dpc-mmstts.hf.space",
+})
+ALLOWED_EXTERNAL_HOSTS = ALLOWED_NASA_HOSTS
 
 # Bounding box for Bolivia's agricultural zones
 BOLIVIA_LAT_MIN = -23.0
