@@ -1,19 +1,26 @@
 import React from "react";
-import { AlertTriangle, CheckCircle2, CloudRain, ThermometerSnowflake, Volume2, Wind, Calendar } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/Primitives.jsx";
+import { CloudRain, ThermometerSnowflake, Volume2, AlertTriangle, CheckCircle2 } from "lucide-react";
 
-const SEV_STYLES = {
-  critical: { wrap: "bg-rose-50 border-rose-400 text-rose-950", badge: "bg-rose-600 text-white", label: "¡ALERTA URGENTE!" },
-  warning: { wrap: "bg-amber-50 border-amber-400 text-amber-950", badge: "bg-amber-600 text-white", label: "¡CUIDADO HOY!" },
-  info: { wrap: "bg-emerald-50 border-emerald-300 text-emerald-950", badge: "bg-emerald-700 text-white", label: "BUENA SEÑAL" },
+const SEV_BORDER = {
+  critical: "border-l-rose-600 bg-rose-50/50 text-stone-900",
+  warning: "border-l-amber-500 bg-amber-50/50 text-stone-900",
+  info: "border-l-emerald-600 bg-white text-stone-900",
 };
 
-const DAY_PILLS = {
-  frost_risk: { bg: "bg-rose-100 text-rose-900 border-rose-300", tag: "Helada" },
-  chill_caution: { bg: "bg-amber-100 text-amber-900 border-amber-300", tag: "Frío" },
-  rain_window: { bg: "bg-sky-100 text-sky-900 border-sky-300", tag: "Lluvia" },
-  dry_wind: { bg: "bg-orange-100 text-orange-900 border-orange-300", tag: "Viento" },
-  stable: { bg: "bg-stone-100 text-stone-700 border-stone-200", tag: "Normal" },
+const DAY_TAG = {
+  frost_risk: "text-rose-700 bg-rose-50",
+  chill_caution: "text-amber-800 bg-amber-50",
+  rain_window: "text-sky-800 bg-sky-50",
+  dry_wind: "text-orange-800 bg-orange-50",
+  stable: "text-stone-600 bg-stone-100",
+};
+
+const DAY_WORD = {
+  frost_risk: "Helada",
+  chill_caution: "Frío",
+  rain_window: "Lluvia",
+  dry_wind: "Viento",
+  stable: "Normal",
 };
 
 export default function EarlyWarningBanner({ bulletin, zoneName = "", onSpeak, activeAudioKey, voiceLang = "qu" }) {
@@ -25,117 +32,106 @@ export default function EarlyWarningBanner({ bulletin, zoneName = "", onSpeak, a
   const zId = bulletin.zone_id || "punata_valle_alto";
   const aKey = `alert_${zId}_${voiceLang}`;
 
-  const handleListenAlert = () => {
+  const handleListen = () => {
     if (voiceLang === "qu") {
       onSpeak?.(bulletin.alerts_spoken_qu || "", "qu", aKey, `alert_${zId}`);
     } else {
       const top = alerts[0];
-      const text = `${pred.plain_prediction_es || ""} ${top ? `${top.title_es}. Qué hacer hoy: ${top.action_es}` : ""}`;
-      onSpeak?.(text, "es", aKey);
+      const msg = `${pred.plain_prediction_es || ""} ${top ? `${top.title_es}. ${top.action_es}` : ""}`;
+      onSpeak?.(msg, "es", aKey);
     }
   };
 
   return (
-    <Card className="border-amber-300/90 bg-gradient-to-br from-white via-amber-50/25 to-sky-50/30 shadow-sm">
-      <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-6">
+      {/* Screen Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <CardTitle className="flex items-center gap-2 text-stone-900">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <span>Clima de Hoy, Alertas y Pronóstico a 7 Días — {zoneName || zId}</span>
-          </CardTitle>
-          <p className="text-xs text-stone-600 mt-0.5">
-            Medición en tiempo real y predicción de lluvia, helada, calor y humedad en la tierra
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Reporte en vivo · 7 días</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">Clima hoy en {zoneName || zId}</h2>
         </div>
-
         <button
           type="button"
-          onClick={handleListenAlert}
-          className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+          onClick={handleListen}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition cursor-pointer ${
             activeAudioKey === aKey
-              ? "bg-amber-600 text-white border-amber-700 animate-pulse"
-              : "bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300"
+              ? "bg-[#0B2545] text-white border-[#081B33]"
+              : "bg-white hover:bg-slate-100 text-slate-900 border-slate-300"
           }`}
         >
-          <Volume2 className="w-4 h-4 shrink-0" />
-          <span>{voiceLang === "qu" ? "Escuchar Avisos en Qhichwa" : "Escuchar Avisos de la Semana"}</span>
+          <Volume2 className={`w-4 h-4 ${activeAudioKey === aKey ? "text-sky-300" : "text-[#0284C7]"}`} />
+          <span>{voiceLang === "qu" ? "Escuchar en Qhichwa" : "Escuchar avisos"}</span>
         </button>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4">
-        {/* 4 Live Current + 7-day Forecast Summary Tiles */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
-          <div className="p-3 rounded-xl bg-white border border-stone-200">
-            <span className="text-stone-500 font-semibold block">Calor / Frío Ahora</span>
-            <strong className="text-base sm:text-lg font-extrabold text-stone-900">{cur.temp_c}°C</strong>
-            <span className="text-[11px] text-stone-500 block">Mínima 7 días: {pred.min_temp_7d_c}°C</span>
-          </div>
-          <div className="p-3 rounded-xl bg-white border border-stone-200">
-            <span className="text-stone-500 font-semibold block">Agua en Suelo Superficial</span>
-            <strong className="text-base sm:text-lg font-extrabold text-sky-700">{cur.soil_moisture_top_pct}%</strong>
-            <span className="text-[11px] text-stone-500 block">Humedad aire: {cur.humidity_pct}%</span>
-          </div>
-          <div className="p-3 rounded-xl bg-white border border-stone-200">
-            <span className="text-stone-500 font-semibold block">Lluvia Esperada (7 días)</span>
-            <strong className="text-base sm:text-lg font-extrabold text-emerald-700">{pred.total_precip_7d_mm} mm</strong>
-            <span className="text-[11px] text-stone-500 block">Suma pronóstico semanal</span>
-          </div>
-          <div className="p-3 rounded-xl bg-white border border-stone-200">
-            <span className="text-stone-500 font-semibold block">Agua que Seca el Sol</span>
-            <strong className="text-base sm:text-lg font-extrabold text-amber-700">{pred.total_et0_7d_mm} mm</strong>
-            <span className="text-[11px] font-bold text-rose-700 block">Balance: {pred.net_water_balance_7d_mm} mm</span>
-          </div>
+      {/* 4 Clean Key Numbers */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 bg-white border border-stone-200 rounded-xl divide-y lg:divide-y-0 lg:divide-x divide-stone-200">
+        <div className="p-4 sm:p-5">
+          <span className="text-xs font-medium text-stone-500">Temperatura ahora</span>
+          <p className="text-3xl font-bold text-stone-900 mt-1">{cur.temp_c}°C</p>
+          <span className="text-xs text-stone-500">Mín. semana: {pred.min_temp_7d_c}°C</span>
         </div>
+        <div className="p-4 sm:p-5">
+          <span className="text-xs font-medium text-slate-500">Humedad en tierra</span>
+          <p className="text-3xl font-bold text-[#0B2545] mt-1">{cur.soil_moisture_top_pct}%</p>
+          <span className="text-xs text-slate-500">Aire: {cur.humidity_pct}%</span>
+        </div>
+        <div className="p-4 sm:p-5">
+          <span className="text-xs font-medium text-slate-500">Lluvia esperada</span>
+          <p className="text-3xl font-bold text-[#0284C7] mt-1">{pred.total_precip_7d_mm} mm</p>
+          <span className="text-xs text-slate-500">En los próximos 7 días</span>
+        </div>
+        <div className="p-4 sm:p-5">
+          <span className="text-xs font-medium text-stone-500">Sol que seca</span>
+          <p className="text-3xl font-bold text-amber-700 mt-1">{pred.total_et0_7d_mm} mm</p>
+          <span className="text-xs text-stone-600">Balance: {pred.net_water_balance_7d_mm} mm</span>
+        </div>
+      </div>
 
-        {/* Active Alerts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {alerts.map((al) => {
-            const st = SEV_STYLES[al.severity] || SEV_STYLES.info;
-            return (
-              <div key={al.id} className={`p-3.5 rounded-xl border-l-4 border ${st.wrap} space-y-1.5`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${st.badge}`}>{st.label}</span>
-                  <span className="text-[11px] font-semibold italic opacity-80">{al.title_qu}</span>
-                </div>
-                <h4 className="text-sm font-bold leading-snug">{al.title_es}</h4>
-                <p className="text-xs leading-relaxed opacity-90">{al.message_es}</p>
-                <div className="pt-1.5 border-t border-black/10 text-xs font-semibold flex items-start gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>Qué hacer hoy: {al.action_es}</span>
+      {/* Weekly Advisories */}
+      <div className="space-y-3">
+        <h3 className="text-base font-bold text-stone-900">Avisos para tu chacra</h3>
+        <div className="space-y-2.5">
+          {alerts.map((al) => (
+            <div key={al.id} className={`p-4 rounded-xl border border-stone-200 border-l-4 ${SEV_BORDER[al.severity] || SEV_BORDER.info}`}>
+              <div className="flex items-start gap-3">
+                {al.severity === "info"
+                  ? <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                  : <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />}
+                <div className="space-y-1">
+                  <p className="text-sm sm:text-base font-bold text-stone-900">{al.title_es}</p>
+                  <p className="text-sm text-stone-700">{al.action_es}</p>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* 7-Day Forecast Mini Strip */}
-        <div className="space-y-1.5">
-          <span className="text-[11px] font-bold text-stone-600 flex items-center gap-1.5 uppercase tracking-wide">
-            <Calendar className="w-3.5 h-3.5" />
-            Pronóstico Día por Día (Próximos 7 Días)
-          </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-            {days.map((d) => {
-              const pill = DAY_PILLS[d.day_status] || DAY_PILLS.stable;
-              return (
-                <div key={d.date} className="p-2 rounded-xl bg-white border border-stone-200 text-[11px] space-y-1">
-                  <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>{d.day_label}</span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${pill.bg}`}>{pill.tag}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-stone-700">
-                    <span className="inline-flex items-center gap-0.5"><ThermometerSnowflake className="w-3 h-3 text-rose-500" />{d.temp_min_c}°/{d.temp_max_c}°</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-stone-600">
-                    <span className="inline-flex items-center gap-0.5"><CloudRain className="w-3 h-3 text-sky-600" />{d.precip_mm} mm ({d.precip_prob_pct}%)</span>
-                    <span className="inline-flex items-center gap-0.5"><Wind className="w-3 h-3 text-stone-400" />{Math.round(d.wind_kmh)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {/* 7-Day Forecast Strip */}
+      <div className="space-y-3">
+        <h3 className="text-base font-bold text-stone-900">Pronóstico día por día</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+          {days.map((d) => (
+            <div key={d.date} className="p-3 bg-white border border-stone-200 rounded-xl space-y-2">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-xs font-bold text-stone-900">{d.day_label}</span>
+                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${DAY_TAG[d.day_status] || DAY_TAG.stable}`}>
+                  {DAY_WORD[d.day_status] || "Normal"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-sm font-bold text-stone-800">
+                <ThermometerSnowflake className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span>{d.temp_min_c}° / {d.temp_max_c}°</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-stone-600">
+                <CloudRain className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                <span>{d.precip_mm} mm ({d.precip_prob_pct}%)</span>
+              </div>
+            </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

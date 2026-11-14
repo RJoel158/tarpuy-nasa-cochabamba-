@@ -1,11 +1,31 @@
 import React from "react";
-import { Sprout, Satellite, Wifi, WifiOff, Download } from "lucide-react";
+import { CloudSun, Sprout, MapPin, Database, Volume2, Square, Download, Wifi, WifiOff } from "lucide-react";
+
+const NAV_ITEMS = [
+  { id: "clima", label: "Clima hoy", Icon: CloudSun },
+  { id: "siembra", label: "Qué sembrar", Icon: Sprout },
+  { id: "mapa", label: "Mapa", Icon: MapPin },
+  { id: "datos", label: "Datos NASA", Icon: Database },
+];
+
+const SHORT_ZONES = [
+  { id: "punata_valle_alto", label: "Punata · Valle Alto" },
+  { id: "tapacari_zona_andina", label: "Tapacarí · Altura" },
+  { id: "mizque_cono_sur", label: "Mizque · Cono Sur" },
+];
 
 export default function Navbar({
-  mode,
-  onChangeMode,
-  isOnline,
-  forceOffline,
+  activeView = "clima",
+  onChangeView,
+  zoneId = "punata_valle_alto",
+  onSelectZone,
+  voiceLang = "qu",
+  onChangeVoiceLang,
+  isSpeaking = false,
+  onSpeakGuide,
+  onStopAudio,
+  isOnline = true,
+  forceOffline = false,
   onToggleOffline,
   onDownloadBundle,
   cachedCount = 0,
@@ -14,109 +34,146 @@ export default function Navbar({
   const onlineActive = !forceOffline && isOnline;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-stone-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Official Logos and App Identity */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="flex items-center gap-1.5 bg-stone-50 p-1 rounded-xl border border-stone-200">
-            <img
-              src="/logos/nasa-space-apps.png"
-              alt="NASA Space Apps Challenge"
-              className="h-7 sm:h-8 w-auto object-contain"
-            />
-            <div className="h-5 w-px bg-stone-200" aria-hidden="true" />
-            <img
-              src="/logos/alcaldia-cochabamba-celeste.png"
-              alt="Alcaldía de Cochabamba"
-              className="h-7 sm:h-8 w-7 sm:w-8 object-cover rounded-md"
-            />
-            <img
-              src="/logos/alcaldia-cochabamba-escudo.jpg"
-              alt="GAMC Escudo"
-              className="h-7 sm:h-8 w-auto object-contain rounded-xs"
-            />
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 bg-[#0B2545] text-slate-100 min-h-screen sticky top-0 max-h-screen justify-between p-5 border-r border-[#081B33]">
+        <div className="space-y-6">
+          {/* Brand & Logos */}
+          <div className="space-y-3 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-2.5 bg-white rounded-lg px-2.5 py-1.5 w-fit shadow-xs">
+              <img src="/logos/nasa-space-apps.png" alt="NASA Space Apps" className="h-6 w-auto object-contain" />
+              <span className="h-5 w-px bg-slate-200" aria-hidden="true" />
+              <img src="/logos/alcaldia-cochabamba-escudo.jpg" alt="Alcaldía de Cochabamba" className="h-7 w-auto object-contain" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight text-white">Tarpuy Cochabamba</h1>
+              <p className="text-xs text-sky-300/90">Guía agrícola por satélite</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm sm:text-base font-extrabold text-stone-900 leading-tight">
-              Tarpuy Cochabamba
-            </h1>
-            <p className="text-[10px] sm:text-[11px] font-medium text-emerald-700">
-              NASA Earth Data • GAMC
-            </p>
+
+          {/* Single Community Switcher */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Comunidad</span>
+            <div className="space-y-1">
+              {SHORT_ZONES.map((z) => (
+                <button
+                  key={z.id}
+                  type="button"
+                  onClick={() => onSelectZone(z.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition cursor-pointer ${
+                    zoneId === z.id
+                      ? "bg-[#009FE3] text-white font-semibold shadow-xs"
+                      : "text-slate-300 hover:bg-white/10"
+                  }`}
+                >
+                  {z.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* 4 Decentralized Screens */}
+          <nav className="space-y-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">Secciones</span>
+            {NAV_ITEMS.map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onChangeView(id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition cursor-pointer ${
+                  activeView === id
+                    ? "bg-white text-[#0B2545] font-bold shadow-xs"
+                    : "text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 ${activeView === id ? "text-[#009FE3]" : ""}`} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
         </div>
 
-        {/* Center: Segmented Switcher */}
-        <nav className="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200">
-          <button
-            type="button"
-            onClick={() => onChangeMode("producer")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              mode === "producer"
-                ? "bg-emerald-700 text-white shadow-xs"
-                : "text-stone-600 hover:text-stone-900"
-            }`}
-          >
-            <Sprout className="w-4 h-4" />
-            <span>Guía para tu Chacra</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onChangeMode("technical")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              mode === "technical"
-                ? "bg-[#0B3D91] text-white shadow-xs"
-                : "text-stone-600 hover:text-stone-900"
-            }`}
-          >
-            <Satellite className="w-4 h-4" />
-            <span>Datos del Satélite NASA</span>
-          </button>
-        </nav>
-
-        {/* Right: Connectivity & Offline Cache Controls */}
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              onlineActive
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                : "bg-amber-50 text-amber-800 border-amber-200"
-            }`}
-          >
-            {onlineActive ? (
-              <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-            ) : (
-              <WifiOff className="w-3.5 h-3.5 text-amber-600" />
-            )}
-            <span className="hidden sm:inline">
-              {onlineActive ? "Con Internet" : "Sin Internet"}
-            </span>
-          </span>
+        {/* Audio & Offline Controls */}
+        <div className="space-y-3 pt-4 border-t border-white/10 text-xs">
+          <div className="flex rounded-lg bg-black/25 p-1">
+            {[{ id: "qu", label: "Qhichwa" }, { id: "es", label: "Castellano" }].map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => onChangeVoiceLang(l.id)}
+                className={`flex-1 py-1.5 rounded-md font-semibold transition cursor-pointer ${
+                  voiceLang === l.id ? "bg-[#009FE3] text-white shadow-xs" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
 
           <button
             type="button"
-            onClick={onToggleOffline}
-            className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 transition"
+            onClick={isSpeaking ? onStopAudio : onSpeakGuide}
+            className={`w-full py-2.5 px-3 rounded-lg font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+              isSpeaking ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-amber-400 hover:bg-amber-300 text-[#0B2545]"
+            }`}
           >
-            {forceOffline ? "Volver a Conectar" : "Probar Sin Internet"}
+            {isSpeaking ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
+            <span>{isSpeaking ? "Detener audio" : "Escuchar guía"}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={onDownloadBundle}
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs transition"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Guardar en Celular ({cachedCount})</span>
-          </button>
+          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-300 pt-1">
+            <button type="button" onClick={onToggleOffline} className="inline-flex items-center gap-1 hover:text-white cursor-pointer">
+              {onlineActive ? <Wifi className="w-3.5 h-3.5 text-emerald-400" /> : <WifiOff className="w-3.5 h-3.5 text-amber-400" />}
+              <span>{onlineActive ? "Con red" : "Sin red"}</span>
+            </button>
+            <button type="button" onClick={onDownloadBundle} className="inline-flex items-center gap-1 hover:text-white font-semibold cursor-pointer">
+              <Download className="w-3.5 h-3.5 text-amber-300" />
+              <span>Guardar ({cachedCount})</span>
+            </button>
+          </div>
+          {syncStatus ? <p className="text-[11px] text-sky-300 leading-snug">{syncStatus}</p> : null}
         </div>
-      </div>
+      </aside>
 
-      {syncStatus ? (
-        <div className="bg-emerald-50 border-t border-emerald-200 px-3 sm:px-6 py-1 text-[11px] font-medium text-emerald-900 text-center">
-          {syncStatus}
+      {/* Mobile Header + Bottom Tab Bar */}
+      <header className="lg:hidden sticky top-0 z-40 bg-[#0B2545] text-white px-4 py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1.5 shrink-0">
+            <img src="/logos/nasa-space-apps.png" alt="NASA" className="h-5 w-auto object-contain" />
+            <img src="/logos/alcaldia-cochabamba-escudo.jpg" alt="Alcaldía Cochabamba" className="h-5 w-auto object-contain" />
+          </div>
+          <select
+            aria-label="Comunidad"
+            value={zoneId}
+            onChange={(e) => onSelectZone(e.target.value)}
+            className="bg-white/10 text-white text-sm font-semibold rounded-lg px-2.5 py-1.5 border border-white/15 truncate"
+          >
+            {SHORT_ZONES.map((z) => <option key={z.id} value={z.id} className="text-slate-900">{z.label}</option>)}
+          </select>
         </div>
-      ) : null}
-    </header>
+        <button
+          type="button"
+          onClick={isSpeaking ? onStopAudio : onSpeakGuide}
+          className="px-3 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1.5 shrink-0"
+        >
+          {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
+          <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
+        </button>
+      </header>
+
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-4 text-[11px]">
+        {NAV_ITEMS.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onChangeView(id)}
+            className={`py-2.5 flex flex-col items-center gap-1 ${activeView === id ? "text-[#0284C7] font-bold" : "text-slate-500"}`}
+          >
+            <Icon className="w-4 h-4" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
+    </>
   );
 }
