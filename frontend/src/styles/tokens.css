@@ -451,7 +451,7 @@
 }
 
 /* =====================================================================
- * 8. IMPRESIÓN (@media print): Blanco y negro con bordes y patrones
+ * 8. IMPRESIÓN (@media print): Blanco y negro con bordes, dos logos y letra grande
  * ===================================================================== */
 @media print {
   :root {
@@ -460,6 +460,13 @@
     --arena: #FFFFFF;
     --tinta: #000000;
     --tinta-suave: #000000;
+    --tinta-apagada: #000000;
+    --cielo-suave: #FFFFFF;
+    --hoja-suave: #FFFFFF;
+    --dorado-suave: #FFFFFF;
+    --tierra-suave: #FFFFFF;
+    --alerta-cuidado-suave: #FFFFFF;
+    --alerta-critico-suave: #FFFFFF;
   }
 
   body,
@@ -472,5 +479,26 @@
     color: #000000 !important;
     border-color: #000000 !important;
     box-shadow: none !important;
+    font-size: 13pt !important;
+    line-height: 1.45 !important;
+  }
+
+  aside[aria-label="Navegación principal"],
+  nav[aria-label="Navegación inferior móvil"],
+  header.tarpuy-zona-stripe,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .tarpuy-card-physical,
+  section,
+  article,
+  table {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

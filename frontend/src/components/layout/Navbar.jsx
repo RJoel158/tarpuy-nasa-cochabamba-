@@ -280,8 +280,8 @@ export default function Navbar({
                       />
                     </span>
                     <span
-                      className="font-extrabold tracking-tight truncate"
-                      style={{ fontSize: activa ? "1.5rem" : "1.25rem" }}
+                      className="font-extrabold tracking-tight"
+                      style={{ fontSize: activa ? "1.35rem" : "1.2rem" }}
                     >
                       {palabra}
                     </span>
@@ -290,14 +290,13 @@ export default function Navbar({
                   {/* Flechita visible en la pestaña activa */}
                   {activa ? (
                     <span
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold"
+                      className="inline-flex items-center justify-center px-2 py-1 rounded-full shrink-0"
                       style={{
                         backgroundColor: "var(--tarjeta)",
                         color: "var(--tinta)",
                         border: "2px solid var(--tinta)",
                       }}
                     >
-                      <span>{esQuechua ? "Kaypi" : "Aquí"}</span>
                       <FlechitaPestanaActiva direccion="derecha" />
                     </span>
                   ) : null}
@@ -685,21 +684,21 @@ export function CabeceraNavegacion({
                     color: "var(--tinta)",
                   }}
                 >
-                  <span className="flex items-center gap-2.5 min-w-0">
+                  <span className="flex items-center gap-2 min-w-0">
                     <span
-                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                       style={{
                         backgroundColor: "var(--tarjeta)",
                         border: "2px solid var(--tinta)",
                       }}
                     >
-                      <IlustracionTarpuy id={m.dibujoId} size={34} />
+                      <IlustracionTarpuy id={m.dibujoId} size={30} />
                     </span>
-                    <span className="font-extrabold text-lg sm:text-xl truncate">
+                    <span className="font-extrabold text-base sm:text-lg">
                       {m.nombre}
                     </span>
                   </span>
-                  {activo && <CheckDibujado size={24} />}
+                  {activo && <CheckDibujado size={22} />}
                 </button>
               );
             })}

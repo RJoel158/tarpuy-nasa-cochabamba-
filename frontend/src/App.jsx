@@ -325,7 +325,7 @@ export default function App() {
       <button
         type="button"
         onClick={() => setShowFase1Preview(true)}
-        className="fixed bottom-4 right-4 z-50 tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 cursor-pointer"
+        className="no-print fixed bottom-4 right-4 z-50 tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 cursor-pointer"
       >
         Ver prueba Fase 1
       </button>
@@ -501,7 +501,14 @@ export default function App() {
               />
             </div>
           ) : (
-            <TechnicalMode zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} />
+            <TechnicalMode
+              zone={currentZone}
+              strategies={recData?.strategies || []}
+              provenance={recData?.data_provenance}
+              bulletin={alertBulletin}
+              isAdvanced={isAdvanced}
+              lang={voiceLang}
+            />
           )}
         </main>
         </div>

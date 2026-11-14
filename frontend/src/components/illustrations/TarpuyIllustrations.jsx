@@ -922,6 +922,105 @@ export function DibujoNocheLuna({ size = 64, className = "" }) {
   );
 }
 
+/* 35. SATÉLITE MIRANDO LA TIERRA (Sello: Dato real de satélite) */
+export function DibujoSateliteReal({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Satélite: dato real">
+      {/* Panel solar izquierdo */}
+      <rect x="6" y="18" width="14" height="12" rx="2.5" fill={WATER} stroke={INK} strokeWidth="2.8" />
+      <path d="M13 18V30M6 24H20" stroke={INK} strokeWidth="1.8" />
+      {/* Panel solar derecho */}
+      <rect x="44" y="18" width="14" height="12" rx="2.5" fill={WATER} stroke={INK} strokeWidth="2.8" />
+      <path d="M51 18V30M44 24H58" stroke={INK} strokeWidth="1.8" />
+      {/* Brazos de unión */}
+      <path d="M20 24H25M39 24H44" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+      {/* Cuerpo central del satélite */}
+      <rect x="25" y="15" width="14" height="18" rx="4" fill={SUN} stroke={INK} strokeWidth="3" />
+      <circle cx="32" cy="24" r="3.5" fill={HIGHLIGHT} stroke={INK} strokeWidth="2.2" />
+      {/* Antena y ondas hacia la chacra abajo */}
+      <path d="M32 33V39" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+      <path d="M25 42C29 45 35 45 39 42" stroke={WATER} strokeWidth="2.8" strokeLinecap="round" />
+      <path d="M20 48C27 52 37 52 44 48" stroke={LEAF} strokeWidth="2.8" strokeLinecap="round" />
+      {/* Arco de tierra abajo */}
+      <path d="M10 56C22 51 42 51 54 56" stroke={EARTH_DRY} strokeWidth="3.5" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 36. MODELO / ESTIMACIÓN CLIMÁTICA (Sello: Estimación por modelo) */
+export function DibujoModeloEstimacion({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Modelo: estimación">
+      {/* Tablero de cálculo / pronóstico */}
+      <rect x="10" y="10" width="44" height="44" rx="8" fill={SUN_SOFT} stroke={INK} strokeWidth="3" />
+      {/* Sol y nube arriba dentro del modelo */}
+      <circle cx="22" cy="22" r="5.5" fill={SUN} stroke={INK} strokeWidth="2.4" />
+      <path
+        d="M30 27H45C48 27 50 25 50 22.5C50 20 48 18.2 45.5 18C44.5 15 41.5 13.5 38.5 14C35.5 14.5 33.5 17 33 19.8C30.5 20.2 29 22 29 24.2C29 26 30 27 30 27Z"
+        fill={HIGHLIGHT}
+        stroke={INK}
+        strokeWidth="2.2"
+      />
+      {/* Curva punteada de estimación */}
+      <path
+        d="M16 44C22 36 28 46 35 37C40 31 44 35 48 31"
+        stroke={INK}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray="4 4"
+      />
+      <circle cx="16" cy="44" r="3" fill={WATER} stroke={INK} strokeWidth="2" />
+      <circle cx="35" cy="37" r="3" fill={SUN} stroke={INK} strokeWidth="2" />
+      <circle cx="48" cy="31" r="3.5" fill={LEAF} stroke={INK} strokeWidth="2" />
+    </SvgFrame>
+  );
+}
+
+/* 37. ESTUDIO REGIONAL DE SUELO (Sello: Dato de la zona) */
+export function DibujoEstudioSuelo({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Estudio regional de suelo: dato de la zona">
+      {/* Bloque de capas de tierra de la zona */}
+      <rect x="10" y="18" width="38" height="36" rx="6" fill={EARTH_DRY} stroke={INK} strokeWidth="3" />
+      {/* Capa vegetal superior */}
+      <path d="M10 26H48" stroke={INK} strokeWidth="2.6" />
+      <path d="M10 38H48" stroke={INK} strokeWidth="2.4" strokeDasharray="4 3" />
+      {/* Brote arriba de la tierra */}
+      <path
+        d="M26 18V10M26 12C22 8 17 10 18 14C19 17 23 16 26 14ZM26 12C30 8 35 10 34 14C33 17 29 16 26 14Z"
+        fill={LEAF}
+        stroke={INK}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      {/* Lupa observando las capas del suelo */}
+      <circle cx="43" cy="39" r="10" fill={HIGHLIGHT} stroke={INK} strokeWidth="3" />
+      <circle cx="41" cy="38" r="2" fill={EARTH_WET} />
+      <circle cx="46" cy="41" r="1.8" fill={SUN} />
+      <path d="M50 46L57 53" stroke={INK} strokeWidth="4" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 38. IMPRESORA CON CARTILLA (Botón Imprimir Cartilla) */
+export function DibujoImpresora({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Imprimir cartilla">
+      {/* Hoja superior entrando */}
+      <rect x="18" y="8" width="28" height="14" rx="3" fill={HIGHLIGHT} stroke={INK} strokeWidth="2.8" />
+      {/* Cuerpo de la impresora */}
+      <rect x="10" y="20" width="44" height="22" rx="6" fill={CLOUD} stroke={INK} strokeWidth="3.2" />
+      {/* Botón indicador */}
+      <circle cx="45" cy="28" r="3" fill={LEAF} stroke={INK} strokeWidth="2" />
+      {/* Ranura de salida */}
+      <path d="M16 36H48" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+      {/* Cartilla impresa saliendo abajo */}
+      <rect x="17" y="36" width="30" height="20" rx="3" fill={HIGHLIGHT} stroke={INK} strokeWidth="3" />
+      <path d="M22 43H42M22 49H35" stroke={INK} strokeWidth="2.6" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
 /* Catálogo completo de las 24 ilustraciones de la Fase 1 */
 export const CATALOGO_ILUSTRACIONES = [
   { id: "sol", nombre: "Sol", Component: DibujoSol },
@@ -961,6 +1060,10 @@ export const CATALOGO_ILUSTRACIONES_NAVEGACION = [
   { id: "termometro_calor", nombre: "Termómetro calor", Component: DibujoTermometroCalor },
   { id: "termometro_frio", nombre: "Termómetro frío", Component: DibujoTermometroFrio },
   { id: "noche_luna", nombre: "Noche y luna", Component: DibujoNocheLuna },
+  { id: "satelite_real", nombre: "Satélite (Dato real)", Component: DibujoSateliteReal },
+  { id: "modelo_estimacion", nombre: "Modelo (Estimación)", Component: DibujoModeloEstimacion },
+  { id: "estudio_suelo", nombre: "Estudio regional de suelo", Component: DibujoEstudioSuelo },
+  { id: "impresora", nombre: "Imprimir cartilla", Component: DibujoImpresora },
 ];
 
 const MAPA_POR_ID = Object.fromEntries(
