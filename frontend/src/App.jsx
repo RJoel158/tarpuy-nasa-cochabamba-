@@ -13,6 +13,8 @@ import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "
 
 export default function App() {
   const [activeView, setActiveView] = useState("clima");
+  const [appMode, setAppMode] = useState("facil");
+  const isAdvanced = appMode === "avanzado";
   const [zones, setZones] = useState([]);
   const [crops, setCrops] = useState([]);
   const [zoneId, setZoneId] = useState("punata_valle_alto");
@@ -227,11 +229,28 @@ export default function App() {
     });
   };
 
+  const handleChangeAppMode = (nextMode) => {
+    if (nextMode === appMode) return;
+    setAppMode(nextMode);
+    if (nextMode === "facil" && activeView === "datos") setActiveView("clima");
+    simulateProcess(
+      nextMode === "facil" ? "Activando Modo Fácil..." : "Activando Modo Avanzado...",
+      380,
+      () => pushToast(
+        nextMode === "facil" ? "Modo Fácil activo" : "Modo Avanzado activo",
+        nextMode === "facil" ? "Vista simple con dibujos" : "Datos técnicos y satélite NASA",
+        "info"
+      )
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}
+        appMode={appMode}
+        onChangeAppMode={handleChangeAppMode}
         zoneId={zoneId}
         onSelectZone={handleSelectZone}
         onDetectGps={handleDetectGps}
@@ -260,6 +279,7 @@ export default function App() {
                 onSpeak={handleSpeak}
                 activeAudioKey={activeAudioKey}
                 voiceLang={voiceLang}
+                isAdvanced={isAdvanced}
                 onOpenMap={() => setActiveView("mapa")}
                 onDetectGps={handleDetectGps}
               />
@@ -287,6 +307,7 @@ export default function App() {
               onSpeak={handleSpeak}
               activeAudioKey={activeAudioKey}
               isCalculating={isCalculating}
+              isAdvanced={isAdvanced}
               onDetectGps={handleDetectGps}
               onOpenMap={() => setActiveView("mapa")}
             />
@@ -307,7 +328,7 @@ export default function App() {
                 isOnline={isOnline}
                 tall={true}
               />
-              {currentZone?.soil_context ? (
+              {isAdvanced && currentZone?.soil_context ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
                   <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
                   <div className="p-4"><span className="text-xs text-stone-500 block">Terreno</span><strong className="text-stone-900">{currentZone.slope_category}</strong></div>

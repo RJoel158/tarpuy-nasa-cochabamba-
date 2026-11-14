@@ -19,6 +19,7 @@ export default function ProducerMode({
   onSpeak,
   activeAudioKey,
   isCalculating = false,
+  isAdvanced = false,
   onDetectGps,
   onOpenMap,
 }) {
@@ -31,7 +32,7 @@ export default function ProducerMode({
     ...strategies.filter((s) => s.strategy_type === "current_baseline"),
   ];
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const activeStrategy = ordered[selectedIdx] || ordered[0];
+  const shownStrategy = isAdvanced ? (ordered[selectedIdx] || ordered[0]) : ordered[0];
 
   const tabLabel = (s, idx) => {
     if (s.strategy_type === "current_baseline") return "3. Dejar tierra pelada (riesgo)";
@@ -76,7 +77,7 @@ export default function ProducerMode({
         </div>
       </div>
 
-      {/* 2-Step Simple Form */}
+      {/* 2-Step Simple Form / Full Advanced Controls */}
       <PrioritySelectorGrid
         crops={crops}
         cropId={cropId}
@@ -87,45 +88,49 @@ export default function ProducerMode({
         onChangeIrrigation={onChangeIrrigation}
         equipment={equipment}
         onChangeEquipment={onChangeEquipment}
+        isAdvanced={isAdvanced}
       />
 
-      {/* Single-Option Tab Viewer / Process Indicator */}
+      {/* Single Best Card in Fácil / 3-Option Tabs in Avanzado */}
       {isCalculating ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
           <Loader2 className="w-6 h-6 text-[#0284C7] animate-spin" />
           <p className="text-sm font-bold text-[#0B2545]">Calculando mejor siembra...</p>
         </div>
-      ) : ordered.length > 0 && activeStrategy ? (
+      ) : ordered.length > 0 && shownStrategy ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {ordered.map((s, idx) => {
-              const TabIcon = s.strategy_type === "current_baseline" ? AlertTriangle : idx === 0 ? Award : Sprout;
-              return (
-                <button
-                  key={s.strategy_id || idx}
-                  type="button"
-                  onClick={() => setSelectedIdx(idx)}
-                  className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold border text-left transition cursor-pointer inline-flex items-center gap-2 ${
-                    selectedIdx === idx
-                      ? s.strategy_type === "current_baseline"
-                        ? "bg-amber-600 text-white border-amber-700"
-                        : "bg-[#0B2545] text-white border-[#081B33]"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  <TabIcon className="w-4 h-4 shrink-0" />
-                  <span>{tabLabel(s, idx)}</span>
-                </button>
-              );
-            })}
-          </div>
+          {isAdvanced ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {ordered.map((s, idx) => {
+                const TabIcon = s.strategy_type === "current_baseline" ? AlertTriangle : idx === 0 ? Award : Sprout;
+                return (
+                  <button
+                    key={s.strategy_id || idx}
+                    type="button"
+                    onClick={() => setSelectedIdx(idx)}
+                    className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold border text-left transition cursor-pointer inline-flex items-center gap-2 ${
+                      selectedIdx === idx
+                        ? s.strategy_type === "current_baseline"
+                          ? "bg-amber-600 text-white border-amber-700"
+                          : "bg-[#0B2545] text-white border-[#081B33]"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    <TabIcon className="w-4 h-4 shrink-0" />
+                    <span>{tabLabel(s, idx)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
 
           <RotationCard
-            strategy={activeStrategy}
-            index={selectedIdx + 1}
+            strategy={shownStrategy}
+            index={isAdvanced ? selectedIdx + 1 : 1}
             indicators={indicators}
             onSpeak={onSpeak}
             activeAudioKey={activeAudioKey}
+            isAdvanced={isAdvanced}
           />
         </div>
       ) : null}

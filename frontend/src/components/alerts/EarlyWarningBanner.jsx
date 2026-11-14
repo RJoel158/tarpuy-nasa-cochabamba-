@@ -20,6 +20,7 @@ export default function EarlyWarningBanner({
   onSpeak,
   activeAudioKey,
   voiceLang = "qu",
+  isAdvanced = false,
   onOpenMap,
   onDetectGps,
 }) {
@@ -53,10 +54,10 @@ export default function EarlyWarningBanner({
     action: "Condiciones estables para tu chacra esta semana.",
   };
   const weatherCards = [
-    { key: "temp", category: "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c) },
-    { key: "soil", category: "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct) },
-    { key: "rain", category: "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm), isRain: true },
-    { key: "sun", category: "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm) },
+    { key: "temp", category: "TEMPERATURA", ...describeTempCard(cur.temp_c, pred.min_temp_7d_c), techText: `Hoy: ${cur.temp_c}°C · Mín 7d: ${pred.min_temp_7d_c}°C · Máx: ${pred.max_temp_7d_c}°C` },
+    { key: "soil", category: "TU TIERRA", ...describeSoilCard(cur.soil_moisture_top_pct), techText: `Humedad suelo: ${cur.soil_moisture_top_pct}% · Aire: ${cur.humidity_pct}%` },
+    { key: "rain", category: "LLUVIA 7 DÍAS", ...describeRainCard(pred.total_precip_7d_mm), isRain: true, techText: `Acumulado 7d: ${pred.total_precip_7d_mm} mm` },
+    { key: "sun", category: "SOL Y SEQUEDAD", ...describeSunCard(pred.net_water_balance_7d_mm), techText: `Evaporación ET0: ${pred.total_et0_7d_mm} mm · Balance: ${pred.net_water_balance_7d_mm} mm` },
   ];
 
   return (
@@ -152,6 +153,11 @@ export default function EarlyWarningBanner({
               <div>
                 <p className="text-lg font-bold text-[#0B2545] leading-tight">{c.title}</p>
                 <p className="text-xs text-slate-600 mt-0.5">{c.advice}</p>
+                {isAdvanced ? (
+                  <p className="mt-2 text-[11px] font-mono text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                    {c.techText}
+                  </p>
+                ) : null}
               </div>
               {c.isRain ? (
                 <div className="space-y-2">
@@ -183,6 +189,11 @@ export default function EarlyWarningBanner({
                 <div className="space-y-1">
                   <RainDropsVisual count={dv.drops} text={dv.rainText} />
                   <p className="text-[11px] font-medium text-slate-600 truncate">{dv.nightText}</p>
+                  {isAdvanced ? (
+                    <p className="text-[10px] font-mono text-slate-500 leading-snug pt-0.5 border-t border-slate-100">
+                      {d.temp_min_c}° / {d.temp_max_c}°C · {d.precip_mm} mm ({d.precip_prob_pct}%)
+                    </p>
+                  ) : null}
                 </div>
               </div>
             );
