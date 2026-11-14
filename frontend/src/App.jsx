@@ -450,9 +450,37 @@ export default function App() {
             />
           ) : activeView === "mapa" ? (
             <div className="space-y-6">
-              <div className="border-b border-stone-200 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">{tr(voiceLang, "mapSubtitle")}</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">{tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}</h2>
+              <div
+                className="tarpuy-card-physical p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                style={{
+                  backgroundColor: "var(--tarjeta)",
+                  borderColor: "var(--tinta)",
+                }}
+              >
+                <div>
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-extrabold uppercase tracking-wider mb-1.5"
+                    style={{
+                      backgroundColor: "var(--hoja-suave)",
+                      color: "var(--hoja)",
+                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {tr(voiceLang, "mapSubtitle")}
+                  </span>
+                  <h2
+                    className="font-extrabold tracking-tight"
+                    style={{
+                      fontFamily: "var(--tarpuy-font-display)",
+                      fontSize: "var(--tarpuy-text-title)",
+                      lineHeight: "var(--tarpuy-line-title)",
+                      color: "var(--tinta)",
+                    }}
+                  >
+                    {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
+                  </h2>
+                </div>
               </div>
               <CochabambaMap
                 zones={zones}
@@ -466,14 +494,11 @@ export default function App() {
                 forceOffline={forceOffline}
                 isOnline={isOnline}
                 tall={true}
+                lang={voiceLang}
+                isAdvanced={isAdvanced}
+                onSpeak={handleSpeak}
+                activeAudioKey={activeAudioKey}
               />
-              {isAdvanced && currentZone?.soil_context ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
-                  <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
-                  <div className="p-4"><span className="text-xs text-stone-500 block">Terreno</span><strong className="text-stone-900">{currentZone.slope_category}</strong></div>
-                  <div className="p-4"><span className="text-xs text-stone-500 block">Suelo</span><strong className="text-stone-900">{currentZone.soil_context.texture_class}</strong></div>
-                </div>
-              ) : null}
             </div>
           ) : (
             <TechnicalMode zone={currentZone} strategies={recData?.strategies || []} provenance={recData?.data_provenance} bulletin={alertBulletin} />

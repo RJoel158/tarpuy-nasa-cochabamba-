@@ -361,6 +361,54 @@
   border-radius: var(--radius-btn);
 }
 
+/* =====================================================================
+ * ESTILOS DEL MAPA CÁLIDO Y CONTROLES DE ZOOM GRANDES (FASE 5)
+ * ===================================================================== */
+.tarpuy-warm-map.leaflet-container,
+.tarpuy-warm-map .leaflet-container {
+  background-color: var(--arena) !important;
+  font-family: var(--font-family-display) !important;
+}
+
+.tarpuy-warm-map .leaflet-tile-pane {
+  filter: sepia(0.32) saturate(0.72) brightness(1.03) contrast(0.92);
+}
+
+.tarpuy-warm-map .leaflet-control-zoom {
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin: 14px !important;
+}
+
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-in,
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-out {
+  width: 58px !important;
+  height: 58px !important;
+  line-height: 52px !important;
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  background-color: var(--tarjeta) !important;
+  color: var(--tinta) !important;
+  border: var(--border-width-thick) solid var(--tinta) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 0 var(--tinta) !important;
+  text-decoration: none !important;
+}
+
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-in:active,
+.tarpuy-warm-map .leaflet-control-zoom a.leaflet-control-zoom-out:active {
+  transform: translateY(3px) !important;
+  box-shadow: 0 1px 0 var(--tinta) !important;
+}
+
+.tarpuy-map-pin-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+}
+
 /* Ondas animadas del botón de altavoz */
 @keyframes tarpuySpeakerWave {
   0%, 100% {
