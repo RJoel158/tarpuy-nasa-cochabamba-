@@ -17,6 +17,7 @@ from backend.security import RequestGuardMiddleware, SecurityHeadersMiddleware, 
 from engine.alerts import AgroclimaticAlertEvaluator
 from engine.recommender import RotationRecommendationService
 from engine.scoring import MultiCriteriaRotationScorer
+from etl.natural_spanish_tts import synthesize_spanish_mp3
 from etl.quechua_tts_client import QuechuaTtsClient, SpanishTtsClient
 
 
@@ -128,6 +129,14 @@ def create_app(
             return Response(content=wav_bytes, media_type="audio/wav")
         except Exception:
             raise HTTPException(status_code=503, detail="Native Quechua TTS service unavailable")
+
+    @app.post("/api/tts/spanish-natural")
+    def synthesize_natural_spanish(req: QuechuaTtsRequest) -> Response:
+        try:
+            audio = synthesize_spanish_mp3(req.text)
+            return Response(content=audio, media_type="audio/mpeg")
+        except Exception:
+            raise HTTPException(status_code=503, detail="Natural Spanish voice unavailable")
 
     @app.post("/api/tts/spanish")
     def synthesize_spanish_audio(req: QuechuaTtsRequest) -> Response:
