@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v4";
+const CACHE_NAME = "tarpuy-nasa-v5";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -37,6 +37,14 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (
+    url.pathname.startsWith("/src/") ||
+    url.pathname.startsWith("/@vite/") ||
+    url.pathname.startsWith("/@react-refresh") ||
+    url.pathname.startsWith("/node_modules/") ||
+    url.searchParams.has("t") ||
+    url.searchParams.has("v")
+  ) return;
 
   // API endpoints: network-first, fallback to cache for offline rural access
   if (url.pathname.startsWith("/api/")) {
