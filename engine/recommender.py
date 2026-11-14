@@ -3,8 +3,22 @@
 import copy
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 from typing import Any
+
+
+def _normalize_json_numbers(obj: Any) -> Any:
+    """Convert whole-valued finite floats (e.g. 105.0) to int for JS/Python JSON parity."""
+    if isinstance(obj, bool):
+        return obj
+    if isinstance(obj, float) and math.isfinite(obj) and obj.is_integer():
+        return int(obj)
+    if isinstance(obj, list):
+        return [_normalize_json_numbers(item) for item in obj]
+    if isinstance(obj, dict):
+        return {k: _normalize_json_numbers(v) for k, v in obj.items()}
+    return obj
 
 from etl.security import compute_sha256
 from engine.interfaces import CropRepository, RotationScorer, ZoneRepository
@@ -80,7 +94,7 @@ class RotationRecommendationService:
         alts = [s for s in scored if s.get("strategy_type") == "adaptive_alternative"]
         alts.sort(key=lambda s: s.get("priority_alignment_score", 0.0), reverse=True)
         others = [s for s in scored if s.get("strategy_type") not in ("current_baseline", "adaptive_alternative")]
-        strategies = baselines + alts + others
+        strategies = _normalize_json_numbers(baselines + alts + others)
 
         if len(strategies) < 3:
             raise ValueError(f"Zone '{zone_id}' must yield at least 3 strategies, got {len(strategies)}")
@@ -128,7 +142,7 @@ class RotationRecommendationService:
             for s in zone.get("strategies", [])
         ]
         now_utc = datetime.now(timezone.utc).isoformat()
-        bundle_content = {
+        bundle_content = _normalize_json_numbers({
             "bundle_id": f"bundle_{zone_id}",
             "zone_id": zone_id,
             "generated_at": now_utc,
@@ -138,7 +152,7 @@ class RotationRecommendationService:
             "zone_profile": copy.deepcopy(zone),
             "crops_catalog": copy.deepcopy(crops),
             "precomputed_recommendations": scored,
-        }
+        })
         canonical = json.dumps(bundle_content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         bundle_content["integrity_sha256"] = compute_sha256(canonical)
         return bundle_content
