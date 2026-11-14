@@ -10,7 +10,7 @@ export default function ProducerMode({
   cropId,
   onChangeCrop,
   priorities = [],
-  onTogglePriority,
+  onChangePriorities,
   irrigation,
   onChangeIrrigation,
   equipment,
@@ -31,53 +31,37 @@ export default function ProducerMode({
   const activeStrategy = ordered[selectedIdx] || ordered[0];
 
   const tabLabel = (s, idx) => {
-    if (s.strategy_type === "current_baseline") return "3. Práctica actual (riesgo)";
-    const pct = Math.round((s.priority_alignment_score || 0.5) * 100);
-    return `${idx + 1}. Opción ${idx === 0 ? "recomendada" : "alternativa"} (${pct}%)`;
+    if (s.strategy_type === "current_baseline") return "3. Dejar tierra pelada (riesgo)";
+    return idx === 0 ? "1. Mejor opción" : "2. Segunda opción";
   };
 
   return (
     <div className="space-y-6">
-      {/* Header + Previous Crop Selector */}
+      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Plan de rotación · {zone?.name || currentZoneId}</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0B2545] tracking-tight">¿Qué conviene sembrar?</h2>
         </div>
 
-        <div className="flex flex-wrap items-end gap-3 w-full sm:w-auto min-w-0">
-          <div className="w-full sm:w-auto min-w-0">
-            <label htmlFor="crop-select" className="text-xs font-semibold text-slate-600 block mb-1">
-              Última cosecha en tu terreno:
-            </label>
-            <select
-              id="crop-select"
-              value={cropId}
-              onChange={(e) => onChangeCrop(e.target.value)}
-              className="w-full max-w-full sm:w-auto px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold bg-white text-slate-900 truncate"
-            >
-              {crops.map((c) => (
-                <option key={c.crop_id} value={c.crop_id}>{c.name_es} ({c.name_qu})</option>
-              ))}
-            </select>
-          </div>
-
-          <a
-            href={`/api/poster/${currentZoneId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
-          >
-            <Printer className="w-4 h-4 text-amber-700" />
-            <span>Cartilla para imprimir</span>
-          </a>
-        </div>
+        <a
+          href={`/api/poster/${currentZoneId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shrink-0"
+        >
+          <Printer className="w-4 h-4 text-amber-700" />
+          <span>Cartilla para imprimir</span>
+        </a>
       </div>
 
-      {/* Filters */}
+      {/* 2-Step Simple Form */}
       <PrioritySelectorGrid
+        crops={crops}
+        cropId={cropId}
+        onChangeCrop={onChangeCrop}
         priorities={priorities}
-        onTogglePriority={onTogglePriority}
+        onChangePriorities={onChangePriorities}
         irrigation={irrigation}
         onChangeIrrigation={onChangeIrrigation}
         equipment={equipment}

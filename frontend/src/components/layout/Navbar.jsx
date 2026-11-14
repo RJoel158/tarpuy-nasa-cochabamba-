@@ -9,9 +9,9 @@ const NAV_ITEMS = [
 ];
 
 const SHORT_ZONES = [
-  { id: "punata_valle_alto", label: "Punata · Valle Alto" },
-  { id: "tapacari_zona_andina", label: "Tapacarí · Altura" },
-  { id: "mizque_cono_sur", label: "Mizque · Cono Sur" },
+  { id: "punata_valle_alto", label: "Punata · Valle Alto", short: "Punata" },
+  { id: "tapacari_zona_andina", label: "Tapacarí · Altura", short: "Tapacarí" },
+  { id: "mizque_cono_sur", label: "Mizque · Cono Sur", short: "Mizque" },
 ];
 
 export default function Navbar({
@@ -136,29 +136,41 @@ export default function Navbar({
       </aside>
 
       {/* Mobile Header + Bottom Tab Bar */}
-      <header className="lg:hidden sticky top-0 z-40 bg-[#0B2545] text-white px-4 py-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1.5 shrink-0">
-            <img src="/logos/nasa-space-apps.png" alt="NASA" className="h-5 w-auto object-contain" />
-            <img src="/logos/alcaldia-cochabamba-escudo.jpg" alt="Alcaldía Cochabamba" className="h-5 w-auto object-contain" />
+      <header className="lg:hidden sticky top-0 z-40 bg-[#0B2545] text-white px-3 py-2.5 space-y-2 border-b border-[#081B33]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="bg-white rounded px-1.5 py-0.5 flex items-center gap-1.5 shrink-0">
+              <img src="/logos/nasa-space-apps.png" alt="NASA" className="h-5 w-auto object-contain" />
+              <img src="/logos/alcaldia-cochabamba-escudo.jpg" alt="Alcaldía Cochabamba" className="h-5 w-auto object-contain" />
+            </div>
+            <span className="font-bold text-sm tracking-tight truncate">Tarpuy</span>
           </div>
-          <select
-            aria-label="Comunidad"
-            value={zoneId}
-            onChange={(e) => onSelectZone(e.target.value)}
-            className="bg-white/10 text-white text-sm font-semibold rounded-lg px-2.5 py-1.5 border border-white/15 truncate"
+          <button
+            type="button"
+            onClick={isSpeaking ? onStopAudio : onSpeakGuide}
+            className="px-3 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1.5 shrink-0 cursor-pointer"
           >
-            {SHORT_ZONES.map((z) => <option key={z.id} value={z.id} className="text-slate-900">{z.label}</option>)}
-          </select>
+            {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
+            <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={isSpeaking ? onStopAudio : onSpeakGuide}
-          className="px-3 py-1.5 rounded-lg bg-amber-400 text-[#0B2545] font-bold text-xs inline-flex items-center gap-1.5 shrink-0"
-        >
-          {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
-          <span>{voiceLang === "qu" ? "Qhichwa" : "Voz"}</span>
-        </button>
+
+        <div className="grid grid-cols-3 gap-1.5">
+          {SHORT_ZONES.map((z) => (
+            <button
+              key={z.id}
+              type="button"
+              onClick={() => onSelectZone(z.id)}
+              className={`py-1.5 px-2 rounded-lg text-xs text-center transition cursor-pointer ${
+                zoneId === z.id
+                  ? "bg-[#009FE3] text-white font-bold shadow-xs"
+                  : "bg-white/10 text-slate-200 hover:bg-white/15"
+              }`}
+            >
+              {z.short}
+            </button>
+          ))}
+        </div>
       </header>
 
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-4 text-[11px]">
