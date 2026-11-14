@@ -1,5 +1,6 @@
 import React from "react";
 import { Loader2, CheckCircle2, AlertTriangle, Info, X, Volume2 } from "lucide-react";
+import { WeatherIllustration, cleanAlertForFarmer } from "../alerts/WeatherPictograms.jsx";
 
 const TOAST_STYLE = {
   success: { border: "border-l-emerald-600", Icon: CheckCircle2, color: "text-emerald-700" },
@@ -98,21 +99,32 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", onListe
         </div>
 
         <div className="p-5 space-y-3 overflow-y-auto">
-          {alerts.map((al) => (
-            <div
-              key={al.id}
-              className={`p-3.5 rounded-xl border border-slate-200 border-l-4 ${
-                al.severity === "critical"
-                  ? "border-l-rose-600 bg-rose-50/40"
-                  : al.severity === "warning"
-                  ? "border-l-amber-500 bg-amber-50/40"
-                  : "border-l-emerald-600 bg-white"
-              }`}
-            >
-              <p className="text-sm font-bold text-[#0B2545]">{al.title_es}</p>
-              <p className="text-xs text-slate-700 mt-1 leading-relaxed">{al.action_es}</p>
-            </div>
-          ))}
+          {alerts.map((al) => {
+            const vis = cleanAlertForFarmer(al);
+            if (!vis) return null;
+            return (
+              <div
+                key={al.id}
+                className={`p-3.5 rounded-2xl border border-l-4 ${vis.borderClass} ${vis.bgClass} flex items-start gap-3`}
+              >
+                <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <WeatherIllustration kind={vis.kind} className="w-11 h-11" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${vis.badgeClass}`}>
+                      {vis.badgeText}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">{vis.category}</span>
+                  </div>
+                  <p className="text-sm font-bold text-[#0B2545] leading-snug">{vis.cleanTitle}</p>
+                  <div className="bg-white/90 border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-700 leading-relaxed">
+                    <strong className="text-[#0B2545]">Qué hacer en tu chacra:</strong> {vis.action}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
