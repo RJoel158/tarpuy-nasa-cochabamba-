@@ -44,6 +44,8 @@ export default function CochabambaMap({
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 14,
       }).addTo(map);
+      const allPts = ZONE_GEO_CATALOG.flatMap((z) => z.polygon);
+      map.fitBounds(L.latLngBounds(allPts), { padding: [36, 46] });
       map.on("click", (e) => {
         pickRef.current?.(e.latlng.lat, e.latlng.lng, "mapa");
       });
@@ -85,13 +87,15 @@ export default function CochabambaMap({
 
         const badgeHtml = `
           <div style="
-            transform: translate(-50%, -140%);
+            transform: translate(-50%, -128%);
             display: inline-flex;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
+            text-align: center;
+            line-height: 1.15;
             white-space: nowrap;
-            padding: 4px 9px;
-            border-radius: 9999px;
+            padding: 4px 8px;
+            border-radius: 10px;
             font-family: system-ui, -apple-system, sans-serif;
             font-size: 11px;
             font-weight: 700;
@@ -101,11 +105,12 @@ export default function CochabambaMap({
             color: ${active ? "#FFFFFF" : "#0B2545"};
             box-shadow: 0 2px 6px rgba(11, 37, 69, 0.28);
           ">
-            <span>${z.name} · ${z.sub}</span>
-            <span style="opacity: 0.85; font-weight: 600;">(${z.elevation})</span>
+            <span>${z.name}</span>
+            <span style="font-size: 9.5px; opacity: 0.88; font-weight: 600;">${z.sub} · ${z.elevation}</span>
           </div>
         `;
         const labelMarker = L.marker(z.coords, {
+          zIndexOffset: active ? 500 : 100,
           icon: L.divIcon({
             className: "bg-transparent border-0",
             html: badgeHtml,
