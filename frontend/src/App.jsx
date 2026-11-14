@@ -92,13 +92,18 @@ export default function App() {
     else speakSpanish(text, cb);
   };
 
+  const handleSelectZone = (newZoneId) => {
+    setZoneId(newZoneId);
+    setCropId(newZoneId === "tapacari_zona_andina" ? "papa_huaycha" : "maiz_valle");
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F7FA] text-slate-900 font-sans flex flex-col lg:flex-row">
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}
         zoneId={zoneId}
-        onSelectZone={setZoneId}
+        onSelectZone={handleSelectZone}
         voiceLang={voiceLang}
         onChangeVoiceLang={setVoiceLang}
         isSpeaking={isSpeaking}
@@ -134,7 +139,7 @@ export default function App() {
               cropId={cropId}
               onChangeCrop={setCropId}
               priorities={priorities}
-              onTogglePriority={(id) => setPriorities((prev) => prev.includes(id) ? (prev.length > 1 ? prev.filter((p) => p !== id) : prev) : [...prev, id])}
+              onChangePriorities={setPriorities}
               irrigation={irrigation}
               onChangeIrrigation={setIrrigation}
               equipment={equipment}
@@ -149,7 +154,7 @@ export default function App() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#0284C7]">Ubicación y suelo</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Mapa de comunidades · {currentZone?.name || ""}</h2>
               </div>
-              <CochabambaMap zones={zones} activeZoneId={zoneId} onSelectZone={setZoneId} forceOffline={forceOffline} isOnline={isOnline} tall={true} />
+              <CochabambaMap zones={zones} activeZoneId={zoneId} onSelectZone={handleSelectZone} forceOffline={forceOffline} isOnline={isOnline} tall={true} />
               {currentZone?.soil_context ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-stone-200 rounded-xl divide-y sm:divide-y-0 sm:divide-x divide-stone-200 text-sm">
                   <div className="p-4"><span className="text-xs text-stone-500 block">Altura</span><strong className="text-stone-900">{currentZone.elevation_msnm} metros</strong></div>
