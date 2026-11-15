@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v8-unified";
+const CACHE_NAME = "tarpuy-nasa-v9-partner-logos";
 const STATIC_ASSETS = [
   "/fonts/atkinson-hyperlegible-0.ttf",
   "/fonts/atkinson-hyperlegible-1.ttf",
@@ -9,9 +9,8 @@ const STATIC_ASSETS = [
   "/index.html",
   "/manifest.json",
   "/vite.svg",
-  "/logos/nasa-space-apps.png",
-  "/logos/alcaldia-cochabamba-celeste.png",
-  "/logos/alcaldia-cochabamba-escudo.jpg",
+  "/logos/nasa-space-apps-no-background.png",
+  "/logos/alcaldia-cochabamba-escudo-no-background.png",
   "/audio/quh/manifest.json",
   "/audio/quh/guide_punata_valle_alto.wav",
   "/audio/quh/guide_tapacari_zona_andina.wav",

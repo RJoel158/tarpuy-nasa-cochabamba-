@@ -13,7 +13,7 @@ test("narration follows visible months rather than overlapping crop ranges", () 
   const expected = [
     "De Enero a Mayo, Haba Pairumani.",
     "En Junio, Avena con Vicia.",
-    "De Julio a Septiembre, tierra pelada, sin cobertura.",
+    "De Julio a Septiembre, descanso de la tierra, sin cobertura.",
     "En Octubre, Quinua Real de Valle.",
     "De Noviembre a Diciembre, Haba Pairumani.",
   ];

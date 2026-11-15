@@ -23,7 +23,7 @@ def clean_quechua_for_tts(text: str) -> str:
     """Normalize punctuation and symbols for South Bolivian Quechua VITS vocabulary."""
     cleaned = text.replace("’", "'").replace("‘", "'").replace("ʼ", "'")
     cleaned = cleaned.replace("->", ", chanta ").replace("—", ", ").replace("¡", "").replace("!", ".")
-    return re.sub(r"[\s]+", " ", cleaned).strip()[:480]
+    return re.sub(r"[\s]+", " ", cleaned).strip()
 
 
 def clean_spanish_for_tts(text: str) -> str:
@@ -53,6 +53,8 @@ class QuechuaTtsClient:
         cleaned = self.cleaner(text)
         if not cleaned:
             raise ValueError("Empty text cannot be synthesized.")
+        if len(cleaned) > 480:
+            raise ValueError("Split speech into complete phrases of at most 480 characters; do not truncate warnings.")
         return self._synthesize_cached(self.predict_url, self.lang_label, self.timeout, cleaned)
 
     @staticmethod

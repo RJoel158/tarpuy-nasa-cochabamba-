@@ -5,6 +5,8 @@ import {
   DibujoHaba,
   DibujoQuinua,
   DibujoAvena,
+  DibujoHortaliza,
+  DibujoFrutal,
   DibujoTierraSeca,
   DibujoTierraHumeda,
   DibujoPlantaCrecida,
@@ -27,6 +29,10 @@ import {
 const CROP_MATCHERS = [
   ["bare_soil", /pelad|descans|barbecho|vaci|desnudo|sin cobertura/],
   ["mulch", /rastrojo|mulch|cobertura|paja|tapad/],
+  ["tuberculos", /tuberculo|papa|akshu|oca|ulluku|camote/],
+  ["cereales", /cereal|grano|maiz|sara|cebada|siwara|trigo/],
+  ["hortalizas", /hortaliza|yuyu|cebolla|zanahoria|lechuga|tomate/],
+  ["frutales", /frutal|fruta|ruru|durazno|manzana|vid/],
   ["avena_vicia", /avena|vicia|forraje/],
   ["papa", /papa|akshu/],
   ["maiz", /maiz|sara/],
@@ -47,10 +53,16 @@ export function CropIllustration({ cropId, name, className = "w-11 h-11" }) {
   const kind = inferCropKind(cropId || name);
 
   switch (kind) {
+    case "tuberculos":
     case "papa":
       return <DibujoPapa className={className} />;
+    case "cereales":
     case "maiz":
       return <DibujoMaiz className={className} />;
+    case "hortalizas":
+      return <DibujoHortaliza className={className} />;
+    case "frutales":
+      return <DibujoFrutal className={className} />;
     case "haba":
       return <DibujoHaba className={className} />;
     case "quinua":

@@ -21,6 +21,7 @@ def test_realtime_weather_client_parses_live_and_nasa_daily():
             "et0_fao_evapotranspiration": [5.0, 5.5], "wind_speed_10m_max": [12.0, 21.0],
         },
     }
+    mock_om.json.return_value["daily_units"] = {"temperature_2m_max":"°C", "temperature_2m_min":"°C", "precipitation_sum":"mm", "precipitation_probability_max":"%", "et0_fao_evapotranspiration":"mm", "wind_speed_10m_max":"km/h"}
     mock_np = MagicMock(status_code=200)
     mock_np.json.return_value = {
         "properties": {"parameter": {
@@ -56,7 +57,7 @@ def test_alert_evaluator_detects_frost_water_and_wind(tmp_path):
     bulletin = AgroclimaticAlertEvaluator(tel_file).evaluate_zone("tapacari_zona_andina")
     ids = {a["id"]: a["severity"] for a in bulletin["active_alerts"]}
     assert ids["frost_critical"] == "critical"
-    assert ids["water_deficit"] == "critical"
+    assert ids["water_deficit"] == "warning"  # Weekly model balance does not establish local drought.
     assert ids["wind_warning"] == "warning"
     assert len(bulletin["veracity_manifest"]) == 4
 

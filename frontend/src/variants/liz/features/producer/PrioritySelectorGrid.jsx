@@ -20,6 +20,47 @@ import { PersonajeGuia, GloboHabla } from "../../components/personality/Personaj
  * Cero códigos hexadecimales sueltos.
  */
 
+export const PREVIOUS_CROP_CATEGORIES = [
+  {
+    id: "hortalizas",
+    nameEs: "Hortalizas",
+    nameQu: "Yuyukuna",
+    examplesEs: "Cebolla, zanahoria, lechuga, tomate",
+    examplesQu: "Sipás, yuyu, cebolla, tomate",
+    matchIds: ["hortalizas", "haba", "tarwi"],
+  },
+  {
+    id: "tuberculos",
+    nameEs: "Tubérculos",
+    nameQu: "Allpa p'ukukuna",
+    examplesEs: "Papa, oca, papalisa, camote",
+    examplesQu: "Papa, oqa, ulluku, apichu",
+    matchIds: ["tuberculos", "papa_huaycha", "papa"],
+  },
+  {
+    id: "cereales",
+    nameEs: "Cereales y Granos",
+    nameQu: "Sara, Siwara, Trigo",
+    examplesEs: "Maíz, cebada, trigo, avena, quinua",
+    examplesQu: "Sara, trigo, siwara, kinwa",
+    matchIds: ["cereales", "maiz_valle", "maiz", "cebada", "quinua", "avena_vicia"],
+  },
+  {
+    id: "frutales",
+    nameEs: "Frutales",
+    nameQu: "Rurukuna",
+    examplesEs: "Durazno, manzana, frutilla, vid",
+    examplesQu: "Lurasnu, manzana, frutilla",
+    matchIds: ["frutales", "alfalfa"],
+  },
+];
+
+export function isCategoryActive(cat, currentCropId) {
+  if (!currentCropId) return cat.id === "cereales";
+  if (cat.id === currentCropId) return true;
+  return cat.matchIds.includes(currentCropId);
+}
+
 const CROP_LABELS = {
   papa_huaycha: { title: "Papa", sub: "Akshu" },
   maiz_valle: { title: "Maíz", sub: "Sara" },
@@ -236,26 +277,23 @@ export default function PrioritySelectorGrid({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {cropItems.map((c) => {
-            const active = cropId === c.crop_id;
-            const meta = CROP_LABELS[c.crop_id] || {
-              title: c.name_es || c.crop_id,
-              sub: c.name_qu || "",
-            };
-            const mainName = qu ? meta.sub || meta.title : meta.title;
-            const subName = qu ? meta.title : meta.sub;
+          {PREVIOUS_CROP_CATEGORIES.map((cat) => {
+            const active = isCategoryActive(cat, cropId);
+            const mainName = qu ? cat.nameQu : cat.nameEs;
+            const subName = qu ? cat.nameEs : cat.nameQu;
+            const examples = qu ? cat.examplesQu : cat.examplesEs;
 
             return (
               <button
-                key={c.crop_id}
+                key={cat.id}
                 type="button"
-                onClick={() => onChangeCrop(c.crop_id)}
+                onClick={() => onChangeCrop(cat.id)}
                 aria-pressed={active}
                 className={`tarpuy-btn-physical ${
                   active ? "tarpuy-btn-physical--pressed" : ""
                 } relative p-4 flex flex-col items-center justify-between gap-2.5 text-center cursor-pointer`}
                 style={{
-                  minHeight: "148px",
+                  minHeight: "152px",
                   backgroundColor: active ? "var(--hoja-suave)" : "var(--tarjeta)",
                   color: "var(--tinta)",
                 }}
@@ -273,21 +311,27 @@ export default function PrioritySelectorGrid({
                     border: "var(--border-width-medium) solid var(--tinta)",
                   }}
                 >
-                  <CropIllustration cropId={c.crop_id} className="w-16 h-16" />
+                  <CropIllustration cropId={cat.id} className="w-16 h-16" />
                 </span>
 
-                <span className="min-w-0">
+                <span className="min-w-0 w-full">
                   <span className="block font-extrabold text-xl leading-snug break-words">
                     {mainName}
                   </span>
                   {subName ? (
                     <span
-                      className="block text-sm font-bold mt-0.5 break-words"
-                      style={{ color: "var(--tinta-suave)" }}
+                      className="block text-xs font-semibold mt-0.5 break-words uppercase tracking-wide"
+                      style={{ color: "var(--hoja-fuerte)" }}
                     >
                       {subName}
                     </span>
                   ) : null}
+                  <span
+                    className="block text-xs font-normal mt-1 break-words"
+                    style={{ color: "var(--tinta-suave)" }}
+                  >
+                    {examples}
+                  </span>
                 </span>
               </button>
             );

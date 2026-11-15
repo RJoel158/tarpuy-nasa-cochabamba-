@@ -1,0 +1,18 @@
+[
+  {
+    "file": "clima_suelo_quh.wav",
+    "duration_seconds": 8.57,
+    "sample_rate": 16000,
+    "bytes": 274348,
+    "peak": 28967,
+    "sha256": "8d713d717215a6b952140a898c6b190d7591e55ca1f72b58f08b00951f3e2f09"
+  },
+  {
+    "file": "siembra_agua_quh.wav",
+    "duration_seconds": 9.4,
+    "sample_rate": 16000,
+    "bytes": 300972,
+    "peak": 29415,
+    "sha256": "67f49eb4fc59387a312addfc906a56d4ee71496ddba390deea1efb03a4c4e88d"
+  }
+]

@@ -1,7 +1,7 @@
-import MamaTomasaBrand from "./components/MamaTomasaBrand.jsx";
+import WeatherSourcesFooter from "./components/WeatherSourcesFooter.jsx";
 import { locateDevice } from "./services/locationService.js";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight, LocateFixed } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Navbar, { CabeceraNavegacion } from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import FarmerWaterActionCard from "./components/alerts/FarmerWaterActionCard.jsx";
@@ -14,6 +14,7 @@ import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import { IlustracionTarpuy } from "./components/illustrations/TarpuyIllustrations.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { BotonGrande } from "./components/ui/TarpuyBaseComponents.jsx";
+import IntroInicio from "./components/IntroInicio.jsx";
 
 
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
@@ -35,14 +36,12 @@ import {
   listCachedZoneIds,
 } from "./services/apiClient.js";
 import { loadDeviceSnapshotSync, getDeviceDbStats } from "./services/embeddedDb.js";
-import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
+import { speakQuechua, speakSpanish, stopSpeaking } from "./services/speechService.js";
 import { tr } from "./utils/quechuaI18n.js";
 
 export default function App() {
   const initialSnapRef = useRef(loadDeviceSnapshotSync());
   const initialSnap = initialSnapRef.current;
-  const [mapPreviewOpen, setMapPreviewOpen] = useState(false);
-  const [mapNextView, setMapNextView] = useState("clima");
   const [activeView, setActiveView] = useState("clima");
   const [appMode, setAppMode] = useState("facil");
   const isAdvanced = appMode === "avanzado";
@@ -50,12 +49,13 @@ export default function App() {
   const [crops, setCrops] = useState([]);
   const [zoneId, setZoneId] = useState(initialSnap?.zoneId || "punata_valle_alto");
   const [communityName, setCommunityName] = useState(initialSnap?.communityName || "Punata");
-  const [cropId, setCropId] = useState(initialSnap?.cropId || "maiz_valle");
+  const [cropId, setCropId] = useState(initialSnap?.cropId || "cereales");
   const [priorities, setPriorities] = useState(["water_conservation", "nitrogen_fixation", "erosion_control"]);
   const [irrigation, setIrrigation] = useState(initialSnap?.irrigation || "deficit_auxiliary");
   const [equipment, setEquipment] = useState("manual_yunta");
   const forceOffline = false;
   const [refreshTick, setRefreshTick] = useState(0);
+  const [weatherTick, setWeatherTick] = useState(0);
   const recommendationRequest = useRef(0);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
@@ -70,11 +70,12 @@ export default function App() {
   const gpsAttemptRef = useRef(0);
   const [gpsNotice, setGpsNotice] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
-  const [userPoint, setUserPoint] = useState(null);
+  const [userPoint, setUserPoint] = useState(initialSnap?.userPoint || null);
   const [drainage, setDrainage] = useState(null);
   const [periurban, setPeriurban] = useState(null);
-  const [districtMeta, setDistrictMeta] = useState(null);
+  const [districtMeta, setDistrictMeta] = useState(initialSnap?.districtMeta || null);
   useEffect(() => {
     let cancelled = false;
     setDrainage(null);
@@ -147,6 +148,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      if (navigator.onLine && document.visibilityState === "visible") setWeatherTick(t => t + 1);
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     fetchZones(!isOnline).then((zs) => zs?.length && setZones(zs));
     fetchCrops(!isOnline).then((cs) => cs?.length && setCrops(cs));
   }, [isOnline, refreshTick]);
@@ -154,12 +162,13 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     fetchAlerts(zoneId, !isOnline, {
+      lat: userPoint?.lat, lon: userPoint?.lon,
       districtCode: districtMeta?.code,
       comuna: districtMeta?.comuna,
       drainage,
     }).then((b) => { if (!cancelled) setAlertBulletin(b); });
     return () => { cancelled = true; };
-  }, [zoneId, isOnline, refreshTick, districtMeta, drainage]);
+  }, [zoneId, isOnline, refreshTick, weatherTick, districtMeta, drainage, userPoint]);
 
   const loadRecs = useCallback(async () => {
     const request = ++recommendationRequest.current;
@@ -190,9 +199,9 @@ export default function App() {
       );
       if (request !== recommendationRequest.current) return;
       setRecData(data);
-      if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
+      // Weather is refreshed independently; zonal recommendations must not overwrite it.
     } catch {} finally { if (request === recommendationRequest.current) setLoading(false); }
-  }, [zoneId, cropId, priorities, irrigation, equipment, isOnline, refreshTick, districtMeta, periurban, drainage]);
+  }, [zoneId, cropId, priorities, irrigation, equipment, isOnline, refreshTick, districtMeta, periurban, drainage, userPoint]);
 
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
@@ -201,7 +210,7 @@ export default function App() {
     let cancelled = false;
     const controller = new AbortController();
     if (!forceOffline && isOnline) {
-      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation }, { signal: controller.signal })
+      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation, userPoint, districtMeta }, { signal: controller.signal })
         .then((res) => {
           if (cancelled) return;
           setDbStats(getDeviceDbStats());
@@ -218,7 +227,7 @@ export default function App() {
       setSyncStatus(stats.sizeKb > 0 ? `Leído de base local (${stats.sizeKb} KB)` : "Sin copia local aún");
     }
     return () => { cancelled = true; controller.abort(); };
-  }, [zoneId, communityName, cropId, irrigation, isOnline, refreshTick]);
+  }, [zoneId, communityName, cropId, irrigation, isOnline, refreshTick, userPoint, districtMeta]);
 
   const currentZone = zones.find((z) => z.zone_id === zoneId) || zones[0];
   const cachedCount = listCachedZoneIds().length;
@@ -227,7 +236,7 @@ export default function App() {
     setSyncStatus("Actualizando base local...");
     setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 45 });
     try {
-      const res = await autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation });
+      const res = await autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation, userPoint, districtMeta });
       setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 100 });
       setTimeout(() => setActiveProcess(null), 220);
       setDbStats(getDeviceDbStats());
@@ -240,25 +249,7 @@ export default function App() {
     }
   };
 
-  const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
-
-  const handleSpeakGuide = () => {
-    handleStopAudio();
-    if (recData?.zone_id !== zoneId || recData?.current_crop_id !== cropId) {
-      pushToast("Guía aún no disponible", "Espera a que se actualice la recomendación de tu cultivo y zona", "info");
-      return;
-    }
-    setIsSpeaking(true);
-    pushToast(`Voz (${voiceLang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo guía de siembra", "info");
-    speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
-      onStart: () => setIsSpeaking(true),
-      onEnd: () => setIsSpeaking(false),
-      onError: () => {
-        setIsSpeaking(false);
-        pushToast("Audio no disponible", "Revisa el volumen o conexión", "warning");
-      },
-    });
-  };
+  const handleStopAudio = () => { setAudioLoading(false); stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
 
   const handleSpeak = (text, lang, key, clipKey = null) => {
     if (activeAudioKey === key) {
@@ -269,16 +260,18 @@ export default function App() {
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
-    pushToast(`Voz (${lang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo aviso", "info");
+    setAudioLoading(true);
     const cb = {
+      onLoading: setAudioLoading,
       clipKey,
       neuralOnly: key.startsWith("water_"),
       onEngine: (engine) => {
         if (engine === "browser_fallback") pushToast("Voz básica del equipo", "La voz natural no está disponible en este momento", "info");
       },
 
-      onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); },
+      onEnd: () => { setAudioLoading(false); setActiveAudioKey(null); setIsSpeaking(false); },
       onError: () => {
+        setAudioLoading(false);
         setActiveAudioKey(null);
         setIsSpeaking(false);
         pushToast("Audio no disponible", "Intenta de nuevo", "warning");
@@ -311,8 +304,6 @@ export default function App() {
   };
 
   const handleSelectCommunity = (comm) => {
-    setMapPreviewOpen(true);
-    setMapNextView("clima");
     gpsAttemptRef.current += 1;
     setGpsNotice(null);
     setCommunityName(comm.name);
@@ -338,7 +329,6 @@ export default function App() {
   };
 
   const handlePickMapPoint = async (lat, lon, source = "mapa", accuracy = null) => {
-    setMapPreviewOpen(true);
     const attempt = ++gpsAttemptRef.current;
     setGpsNotice(null);
     const district = await findDistrictAt(lat, lon);
@@ -381,8 +371,6 @@ export default function App() {
   const handleDetectGps = async () => {
     const attempt = ++gpsAttemptRef.current;
     setActiveView("mapa");
-    setMapPreviewOpen(false);
-    setMapNextView("clima");
     setGpsNotice("Buscando tu ubicación. Permite el acceso si el navegador lo solicita.");
     try {
       if (!navigator.geolocation) throw new Error("GPS unavailable");
@@ -391,7 +379,6 @@ export default function App() {
         onRetry: () => {},
         onPosition: (pos) => {
           if (attempt !== gpsAttemptRef.current) return;
-          setMapPreviewOpen(true);
           setDistrictMeta(null);
           setUserPoint({ lat: pos.coords.latitude, lon: pos.coords.longitude, source: "GPS", accuracy: pos.coords.accuracy });
           setGpsNotice(`Ubicación aproximada: ±${Math.round(pos.coords.accuracy)} m. Mejorando precisión…`);
@@ -460,30 +447,17 @@ export default function App() {
   if (activeView === "mapa") {
     return <main className="tarpuy-map-screen" aria-label="Elige tu ubicación">
       <CochabambaMap
-        guided previewOpen={mapPreviewOpen}
-        onDismissPreview={() => setMapPreviewOpen(false)}
-        onNavigate={(view) => {
-          setMapNextView(view);
-          if (view === "mapa") { setMapPreviewOpen(false); return; }
-          if (userPoint) setMapPreviewOpen(true);
-          else setGpsNotice("Usa Ubícame, elige tu distrito o toca tu parcela para continuar.");
-        }}
-        nextView={mapNextView}
+        guided
+        onContinue={() => { setActiveProcess(null); setToasts([]); setActiveView("clima"); }}
         activeZoneId={zoneId} onSelectZone={handleSelectZone}
         selectedCommunityName={communityName} onSelectCommunity={handleSelectCommunity}
         onChooseDistrict={(district) => handleSelectCommunity(districtToCommunity(district))}
         userPoint={userPoint} onPickMapPoint={handlePickMapPoint}
         onDetectGps={handleDetectGps} forceOffline={forceOffline} isOnline={isOnline}
-        onContinue={() => { setActiveProcess(null); setToasts([]); setMapPreviewOpen(false); setActiveView(mapNextView); }}
         geoStatus={gpsNotice || ""}
+        onBack={() => setActiveView("clima")}
+        onNavigate={setActiveView}
       />
-      <header className="tarpuy-map-brand">
-        <MamaTomasaBrand compact />
-        <div className="tarpuy-map-actions">
-          <button type="button" onClick={() => setActiveView("clima")} className="tarpuy-map-back">← Volver</button>
-          <button type="button" onClick={handleDetectGps} className="flow-primary"><LocateFixed aria-hidden="true" size={22} />Ubícame</button>
-        </div>
-      </header>
     </main>;
   }
 
@@ -502,7 +476,6 @@ export default function App() {
         voiceLang={voiceLang}
         onChangeVoiceLang={handleChangeVoiceLang}
         isSpeaking={isSpeaking}
-        onSpeakGuide={handleSpeakGuide}
         onStopAudio={handleStopAudio}
         isOnline={isOnline}
         forceOffline={forceOffline}
@@ -529,7 +502,6 @@ export default function App() {
               voiceLang={voiceLang}
               onChangeVoiceLang={handleChangeVoiceLang}
               isSpeaking={isSpeaking}
-              onSpeakGuide={handleSpeakGuide}
               onStopAudio={handleStopAudio}
               isOnline={isOnline}
               forceOffline={forceOffline}
@@ -567,12 +539,13 @@ export default function App() {
                     drainage={drainage} district={municipalChip} tip={municipalTip}
                     lang={voiceLang} onSpeak={handleSpeak} activeAudioKey={activeAudioKey}
                     onPlant={() => setActiveView("siembra")} advanced={isAdvanced}
-                    crop={crops.find((c) => c.crop_id === cropId) || null}
+                    crop={crops.find((c) => c.crop_id === cropId) || { crop_id: cropId, name_es: cropId === "cereales" ? "Cereales y Granos" : cropId === "tuberculos" ? "Tubérculos" : cropId === "hortalizas" ? "Hortalizas" : cropId === "frutales" ? "Frutales" : cropId, name_qu: cropId }}
                     onOpenMunicipalAlert={() => setMunicipalModalOpen(true)}
                   />
                 </div>
               ) : activeView === "siembra" ? (
                 <ProducerMode key={zoneId}
+                  onStopAudio={handleStopAudio} audioLoading={audioLoading}
                   municipalContext={recData?.municipal_context || null}
                   municipalChip={municipalChip} municipalTip={municipalTip}
                   zone={currentZone}
@@ -649,6 +622,7 @@ export default function App() {
           </div>
 
           <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
+            <WeatherSourcesFooter bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null} />
             <InstitutionalBrandBar variant="footer" />
 
           </footer>
@@ -661,6 +635,10 @@ export default function App() {
           activeProcess={activeProcess}
           toasts={toasts}
           onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
+        />
+        <IntroInicio
+          voiceLang={voiceLang}
+          isAppReady={!loading || Boolean(recData || alertBulletin)}
         />
       </div>
       );

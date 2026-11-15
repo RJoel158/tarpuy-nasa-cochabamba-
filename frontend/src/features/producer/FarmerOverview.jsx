@@ -38,13 +38,23 @@ export default function FarmerOverview({
       ? date.toLocaleString("es-BO", { dateStyle: "short", timeStyle: "short" })
       : "";
 
-  const nombreCultivo = (qu ? crop?.name_qu : crop?.name_es) || crop?.name_es || cropId;
+  const CATEGORY_NAMES = {
+    hortalizas: { es: "Hortalizas (cebolla, zanahoria, tomate)", qu: "Yuyukuna" },
+    tuberculos: { es: "Tubérculos (papa, oca, papalisa)", qu: "Allpa p'ukukuna" },
+    cereales: { es: "Cereales y Granos (maíz, trigo, cebada)", qu: "Sara, Siwara, Trigo" },
+    frutales: { es: "Frutales (durazno, manzana)", qu: "Rurukuna" },
+  };
+  const catMeta = CATEGORY_NAMES[cropId];
+  const nombreCultivo = catMeta
+    ? (qu ? catMeta.qu : catMeta.es)
+    : (qu ? crop?.name_qu : crop?.name_es) || crop?.name_es || cropId;
 
-  // TODO-FUNCIONALIDAD: mapear cropId real del catálogo y etapa fenológica calculada para MiChacra.
-  const cultivoSimpleEjemplo = String(cropId || "").includes("papa")
+  const cultivoSimpleEjemplo = String(cropId || "").includes("papa") || String(cropId || "").includes("tuberculo")
     ? "papa"
-    : String(cropId || "").includes("haba")
+    : String(cropId || "").includes("haba") || String(cropId || "").includes("hortaliza")
     ? "haba"
+    : String(cropId || "").includes("frutal")
+    ? "alfalfa"
     : String(cropId || "").includes("quinua")
     ? "quinua"
     : String(cropId || "").includes("avena")

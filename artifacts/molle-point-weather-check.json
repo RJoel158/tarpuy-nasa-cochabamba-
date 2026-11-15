@@ -1,0 +1,420 @@
+{
+  "zone_id": "punata_valle_alto",
+  "weather_location": {
+    "lat": -17.3992,
+    "lon": -66.1907,
+    "model_grid": {
+      "lat": -17.398947,
+      "lon": -66.21988,
+      "elevation": 2545.0
+    }
+  },
+  "weather_scope": "selected_point_model",
+  "weather_refresh_error": false,
+  "data_status": "open_meteo_point_with_zonal_nasa_history",
+  "fetched_at_utc": "2026-11-15T03:56:42.036997+00:00",
+  "current_conditions": {
+    "observed_at": "2026-11-14T23:45",
+    "temp_c": 15.7,
+    "humidity_pct": 74,
+    "precip_mm": 0.0,
+    "wind_kmh": 3.3,
+    "soil_moisture_top_pct": 32.8
+  },
+  "predictions_summary": {
+    "total_precip_7d_mm": 4.1,
+    "total_et0_7d_mm": 42.6,
+    "net_water_balance_7d_mm": -38.5,
+    "min_temp_7d_c": 12.1,
+    "max_temp_7d_c": 33.3,
+    "max_wind_7d_kmh": 12.9,
+    "plain_prediction_es": "En los próximos 7 días caerán aprox. 4.1 mm de lluvia, mientras el sol evaporará 42.6 mm (balance -38.5 mm). Mínima nocturna: 12.1°C; máxima de día: 33.3°C."
+  },
+  "predictions_summary_14d": {
+    "total_precip_14d_mm": 23.0,
+    "total_et0_14d_mm": 77.9,
+    "net_water_balance_14d_mm": -54.9,
+    "min_temp_14d_c": 12.1,
+    "max_temp_14d_c": 33.3,
+    "max_wind_14d_kmh": 12.9,
+    "plain_prediction_es": "Proyección a 14 días: lluvia estimada 23.0 mm vs 77.9 mm de evaporación (balance neto -54.9 mm). Mínima: 12.1°C; máxima: 33.3°C."
+  },
+  "seven_day_forecast": [
+    {
+      "date": "2026-11-14",
+      "temp_max_c": 26.6,
+      "temp_min_c": 12.1,
+      "precip_mm": 1.0,
+      "precip_prob_pct": 65,
+      "et0_mm": 5.6,
+      "wind_kmh": 9.5,
+      "day_label": "Sáb 14/11",
+      "water_balance_mm": -4.6,
+      "day_status": "rain_window"
+    },
+    {
+      "date": "2026-11-15",
+      "temp_max_c": 22.8,
+      "temp_min_c": 13.3,
+      "precip_mm": 2.8,
+      "precip_prob_pct": 85,
+      "et0_mm": 4.4,
+      "wind_kmh": 8.3,
+      "day_label": "Dom 15/11",
+      "water_balance_mm": -1.6,
+      "day_status": "rain_window"
+    },
+    {
+      "date": "2026-11-16",
+      "temp_max_c": 27.6,
+      "temp_min_c": 13.0,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 0,
+      "et0_mm": 6.3,
+      "wind_kmh": 4.6,
+      "day_label": "Lun 16/11",
+      "water_balance_mm": -6.3,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-17",
+      "temp_max_c": 30.1,
+      "temp_min_c": 14.6,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 2,
+      "et0_mm": 6.8,
+      "wind_kmh": 12.9,
+      "day_label": "Mar 17/11",
+      "water_balance_mm": -6.8,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-18",
+      "temp_max_c": 29.9,
+      "temp_min_c": 14.1,
+      "precip_mm": 0.3,
+      "precip_prob_pct": 4,
+      "et0_mm": 6.2,
+      "wind_kmh": 7.1,
+      "day_label": "Mié 18/11",
+      "water_balance_mm": -5.9,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-19",
+      "temp_max_c": 31.9,
+      "temp_min_c": 16.2,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 10,
+      "et0_mm": 6.5,
+      "wind_kmh": 9.8,
+      "day_label": "Jue 19/11",
+      "water_balance_mm": -6.5,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-20",
+      "temp_max_c": 33.3,
+      "temp_min_c": 15.9,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 11,
+      "et0_mm": 6.8,
+      "wind_kmh": 7.3,
+      "day_label": "Vie 20/11",
+      "water_balance_mm": -6.8,
+      "day_status": "stable"
+    }
+  ],
+  "fourteen_day_forecast": [
+    {
+      "date": "2026-11-14",
+      "temp_max_c": 26.6,
+      "temp_min_c": 12.1,
+      "precip_mm": 1.0,
+      "precip_prob_pct": 65,
+      "et0_mm": 5.6,
+      "wind_kmh": 9.5,
+      "day_label": "Sáb 14/11",
+      "water_balance_mm": -4.6,
+      "day_status": "rain_window"
+    },
+    {
+      "date": "2026-11-15",
+      "temp_max_c": 22.8,
+      "temp_min_c": 13.3,
+      "precip_mm": 2.8,
+      "precip_prob_pct": 85,
+      "et0_mm": 4.4,
+      "wind_kmh": 8.3,
+      "day_label": "Dom 15/11",
+      "water_balance_mm": -1.6,
+      "day_status": "rain_window"
+    },
+    {
+      "date": "2026-11-16",
+      "temp_max_c": 27.6,
+      "temp_min_c": 13.0,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 0,
+      "et0_mm": 6.3,
+      "wind_kmh": 4.6,
+      "day_label": "Lun 16/11",
+      "water_balance_mm": -6.3,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-17",
+      "temp_max_c": 30.1,
+      "temp_min_c": 14.6,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 2,
+      "et0_mm": 6.8,
+      "wind_kmh": 12.9,
+      "day_label": "Mar 17/11",
+      "water_balance_mm": -6.8,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-18",
+      "temp_max_c": 29.9,
+      "temp_min_c": 14.1,
+      "precip_mm": 0.3,
+      "precip_prob_pct": 4,
+      "et0_mm": 6.2,
+      "wind_kmh": 7.1,
+      "day_label": "Mié 18/11",
+      "water_balance_mm": -5.9,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-19",
+      "temp_max_c": 31.9,
+      "temp_min_c": 16.2,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 10,
+      "et0_mm": 6.5,
+      "wind_kmh": 9.8,
+      "day_label": "Jue 19/11",
+      "water_balance_mm": -6.5,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-20",
+      "temp_max_c": 33.3,
+      "temp_min_c": 15.9,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 11,
+      "et0_mm": 6.8,
+      "wind_kmh": 7.3,
+      "day_label": "Vie 20/11",
+      "water_balance_mm": -6.8,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-21",
+      "temp_max_c": 30.4,
+      "temp_min_c": 15.5,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 33,
+      "et0_mm": 6.1,
+      "wind_kmh": 8.6,
+      "day_label": "Sáb 21/11",
+      "water_balance_mm": -6.1,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-22",
+      "temp_max_c": 32.9,
+      "temp_min_c": 14.3,
+      "precip_mm": 0.0,
+      "precip_prob_pct": 9,
+      "et0_mm": 6.0,
+      "wind_kmh": 5.0,
+      "day_label": "Dom 22/11",
+      "water_balance_mm": -6.0,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-23",
+      "temp_max_c": 32.8,
+      "temp_min_c": 15.8,
+      "precip_mm": 3.0,
+      "precip_prob_pct": 29,
+      "et0_mm": 6.0,
+      "wind_kmh": 7.0,
+      "day_label": "Lun 23/11",
+      "water_balance_mm": -3.0,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-24",
+      "temp_max_c": 23.6,
+      "temp_min_c": 15.0,
+      "precip_mm": 1.2,
+      "precip_prob_pct": 31,
+      "et0_mm": 4.0,
+      "wind_kmh": 10.0,
+      "day_label": "Mar 24/11",
+      "water_balance_mm": -2.8,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-25",
+      "temp_max_c": 27.6,
+      "temp_min_c": 15.0,
+      "precip_mm": 1.2,
+      "precip_prob_pct": 27,
+      "et0_mm": 5.1,
+      "wind_kmh": 9.9,
+      "day_label": "Mié 25/11",
+      "water_balance_mm": -3.9,
+      "day_status": "stable"
+    },
+    {
+      "date": "2026-11-26",
+      "temp_max_c": 24.7,
+      "temp_min_c": 14.2,
+      "precip_mm": 6.9,
+      "precip_prob_pct": 24,
+      "et0_mm": 4.3,
+      "wind_kmh": 8.3,
+      "day_label": "Jue 26/11",
+      "water_balance_mm": 2.6,
+      "day_status": "rain_window"
+    },
+    {
+      "date": "2026-11-27",
+      "temp_max_c": 23.1,
+      "temp_min_c": 13.1,
+      "precip_mm": 6.6,
+      "precip_prob_pct": 44,
+      "et0_mm": 3.8,
+      "wind_kmh": 3.2,
+      "day_label": "Vie 27/11",
+      "water_balance_mm": 2.8,
+      "day_status": "rain_window"
+    }
+  ],
+  "municipal_alert": {
+    "audience": "regantes_gamc",
+    "district_code": "D4",
+    "comuna": "Molle",
+    "severity": "critical",
+    "theme": "desabastecimiento",
+    "title_es": "Aviso de déficit hídrico prolongado (14 días) — Distrito 4 (Comuna Molle)",
+    "body_es": "Balance hídrico neto proyectado de -54.9 mm en los próximos 14 días. La evapotranspiración superará ampliamente las precipitaciones en la cuenca comunal.",
+    "actions_es": [
+      "Revisar y reprogramar turnos de entrega de agua entre los comités de regantes",
+      "Priorizar parcelas con cultivos en floración y emergencia de brotes",
+      "Recomendar aplicación de cobertura vegetal (mulch/chala) para reducir evaporación"
+    ],
+    "share_text": "⚠️ AVISO A REGANTES — Distrito 4 (Comuna Molle)\nAlerta: Déficit hídrico prolongado (14 días).\nBalance proyectado: -54.9 mm (humedad 33%).\nAcción: Programar turnos de agua comunales con anticipación y evitar riego a mediodía."
+  },
+  "nasa_recent_daily": [
+    {
+      "date": "2026-11-07",
+      "temp_min_c": 12.5,
+      "temp_max_c": 20.73,
+      "precip_mm": 5.02,
+      "surface_wetness": 0.81,
+      "solar_mj_m2": 16.3
+    },
+    {
+      "date": "2026-11-08",
+      "temp_min_c": 11.6,
+      "temp_max_c": 14.52,
+      "precip_mm": 11.92,
+      "surface_wetness": 0.83,
+      "solar_mj_m2": 13.2
+    },
+    {
+      "date": "2026-11-09",
+      "temp_min_c": 10.7,
+      "temp_max_c": 17.21,
+      "precip_mm": 4.3,
+      "surface_wetness": 0.83,
+      "solar_mj_m2": 17.6
+    },
+    {
+      "date": "2026-11-10",
+      "temp_min_c": 9.8,
+      "temp_max_c": 18.99,
+      "precip_mm": 5.66,
+      "surface_wetness": 0.82,
+      "solar_mj_m2": null
+    },
+    {
+      "date": "2026-11-11",
+      "temp_min_c": 12.4,
+      "temp_max_c": 17.21,
+      "precip_mm": 4.17,
+      "surface_wetness": 0.83,
+      "solar_mj_m2": null
+    }
+  ],
+  "active_alerts": [
+    {
+      "id": "water_deficit",
+      "severity": "warning",
+      "category": "Agua y Sequía",
+      "title_es": "Déficit de agua de referencia previsto en 7 días (-38.5 mm en 7 días)",
+      "title_qu": "Ruphay Allpata Ch'akichishan",
+      "message_es": "Lloverá aprox. 4.1 mm, pero el sol y viento evaporarán 42.6 mm. Humedad actual de superficie: 33%.",
+      "action_es": "Deja chala, paja o rastrojo tapando la tierra; si tienes riego, riega al amanecer o al caer el sol."
+    },
+    {
+      "id": "frost_safe",
+      "severity": "info",
+      "category": "Temperatura Segura",
+      "title_es": "Sin Peligro de Helada esta Semana (mínima 12.1°C)",
+      "title_qu": "Mana Qasa Kanchu Kay Semana",
+      "message_es": "Las madrugadas bajarán entre 12.1°C y 16.2°C esta semana.",
+      "action_es": "Buena temperatura nocturna para siembras y emergencia de semillas."
+    },
+    {
+      "id": "rain_window",
+      "severity": "info",
+      "category": "Ventana de Lluvia",
+      "title_es": "Días con Lluvia Útil para el Campo",
+      "title_qu": "Para P'unchawkuna Hamushan",
+      "message_es": "Mayor lluvia prevista: Sáb 14/11 (~1.0 mm), Dom 15/11 (~2.8 mm), Jue 26/11 (~6.9 mm).",
+      "action_es": "Momento bueno para sembrar o tapar abono sin gastar riego."
+    }
+  ],
+  "alerts_spoken_qu": "Allillanchu. Kay semanapaq willakuy: Ruphay Allpata Ch'akichishan. Mana Qasa Kanchu Kay Semana. Para P'unchawkuna Hamushan. Allpata qhorawan p'istuy.",
+  "alerts_spoken_es": "Hola compañero productor. Aviso del clima para esta semana: Déficit de agua de referencia previsto en 7 días. Sin Peligro de Helada esta Semana. Días con Lluvia Útil para el Campo. Consejo práctico: Deja chala, paja o rastrojo tapando la tierra; si tienes riego, riega al amanecer o al caer el sol.",
+  "veracity_manifest": [
+    {
+      "layer": "live_forecast",
+      "status_badge": "EN VIVO · 7 Y 14 DÍAS",
+      "title_es": "Clima Actual y Proyección a 7 y 14 Días",
+      "source": "Open-Meteo (modelos meteorológicos globales calibrados por altura)",
+      "updated": "2026-11-15T03:56:42.036997+00:00",
+      "honest_note": "Muestra lluvia, temperatura y balance hídrico proyectados a 7 y 14 días para apoyar turnos de riego y prevención de anegamiento."
+    },
+    {
+      "layer": "nasa_recent_daily",
+      "status_badge": "SATÉLITE NASA RECIENTE",
+      "title_es": "Observación Diaria NASA POWER (últimos días disponibles)",
+      "source": "NASA POWER Daily API (radiación solar y humedad superficial satelital)",
+      "updated": "2026-11-15T03:56:42.036997+00:00",
+      "honest_note": "Son mediciones reales ya ocurridas desde satélite (rejilla ~50 km); no incluye días futuros ni valores faltantes (-999)."
+    },
+    {
+      "layer": "nasa_climatology_30yr",
+      "status_badge": "HISTORIA NASA · 30 AÑOS",
+      "title_es": "Calendario de Lluvias y Frío de Cada Mes",
+      "source": "NASA POWER Climatology API (promedios históricos multianuales)",
+      "updated": "Base histórica fija",
+      "honest_note": "Sirve para planificar rotaciones de todo el año, pero no predice tormentas o heladas de esta semana."
+    },
+    {
+      "layer": "regional_soil_ndvi_baseline",
+      "status_badge": "ESTUDIO REGIONAL DE SUELO",
+      "title_es": "Suelo Regional y Cobertura Verde (NDVI / Pairumani)",
+      "source": "ISRIC SoilGrids 250m, FAO GAEZ v4, Centro Pairumani y referencia MODIS/Sentinel",
+      "updated": "Referencia estacional regional",
+      "honest_note": "Refleja el suelo típico del municipio. Tu parcela puede cambiar según riego, estiércol y pendiente; revisa un puñado de tierra antes de sembrar."
+    }
+  ]
+}

@@ -104,11 +104,12 @@ export async function fetchCrops(forceOffline = false) {
   ];
 }
 
-export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, comuna, drainage } = {}) {
-  const cacheKey = `alerts:${canonicalJsonStringify({ zoneId, districtCode: districtCode || null, comuna: comuna || null, drainage: drainage || null })}`;
+export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, comuna, drainage, lat, lon } = {}) {
+  const cacheKey = `alerts:${canonicalJsonStringify({ zoneId, lat: lat ?? null, lon: lon ?? null, districtCode: districtCode || null, comuna: comuna || null, drainage: drainage || null })}`;
   if (!forceOffline) {
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ refresh: "true" });
+      if (Number.isFinite(lat) && Number.isFinite(lon)) { params.set("lat", lat); params.set("lon", lon); }
       if (districtCode) params.set("district_code", districtCode);
       if (comuna) params.set("comuna", comuna);
       if (drainage) {

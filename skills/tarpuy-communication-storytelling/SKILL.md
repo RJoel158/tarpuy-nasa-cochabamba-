@@ -17,8 +17,10 @@ Estrategias de comunicación de impacto para agricultores andinos y jurados inte
 
 ## 2. Pautas de Comunicación Oral en Quechua y Español
 - **Respeto a la cosmovisión andina y claridad terminológica**:
-  - Emplear términos validados en quechua boliviano para conceptos agronómicos (e.g., *tarpuy* = siembra, *allpa* = tierra/suelo, *chiri* = frío/helada, *paray* = lluvia).
+  - Trabajar con variantes de Cochabamba y referencias bolivianas; no confundir frío (*chiri*) con helada. Un término documentado no valida una frase completa ni su pronunciación sintética.
   - Claridad de audio: Locución pausada, concisa y directa (priorizar mensajes de advertencia de no más de 15 a 20 segundos).
 - **Consistencia en los Guiones de Voz**:
   - Estructura del mensaje de audio: `[Saludo/Contexto] + [Condición Climática Clave] + [Acción Práctica Recomendada]`.
+  - Para traducción y audio, consultar `../../docs/quechua-boliviano-revision.md`. Conservar negaciones, condiciones, fechas, incertidumbre y acción del español. Marcar los borradores sin revisión local; no presentarlos como traducciones oficiales.
+  - Separar texto escrito y texto hablado. Preservar apóstrofos y aspiraciones; dividir guiones por frases sin recortar advertencias. Comparar comprensión del texto y de la voz por separado con hablantes locales.
 

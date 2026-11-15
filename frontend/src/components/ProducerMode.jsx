@@ -8,7 +8,6 @@ import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
 import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
 import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
-import { buildStrategyNarration } from "../services/narration.js";
 import { tr } from "../utils/quechuaI18n.js";
 
 /**
@@ -39,6 +38,8 @@ export default function ProducerMode({
   strategies = [],
   onSpeak,
   activeAudioKey,
+  onStopAudio,
+  audioLoading = false,
   isCalculating = false,
   isAdvanced = false,
   lang = "es",
@@ -69,22 +70,6 @@ export default function ProducerMode({
   const stratKey = shownStrategy
     ? `${shownStrategy.strategy_id}_${qu ? "qu" : "es"}`
     : `siembra_guia_${qu ? "qu" : "es"}`;
-
-  const handleListenMamaTomasa = () => {
-    if (shownStrategy) {
-      onSpeak?.(
-        buildStrategyNarration(shownStrategy, qu ? "qu" : "es"),
-        qu ? "qu" : "es",
-        stratKey,
-        `strat_${shownStrategy.strategy_id}`
-      );
-    } else {
-      const msg = qu
-        ? "Kay 4 tapuykunata kutichiy, chakraykipaq allin tarpuyta rikuchisqayki."
-        : "Responde estas 4 preguntas con calma tocando los dibujos. Abajo verás el mejor plan para tu tierra.";
-      onSpeak?.(msg, qu ? "qu" : "es", stratKey);
-    }
-  };
 
   /* Semáforo y expresión de Fase 1 de Mamá Tomasa para la estrategia seleccionada */
   const tl = shownStrategy?.traffic_light || {};
@@ -343,6 +328,8 @@ export default function ProducerMode({
               indicators={indicators}
               onSpeak={onSpeak}
               activeAudioKey={activeAudioKey}
+              onStopAudio={onStopAudio}
+              audioLoading={audioLoading}
               isAdvanced={isAdvanced}
               lang={lang}
             />
@@ -374,7 +361,6 @@ export default function ProducerMode({
         semaforoPrincipal={semaforoPrincipalSiembra}
         mensaje={mensajeCortoSiembra}
         tarjetas={tarjetasMamaTomasa}
-        onListen={handleListenMamaTomasa}
         isSpeaking={activeAudioKey === stratKey}
         badgeCount={tarjetasMamaTomasa.length}
         lang={lang}

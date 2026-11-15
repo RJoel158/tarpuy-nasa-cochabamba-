@@ -1,3 +1,9 @@
+from etl.weatherapi_client import WeatherApiClient
+from datetime import datetime, timezone
+from time import monotonic
+from threading import Lock
+from etl.realtime_weather_client import RealtimeWeatherClient
+from etl.security import validate_bolivia_coords
 """FastAPI application entrypoint for Tarpuy NASA Cochabamba (OWASP Top 10 & SOLID)."""
 
 from typing import Any
@@ -42,6 +48,9 @@ def create_app(
     service = RotationRecommendationService(
         zone_repo=zone_repo, crop_repo=crop_repo, scorer=scorer, alert_evaluator=alert_evaluator
     )
+    weather_cache = {}
+    weather_lock = Lock()
+    weather_client = RealtimeWeatherClient(timeout=10)
     gamc_proxy = GamcWmsProxy(settings=cfg, http_client=gamc_http_client)
 
     app.state.settings = cfg
@@ -87,6 +96,10 @@ def create_app(
     def list_crops() -> list[dict[str, Any]]:
         return crop_repo.list_crops()
 
+    @app.get("/api/crop-categories")
+    def list_crop_categories() -> list[dict[str, Any]]:
+        return crop_repo.list_categories()
+
     @app.get("/api/zones")
     def list_zones() -> list[dict[str, Any]]:
         zones = zone_repo.list_zones()
@@ -120,17 +133,63 @@ def create_app(
         district_code: str | None = None,
         comuna: str | None = None,
         drainage: str | None = None,
+        lat: float | None = None,
+        lon: float | None = None,
+        refresh: bool = False,
     ) -> dict[str, Any]:
         valid_id = validate_safe_id(zone_id, "zone_id")
         zone = zone_repo.get_zone(valid_id)
         if not zone:
             raise HTTPException(status_code=404, detail=f"Zone '{valid_id}' not found")
+        override = None
+        if (lat is None) != (lon is None):
+            raise HTTPException(status_code=422, detail="lat and lon must be supplied together")
+        selected_point = lat is not None
+        if refresh and not selected_point:
+            coordinates = zone.get("coordinates", {})
+            lat, lon = coordinates.get("lat"), coordinates.get("lon")
+        if lat is not None:
+            try:
+                point = validate_bolivia_coords(lat, lon)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc))
+            key = (valid_id, selected_point, round(point[0], 4), round(point[1], 4))
+            try:
+                with weather_lock:
+                    cached = weather_cache.get(key)
+                    if cached and monotonic() - cached[0] < 300:
+                        override = cached[1]
+                    else:
+                        weather = weather_client.fetch_zone_realtime(key[2], key[3], include_nasa=False)
+                        weather["weather_provider"] = "Open-Meteo"
+                        weather["primary_provider_status"] = "not_configured"
+                        if cfg.WEATHERAPI_KEY:
+                            try:
+                                weather = WeatherApiClient(cfg.WEATHERAPI_KEY).enrich(weather, key[2], key[3])
+                                weather["primary_provider_status"] = "active"
+                            except (RuntimeError, ValueError, KeyError, TypeError):
+                                weather["primary_provider_status"] = "unavailable_using_open_meteo"
+                        # NASA series retain their zonal location and date; never relabel as parcel observations.
+                        stored = alert_evaluator._load_telemetry().get("zones", {}).get(valid_id, {})
+                        weather["nasa_recent_daily"] = stored.get("nasa_recent_daily", [])
+                        weather.setdefault("data_status", "open_meteo_point_with_zonal_nasa_history")
+                        override = {"fetched_at_utc": datetime.now(timezone.utc).isoformat(),
+                            "weather_scope": "selected_point_model" if selected_point else "zone_reference_model", "zones": {valid_id: weather}}
+                        if len(weather_cache) >= 64:
+                            weather_cache.pop(next(iter(weather_cache)))
+                        weather_cache[key] = (monotonic(), override)
+            except Exception:
+                if cached:
+                    override = {**cached[1], "weather_refresh_error": True}
+                else:
+                    override = {**alert_evaluator._load_telemetry(), "weather_refresh_error": True}
         return alert_evaluator.evaluate_zone(
             valid_id,
             zone,
             district_code=district_code,
             comuna=comuna,
             drainage_type=drainage,
+            telemetry_override=override,
         )
 
     @app.post("/api/tts/quechua")

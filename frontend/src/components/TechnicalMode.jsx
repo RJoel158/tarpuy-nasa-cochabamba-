@@ -7,7 +7,7 @@ import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
 import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
-import { speakSpanish, speakQuechua } from "../services/speechService.js";
+
 
 const DEFAULT_MONTHS = [
   { month: 1, month_name: "Enero", precip_mm: 98, temp_min_c: 11.2, temp_max_c: 23.5, soil_moisture_index: 0.58, ndvi_mean: 0.54, frost_risk_days: 0, bare_soil_flag: false },
@@ -369,7 +369,7 @@ export default function TechnicalMode({
       Math.round((m.soil_moisture_index || 0) * 100),
       m.ndvi_mean ?? "",
       m.frost_risk_days ?? 0,
-      m.bare_soil_flag ? "Suelo desnudo" : "Cubierto",
+      m.bare_soil_flag ? "Descanso de la tierra" : "Cubierto",
     ]);
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -761,7 +761,7 @@ export default function TechnicalMode({
                               color: "var(--tinta)",
                             }}
                           >
-                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                            {m.bare_soil_flag ? "⚠️ Descanso de la tierra" : "🌱 Cubierto"}
                           </span>
                         </div>
 
@@ -850,7 +850,7 @@ export default function TechnicalMode({
                           <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
                           <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
                           <td className="py-2.5 px-3 font-extrabold">
-                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                            {m.bare_soil_flag ? "⚠️ Descanso de la tierra" : "🌱 Cubierto"}
                           </td>
                         </tr>
                       ))}
@@ -972,13 +972,6 @@ export default function TechnicalMode({
               : "Madrugadas muy frías: abriga tus brotes.",
           },
         ]}
-        onListen={() => {
-          const texto = isQu
-            ? "NASA satélitekuna 30 wata qhawarqanku mayk'aqchus paran, qasan, ruphan ima."
-            : `Así se porta el tiempo en ${zone?.name || "tu comunidad"} durante el año. Los satélites de la NASA miraron el cielo durante 30 años para recordar en qué meses llueve más, cuándo cae helada y cuándo hace más calor.`;
-          if (isQu) speakQuechua(texto);
-          else speakSpanish(texto);
-        }}
         badgeCount={3}
         lang={lang}
       />
