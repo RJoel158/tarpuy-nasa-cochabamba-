@@ -4,8 +4,8 @@ import {
   TarjetaGrande,
   BotonAltavoz,
   SeparadorAndino,
-  EtiquetaLogo,
 } from "./TarpuyBaseComponents.jsx";
+import InstitutionalBrandBar from "../InstitutionalBrandBar.jsx";
 import {
   CATALOGO_ILUSTRACIONES,
   IlustracionTarpuy,
@@ -152,23 +152,7 @@ export default function PaginaTemporalFase1({ onClosePreview }) {
             </p>
           </div>
 
-          <EtiquetaLogo>
-            <img
-              src="/logos/nasa-space-apps.png"
-              alt="NASA International Space Apps Challenge"
-              className="h-10 w-auto object-contain"
-            />
-            <span
-              className="h-7 w-0.5"
-              style={{ backgroundColor: "var(--piedra)" }}
-              aria-hidden="true"
-            />
-            <img
-              src="/logos/alcaldia-cochabamba-escudo.jpg"
-              alt="Alcaldía de Cochabamba"
-              className="h-10 w-auto object-contain"
-            />
-          </EtiquetaLogo>
+          <InstitutionalBrandBar variant="inline" size="md" />
         </div>
 
         <div className="p-6 flex flex-wrap items-center justify-between gap-6">

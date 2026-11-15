@@ -1,7 +1,8 @@
 import MamaTomasaBrand from "../MamaTomasaBrand.jsx";
 import React, { useState } from "react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
-import { EtiquetaLogo, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
+import { BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
+import InstitutionalBrandBar from "../InstitutionalBrandBar.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
@@ -152,7 +153,7 @@ export default function Navbar({
             style={{ borderBottom: "1px solid var(--tinta-suave)" }}
           >
             <MamaTomasaBrand />
-
+            <InstitutionalBrandBar variant="inline" size="sm" />
           </div>
 
           {/* Las pestañas grandes: Dibujo + UNA palabra completa, sin botones interiores ni cortes */}
@@ -311,7 +312,10 @@ export function CabeceraNavegacion({
     >
       {/* FILA 1 EN MÓVIL: Los 2 logos juntos en su etiqueta crema + Comunidad actual + Estado sin internet */}
       <div className="lg:hidden flex flex-wrap items-center justify-between gap-2.5">
-        <MamaTomasaBrand compact />
+        <div className="flex flex-col gap-2 min-w-0">
+          <MamaTomasaBrand compact />
+          <InstitutionalBrandBar variant="inline" size="sm" />
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Comunidad actual (toca para cambiar o usar GPS) */}

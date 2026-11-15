@@ -2,6 +2,9 @@
 @import "leaflet/dist/leaflet.css";
 @import "./styles/tokens.css";
 @import "./styles/fonts.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @layer base {
   html {
@@ -111,7 +114,6 @@
     scroll-behavior: auto !important;
   }
 }
-
 
 .tarpuy-carousel { min-width:0; max-width:100%; }
 .tarpuy-carousel-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
@@ -240,3 +242,56 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
 .sowing-step-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .sowing-step-actions button:disabled { opacity:.4; cursor:default; }
 .sync-indicator { display:inline-block; padding:8px 0; font-size:13px; color:var(--tinta-suave); }
+
+/* shadcn theme tokens mapped to Tarpuy so Dialog keeps the app look */
+@theme inline {
+  --font-heading: var(--font-family-base);
+  --font-sans: var(--font-family-base);
+  --color-ring: var(--color-focus-ring);
+  --color-input: var(--arena);
+  --color-border: var(--tinta);
+  --color-destructive: var(--alerta-critico, #7A2E2E);
+  --color-accent-foreground: var(--tinta);
+  --color-accent: var(--arena);
+  --color-muted-foreground: var(--tinta-suave);
+  --color-muted: var(--arena);
+  --color-secondary-foreground: var(--tinta);
+  --color-secondary: var(--arena);
+  --color-primary-foreground: var(--tarjeta);
+  --color-primary: var(--hoja-oscura);
+  --color-popover-foreground: var(--tinta);
+  --color-popover: var(--tarjeta);
+  --color-card-foreground: var(--tinta);
+  --color-card: var(--tarjeta);
+  --color-foreground: var(--tinta);
+  --color-background: var(--papel);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: var(--papel);
+  --foreground: var(--tinta);
+  --card: var(--tarjeta);
+  --card-foreground: var(--tinta);
+  --popover: var(--tarjeta);
+  --popover-foreground: var(--tinta);
+  --primary: var(--hoja-oscura);
+  --primary-foreground: var(--tarjeta);
+  --secondary: var(--arena);
+  --secondary-foreground: var(--tinta);
+  --muted: var(--arena);
+  --muted-foreground: var(--tinta-suave);
+  --accent: var(--arena);
+  --accent-foreground: var(--tinta);
+  --destructive: var(--ladrillo);
+  --border: var(--tinta);
+  --input: var(--arena);
+  --ring: var(--dorado);
+  --radius: 1rem;
+}

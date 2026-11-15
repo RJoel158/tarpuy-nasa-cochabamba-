@@ -479,6 +479,9 @@ export default function App() {
       />
       <header className="tarpuy-map-brand">
         <MamaTomasaBrand compact />
+        <div className="mt-2">
+          <InstitutionalBrandBar variant="inline" size="sm" />
+        </div>
         <div className="tarpuy-map-actions">
           <button type="button" onClick={() => setActiveView("clima")} className="tarpuy-map-back">← Volver</button>
           <button type="button" onClick={handleDetectGps} className="flow-primary"><LocateFixed aria-hidden="true" size={22} />Ubícame</button>
