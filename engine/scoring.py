@@ -3,6 +3,8 @@
 import copy
 from typing import Any
 
+from engine.categories import get_category_botanical_families
+
 from engine.interfaces import RotationScorer
 
 LEVEL_SCORES = {"high": 1.0, "medium": 0.6, "low": 0.25, "none": 0.0}
@@ -55,12 +57,11 @@ class MultiCriteriaRotationScorer(RotationScorer):
         p_scores = [priority_metric_map.get(p, 0.5) for p in active_priorities]
         base_score = sum(p_scores) / max(len(p_scores), 1)
 
-        # Pest cycle break: reward rotating away from current crop botanical family
-        curr_crop = crops_map.get(current_crop_id, {})
-        curr_fam = curr_crop.get("botanical_family", "")
+        # Pest cycle break: reward rotating away from current crop or category botanical family
+        curr_fams = get_category_botanical_families(current_crop_id, crops_map)
         seq_fams = {c.get("botanical_family") for c in crops if c.get("botanical_family")}
-        if curr_fam and seq_fams:
-            pest_bonus = 0.12 if any(f != curr_fam for f in seq_fams) else -0.12
+        if curr_fams and seq_fams:
+            pest_bonus = 0.12 if any(f not in curr_fams for f in seq_fams) else -0.12
         else:
             pest_bonus = 0.0
 

@@ -87,6 +87,10 @@ def create_app(
     def list_crops() -> list[dict[str, Any]]:
         return crop_repo.list_crops()
 
+    @app.get("/api/crop-categories")
+    def list_crop_categories() -> list[dict[str, Any]]:
+        return crop_repo.list_categories()
+
     @app.get("/api/zones")
     def list_zones() -> list[dict[str, Any]]:
         zones = zone_repo.list_zones()

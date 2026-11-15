@@ -497,7 +497,11 @@
             "quinua",
             "cebada",
             "avena_vicia",
-            "alfalfa"
+            "alfalfa",
+            "hortalizas",
+            "tuberculos",
+            "cereales",
+            "frutales"
           ]
         },
         "farmer_priorities": {

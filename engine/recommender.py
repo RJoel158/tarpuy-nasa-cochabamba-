@@ -22,6 +22,7 @@ def _normalize_json_numbers(obj: Any) -> Any:
 
 from etl.security import compute_sha256
 from engine.alerts import AgroclimaticAlertEvaluator
+from engine.categories import CROP_CATEGORIES, get_crop_categories_list
 from engine.interfaces import CropRepository, RotationScorer, ZoneRepository
 from engine.periurban import build_municipal_context
 from engine.scoring import MultiCriteriaRotationScorer
@@ -52,6 +53,12 @@ class JsonCropRepository:
         if not self.path.exists():
             return []
         return json.loads(self.path.read_text(encoding="utf-8")).get("crops", [])
+
+    def list_categories(self) -> list[dict[str, Any]]:
+        if not self.path.exists():
+            return get_crop_categories_list()
+        cats = json.loads(self.path.read_text(encoding="utf-8")).get("crop_categories", [])
+        return cats or get_crop_categories_list()
 
     def get_crops_map(self) -> dict[str, dict[str, Any]]:
         return {c["crop_id"]: c for c in self.list_crops() if "crop_id" in c}
@@ -86,8 +93,8 @@ class RotationRecommendationService:
             raise ValueError(f"Unknown zone: '{zone_id}'")
 
         crops_map = self.crop_repo.get_crops_map()
-        if current_crop_id not in crops_map:
-            raise ValueError(f"Unknown crop: '{current_crop_id}'")
+        if current_crop_id not in crops_map and current_crop_id not in CROP_CATEGORIES:
+            raise ValueError(f"Unknown crop or category: '{current_crop_id}'")
 
         muni = None
         if municipal_context and municipal_context.get("district_code"):

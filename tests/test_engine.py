@@ -196,8 +196,28 @@ class TestRecommenderService:
         with pytest.raises(ValueError, match="Unknown zone"):
             service.recommend("unknown_zone", "maiz_valle", ["water_conservation"], {})
 
-        with pytest.raises(ValueError, match="Unknown crop"):
+        with pytest.raises(ValueError, match="Unknown crop or category"):
             service.recommend("punata_valle_alto", "unknown_crop", ["water_conservation"], {})
+
+    def test_crop_categories_scoring_and_recommendation(self):
+        service = RotationRecommendationService()
+        for cat in ["hortalizas", "tuberculos", "cereales", "frutales"]:
+            res = service.recommend("punata_valle_alto", cat, ["water_conservation"], {})
+            assert res["current_crop_id"] == cat
+            assert len(res["strategies"]) >= 3
+
+        # Tubérculos break pest cycle when rotating to legumes/cereals in adaptive alternatives
+        res_tub = service.recommend("punata_valle_alto", "tuberculos", ["nitrogen_fixation"], {})
+        baseline = next(s for s in res_tub["strategies"] if s.get("strategy_type") == "current_baseline")
+        top_alt = next(s for s in res_tub["strategies"] if s.get("strategy_type") == "adaptive_alternative")
+        assert top_alt["priority_alignment_score"] > baseline["priority_alignment_score"]
+        assert top_alt["priority_alignment_score"] >= 0.70
+
+    def test_list_categories_repo(self):
+        repo = JsonCropRepository()
+        cats = repo.list_categories()
+        cat_ids = {c["category_id"] for c in cats}
+        assert {"hortalizas", "tuberculos", "cereales", "frutales"}.issubset(cat_ids)
 
     def test_build_offline_bundle(self):
         service = RotationRecommendationService()
