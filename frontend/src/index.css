@@ -3,6 +3,23 @@
 @import "./styles/tokens.css";
 @import "./styles/fonts.css";
 
+.pwa-install-entry { grid-column:1/-1; width:100%; }
+.pwa-install-trigger { display:flex; gap:10px; align-items:center; justify-content:center; width:100%; padding:12px; min-height:48px; border:1px solid currentColor; border-radius:16px; font-weight:800; cursor:pointer; }
+.pwa-install-trigger:focus-visible,.pwa-install-dialog button:focus-visible { outline:3px solid var(--dorado); outline-offset:3px; }
+.pwa-install-dialog { width:min(520px,calc(100% - 24px)); max-height:90dvh; margin:auto; padding:0; border:2px solid var(--tinta); border-radius:28px; background:var(--tarjeta); color:var(--tinta); overflow:auto; }
+.pwa-install-dialog::backdrop { background:#231a14b3; }
+.pwa-install-dialog[open] { animation:pwa-install-enter .25s ease-out; }
+.pwa-install-sheet { position:relative; padding:24px; display:flex; flex-direction:column; gap:16px; }
+.pwa-install-close { position:absolute; right:8px; top:8px; display:grid; place-items:center; min-width:44px; min-height:44px; border-radius:50%; cursor:pointer; }
+.pwa-install-sheet .tarpuy-brand-lockup { padding-right:24px; }
+.pwa-install-dialog .tarpuy-brand-wordmark { color:var(--hoja-oscura); }
+.pwa-install-dialog .tarpuy-brand-tagline { color:var(--tinta-suave); }
+.pwa-install-steps { padding:16px; border-radius:20px; background:var(--arena); }
+.pwa-install-steps h3 { margin-bottom:8px; }
+@keyframes pwa-install-enter { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:640px) { .pwa-install-dialog { margin:auto 0 0; width:100%; max-width:100%; border-radius:28px 28px 0 0; padding-bottom:env(safe-area-inset-bottom); } .pwa-install-sheet { padding:24px 20px; } }
+@media(prefers-reduced-motion:reduce) { .pwa-install-dialog[open] { animation:none; } }
+
 @custom-variant dark (&:is(.dark *));
 
 @layer base {

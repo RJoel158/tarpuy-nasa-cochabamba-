@@ -27,7 +27,7 @@ export default function FarmerWaterActionCard({
     drainage: { icon: "riego_gravedad", title: "Comprueba por dónde sale el agua", cue: "Revisa el drenaje", bg: "var(--cielo-suave)" },
     reference_deficit: { icon: "mano_toca", title: "Comprueba cómo se siente la tierra", cue: "Antes de decidir el riego", bg: "var(--arena)" },
     check: { icon: "estudio_suelo", title: "Comprueba cómo se siente la tierra", cue: "Comprueba tu parcela", bg: "var(--arena)" },
-    data_review: { icon: "pin_ubicacion", title: "Primero confirma tu ubicación", cue: "Datos por confirmar", bg: "var(--arena)" },
+    data_review: { icon: bulletin?.offline_copy ? "cartilla_grafico" : "pin_ubicacion", title: bulletin?.offline_copy ? "Revisa la fecha y comprueba tu tierra" : "Primero confirma tu ubicación", cue: bulletin?.offline_copy ? "Usando una copia guardada" : "Datos por confirmar", bg: "var(--arena)" },
   }[action.reason] || { icon: "estudio_suelo", title: text.title, cue: "Antes de regar", bg: "var(--arena)" };
   const summary = bulletin?.predictions_summary || {};
   const summary14d = bulletin?.predictions_summary_14d || {};
@@ -39,7 +39,7 @@ export default function FarmerWaterActionCard({
   const date = bulletin?.fetched_at_utc ? new Date(bulletin.fetched_at_utc) : null;
   const dateLabel = date && Number.isFinite(date.getTime())
     ? date.toLocaleString("es-BO", { timeZone: "America/La_Paz", dateStyle: "short", timeStyle: "short" }) : "";
-  return <section aria-label={text.heading} className={`water-advice water-advice--${action.code.toLowerCase()}`}>
+  return <section lang={text.language === "es" ? "es-BO" : undefined} aria-label={text.heading} className={`water-advice water-advice--${action.code.toLowerCase()}`}>
     <div className="water-advice-heading">
       <p className="text-sm font-bold">{text.heading}</p>
       {district && <p className="text-sm text-slate-600 break-words">{district}</p>}
@@ -50,7 +50,8 @@ export default function FarmerWaterActionCard({
       <div className="min-w-0 space-y-2">
         <p className="text-sm font-bold">{visual.cue}</p>
         <h2 className="text-xl sm:text-2xl font-extrabold leading-tight">{visual.title}</h2>
-        <p className="text-base leading-relaxed font-medium">{["reference_deficit", "check"].includes(action.reason)
+        <p className="text-base leading-relaxed font-medium">{action.reason === "data_review" && bulletin?.offline_copy ? "Mira cómo está tu parcela antes de decidir el riego. Los datos guardados pueden haber cambiado."
+          : ["reference_deficit", "check"].includes(action.reason)
           ? "Toma un poco de tierra a la profundidad de las raíces. Apriétala y observa si está seca al tacto, húmeda o muy pegajosa."
           : text.instruction || text.message}</p>
       </div>

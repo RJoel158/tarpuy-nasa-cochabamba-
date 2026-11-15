@@ -1,4 +1,5 @@
 import MamaTomasaBrand from "../MamaTomasaBrand.jsx";
+import InstallPwa from "../InstallPwa.jsx";
 import React, { useState } from "react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
@@ -102,6 +103,7 @@ function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }
         <option value="avanzado">{qu ? "Sut'i (Avanzado)" : "Avanzada"}</option>
       </select>
     </label>
+    <InstallPwa />
   </div>;
 }
 
@@ -292,6 +294,7 @@ export function CabeceraNavegacion({
   cachedCount = 0,
   dbStats = null,
   syncStatus = "",
+  usingSavedWeather = false,
 }) {
   const [mostrarBuscador, setMostrarBuscador] = useState(false);
   const [mostrarPanelOffline, setMostrarPanelOffline] = useState(false);
@@ -328,7 +331,7 @@ export function CabeceraNavegacion({
           </button>
 
           {/* Estado sin internet */}
-          <span role="status" className="sync-indicator">{onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          <span role="status" className="sync-indicator">{usingSavedWeather ? "Copia guardada · actualización pendiente" : onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
         </div>
       </div>
 
@@ -381,7 +384,7 @@ export function CabeceraNavegacion({
             </button>
           </div>
 
-          <span role="status" className="sync-indicator">{onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          <span role="status" className="sync-indicator">{usingSavedWeather ? "Copia guardada · actualización pendiente" : onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
         </div>
 
       </div>

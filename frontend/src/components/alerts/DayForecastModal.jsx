@@ -1,10 +1,30 @@
 import { X } from "lucide-react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 import { weatherTodayCards } from "../../services/weatherTodayCards.js";
 
 export default function DayForecastModal({ day, dv, zoneName = "", lang = "es", onClose }) {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    if (!day) return;
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.querySelector("button")?.focus();
+    const keydown = event => {
+      if (event.key === "Escape") { event.preventDefault(); closeRef.current?.(); }
+      if (event.key !== "Tab") return;
+      const elements = [...(dialogRef.current?.querySelectorAll("button:not(:disabled), summary, a[href], select, input") || [])].filter(el => el.getClientRects().length);
+      const first = elements[0], last = elements.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => { document.removeEventListener("keydown", keydown); document.body.style.overflow = overflow; previous?.focus(); };
+  }, [day?.date]);
   if (!day || !dv) return null;
   const cards = weatherTodayCards(day);
   const tones = {
@@ -13,7 +33,7 @@ export default function DayForecastModal({ day, dv, zoneName = "", lang = "es", 
     calm: { bg: "var(--hoja-suave)", label: "Sin extremos previstos" },
     unknown: { bg: "var(--arena)", label: "Por confirmar" },
   };
-  return <div role="dialog" aria-modal="true" aria-label={`Clima para ${day.day_label}`}
+  return <div ref={dialogRef} role="dialog" lang="es-BO" aria-modal="true" aria-label={`Clima para ${day.day_label}`}
     className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5"
     style={{ backgroundColor: "rgba(35, 26, 20, 0.65)" }} onClick={onClose}>
     <div className="tarpuy-card-physical max-w-3xl w-full max-h-[88dvh] sm:max-h-[90vh] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"

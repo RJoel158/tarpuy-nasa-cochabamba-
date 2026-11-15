@@ -118,10 +118,15 @@ export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, 
       }
       const qs = params.toString();
       const res = await fetch(`/api/alerts/${zoneId}${qs ? `?${qs}` : ""}`, { cache: "no-store" });
-      if (res.ok) { const data = await res.json(); cacheResponse(cacheKey, data); return data; }
+      if (res.ok) {
+        const data = await res.json();
+        if (res.headers?.get("X-Tarpuy-Offline") === "1") return { ...data, offline_copy: true, weather_refresh_error: true };
+        cacheResponse(cacheKey, data); return data;
+      }
     } catch {}
   }
-  return readResponseCache(cacheKey) || loadOfflineBundle(zoneId)?.realtime_bulletin || null;
+  const saved = readResponseCache(cacheKey) || loadOfflineBundle(zoneId)?.realtime_bulletin;
+  return saved ? { ...saved, offline_copy: true, weather_refresh_error: true } : null;
 }
 
 export async function fetchRecommendations(payload, forceOffline = false) {
@@ -146,29 +151,20 @@ export async function fetchRecommendations(payload, forceOffline = false) {
   const bundle = loadOfflineBundle(payload.zone_id);
   const strats = bundle?.precomputed_recommendations || bundle?.zone_profile?.strategies || [];
   const muni = payload.municipal_context || null;
-  const scored = strats.map((s) => {
-    let score = s.strategy_type === "current_baseline" ? 0.38 : 0.82;
-    const txt = JSON.stringify(s).toLowerCase();
-    (payload.farmer_priorities || []).forEach((p) => {
-      if (txt.includes(p.replace("_", " ").slice(0, 5))) score += 0.04;
-    });
-    if (muni?.periurban_pressure === "consolidated" && (s.crop_sequence || []).length >= 4) score -= 0.06;
-    if (muni?.near_drainage && muni?.wet_bulletin && txt.includes("high")) score -= 0.05;
-    return { ...s, priority_alignment_score: Math.min(0.98, Math.max(0.05, Number(score.toFixed(2)))) };
-  });
+  const scored = strats; // Stored reference strategies, never fabricate a new offline score.
   return {
     zone_id: payload.zone_id,
-    evaluated_at: new Date().toISOString(),
+    evaluated_at: loadDeviceSnapshotSync()?.updatedAt || null,
     current_crop_id: payload.current_crop_id,
-    priorities_considered: payload.farmer_priorities,
+    priorities_considered: [],
     strategies: scored,
     realtime_bulletin: bundle?.realtime_bulletin || null,
     municipal_context: muni,
     data_provenance: {
       nasa_datasets: ["NASA POWER", "SMAP L4", "MODIS/Sentinel-2", "GPM/IMERG", "SRTM"],
       soil_dataset: "ISRIC SoilGrids 250m & FAO GAEZ v4 (Offline Sync)",
-      etl_status: bundle ? "offline_bundle_cached" : "offline_fallback",
-      integrity_sha256: bundle?.integrity_sha256 || "verified_offline",
+      etl_status: "offline_reference_only",
+      integrity_sha256: bundle?.integrity_sha256 || null,
     },
   };
 }

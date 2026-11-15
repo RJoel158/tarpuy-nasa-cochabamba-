@@ -1,42 +1,39 @@
-const CACHE_NAME = "tarpuy-nasa-v9-partner-logos";
+const CACHE_NAME = "tarpuy-nasa-pwa-__BUILD_ID__";
 const STATIC_ASSETS = [
-  "/fonts/atkinson-hyperlegible-0.ttf",
-  "/fonts/atkinson-hyperlegible-1.ttf",
-  "/fonts/nunito-0.ttf",
-  "/fonts/nunito-1.ttf",
-  "/fonts/nunito-2.ttf",
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/vite.svg",
-  "/logos/nasa-space-apps-no-background.png",
-  "/logos/alcaldia-cochabamba-escudo-no-background.png",
-  "/audio/quh/manifest.json",
-  "/audio/quh/guide_punata_valle_alto.wav",
-  "/audio/quh/guide_tapacari_zona_andina.wav",
-  "/audio/quh/guide_mizque_cono_sur.wav",
-  "/audio/es/manifest.json",
-  ...["es", "quh"].flatMap((lang) =>
-    ["frost", "rain", "drainage", "dry", "missing", "check", "stable"]
-      .map((reason) => `/audio/${lang}/water_${reason}.wav`)),
+  "/", "/index.html", "/manifest.json",
+  "/icons/tarpuy-180.png", "/icons/tarpuy-192.png", "/icons/tarpuy-512.png", "/icons/tarpuy-maskable-512.png",
+  "/fonts/atkinson-hyperlegible-0.ttf", "/fonts/atkinson-hyperlegible-1.ttf",
+  "/fonts/nunito-0.ttf", "/fonts/nunito-1.ttf", "/fonts/nunito-2.ttf",
+  "/logos/nasa-space-apps-no-background.png", "/logos/alcaldia-cochabamba-escudo-no-background.png",
 ];
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
-  self.skipWaiting();
+self.addEventListener("install", event => {
+  event.waitUntil((async () => {
+    const response = await fetch("/precache-manifest.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Application asset list unavailable");
+    const assets = await response.json();
+    if (!Array.isArray(assets) || !assets.length || assets.some(path => typeof path !== "string" || !path.startsWith("/assets/"))) throw new Error("Invalid asset list");
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll([...STATIC_ASSETS, ...assets]);
+    await self.skipWaiting();
+  })());
 });
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
-    )
-  );
-  self.clients.claim();
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    // Keep previously downloaded API/audio assets; replace only the app shell.
+    const current = await caches.open(CACHE_NAME);
+    for (const key of keys.filter(key => key.startsWith("tarpuy-nasa-") && key !== CACHE_NAME)) {
+      const previous = await caches.open(key);
+      for (const request of await previous.keys()) {
+        const url = new URL(request.url);
+        if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/audio/")) {
+          if (!(await current.match(request))) await current.put(request, await previous.match(request));
+        }
+      }
+      await caches.delete(key);
+    }
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
@@ -61,11 +58,17 @@ self.addEventListener("fetch", (event) => {
         .then((networkRes) => {
           if (networkRes && networkRes.status === 200) {
             const copy = networkRes.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)));
           }
           return networkRes;
         })
-        .catch(() => caches.match(req))
+        .catch(async () => {
+          const cached = await caches.match(req);
+          if (!cached) return new Response(JSON.stringify({ detail: "Sin conexión y sin copia guardada" }), { status: 503, headers: { "Content-Type": "application/json" } });
+          const headers = new Headers(cached.headers);
+          headers.set("X-Tarpuy-Offline", "1");
+          return new Response(cached.body, { status: cached.status, headers });
+        })
     );
     return;
   }
@@ -77,7 +80,7 @@ self.addEventListener("fetch", (event) => {
         .then((res) => {
           if (res && res.status === 200) {
             const copy = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)));
           }
           return res;
         })
@@ -93,7 +96,7 @@ self.addEventListener("fetch", (event) => {
       return fetch(req).then((res) => {
         if (res && res.status === 200) {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)));
         }
         return res;
       });

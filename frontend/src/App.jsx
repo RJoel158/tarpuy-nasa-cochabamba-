@@ -66,7 +66,14 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState(
     initialSnap?.sizeKb ? `Base local (${initialSnap.sizeKb} KB)` : "Sincronizando base local..."
   );
-  const [voiceLang, setVoiceLang] = useState("es");
+  const [voiceLang, setVoiceLang] = useState(() => {
+    try { return localStorage.getItem("tarpuy_language_v1") === "qu" ? "qu" : "es"; }
+    catch { return "es"; }
+  });
+  useEffect(() => {
+    document.documentElement.lang = voiceLang === "qu" ? "quh-BO" : "es-BO";
+    try { localStorage.setItem("tarpuy_language_v1", voiceLang); } catch { /* Storage may be unavailable. */ }
+  }, [voiceLang]);
   const gpsAttemptRef = useRef(0);
   const [gpsNotice, setGpsNotice] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -438,7 +445,7 @@ export default function App() {
     setVoiceLang(nextLang);
     pushToast(
       nextLang === "qu" ? "Simi: Qhichwa (Cochabamba)" : "Idioma: Castellano",
-      nextLang === "qu" ? "Qillqakuna, uyarinapas qhichwapi" : "Textos y voz en castellano",
+      nextLang === "qu" ? "Quechua seleccionado; algunas interpretaciones siguen en castellano y pendientes de revisión local." : "Textos y voz en castellano",
       "info"
     );
   };
@@ -510,12 +517,14 @@ export default function App() {
               cachedCount={cachedCount}
               dbStats={dbStats}
               syncStatus={syncStatus}
+            usingSavedWeather={Boolean(alertBulletin?.offline_copy)}
             />
             <main
               id="tarpuy-main-view"
               data-producer-mode={!isAdvanced}
               className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-4 sm:py-6 space-y-8"
             >
+              {activeView === "siembra" && recData?.data_provenance?.etl_status === "offline_reference_only" && <p role="status" lang="es-BO" className="rounded-2xl bg-[var(--arena)] p-4">Estas son opciones de referencia guardadas. Sin conexión al servidor no se recalcula su ajuste a los cambios del formulario; vuelve a consultar al recuperar la conexión.</p>}
               {loading && !recData ? (
                 <p className="py-12 text-center font-extrabold" style={{ color: "var(--tinta-suave)" }}>
                   Cargando datos...

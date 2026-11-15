@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { fetchZones, fetchCrops, fetchRecommendations } from "./apiClient.js";
+import { fetchZones, fetchCrops, fetchRecommendations, fetchAlerts } from "./apiClient.js";
 
 function setup(t) {
   const stored = new Map();
@@ -49,4 +49,25 @@ test("a failed refresh preserves the last successful recommendation", async t =>
   await fetchRecommendations(payload);
   globalThis.fetch = async () => { throw new Error("server unavailable"); };
   assert.deepEqual((await fetchRecommendations(payload)).strategies, result.strategies);
+});
+
+test("weather from service-worker cache is flagged and keeps the original date", async t => {
+  setup(t);
+  const data = { zone_id: "z1", fetched_at_utc: "2026-11-14T12:00:00Z", weather_scope: "selected_point_model" };
+  globalThis.fetch = async () => ({ ok: true, headers: new Headers({ "X-Tarpuy-Offline": "1" }), json: async () => data });
+  const cached = await fetchAlerts("z1");
+  assert.equal(cached.offline_copy, true);
+  assert.equal(cached.weather_refresh_error, true);
+  assert.equal(cached.fetched_at_utc, data.fetched_at_utc);
+});
+
+test("new offline choices preserve reference scores and never invent an evaluation", async t => {
+  setup(t);
+  const saved = { strategy_id: "reference", priority_alignment_score: .47, crop_sequence: [] };
+  localStorage.setItem("tarpuy_single_snapshot_v1", JSON.stringify({ zoneId: "z1", updatedAt: "2026-11-14T12:00:00Z", bundle: { zone_profile: { strategies: [saved] } } }));
+  const result = await fetchRecommendations({ zone_id: "z1", current_crop_id: "changed", farmer_priorities: ["water_conservation"] }, true);
+  assert.deepEqual(result.strategies, [saved]);
+  assert.equal(result.data_provenance.etl_status, "offline_reference_only");
+  assert.equal(result.evaluated_at, "2026-11-14T12:00:00Z");
+  assert.deepEqual(result.priorities_considered, []);
 });

@@ -29,7 +29,9 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
     const name = group.category === "bare" ? "descanso de la tierra, sin cobertura"
       : group.category === "idle" ? "descanso o transición"
       : group.cropName.replace(/\s*\/\s*/g, ", o ").replace(/\s*\([^)]*\)/g, "");
-    const role = group.role.toLowerCase();
+    // The visual calendar simplifies role wording; keep the documented role
+    // for deciding which agronomic explanation belongs to the selected crop.
+    const role = (sequence.find(crop => crop.crop_id === group.cropId)?.agronomic_role || group.role).toLowerCase();
     const purpose = group.category === "bare" ? { es: "La tierra queda expuesta a la lluvia y al viento.", qu: "Para, wayra ima allpata apanman." }
       : group.category === "mulch" ? { es: "La cobertura ayuda a cuidar la humedad de la tierra.", qu: "Allpata qhatanapaq." }
       : /forraj/.test(role) ? { es: "Sirve como alimento para los animales.", qu: "Uywakunapaq mikhuna." }

@@ -9,6 +9,7 @@ export default function WeatherSourcesFooter({ bulletin }) {
   const point = bulletin?.weather_scope === "selected_point_model";
   return <section className="py-4 text-sm text-[var(--tinta-suave)] border-t border-[var(--color-border-subtle)]" aria-label="Fuentes y actualización del clima">
     <p className="font-bold">Fuentes y actualización</p>
+    {bulletin?.offline_copy && <p role="status">Copia guardada: no se pudo consultar una actualización. Conserva su fecha original.</p>}
     {bulletin?.primary_provider_status === "unavailable_using_open_meteo" && <p>Se está utilizando un pronóstico de respaldo.</p>}
     <p>{point ? "Pronóstico del modelo para el punto elegido." : "Pronóstico de referencia zonal; no es el punto exacto de tu parcela."} No es una medición en campo.</p>
     <p>Descarga del proveedor: {date(bulletin?.fetched_at_utc)} · Hora de las condiciones del modelo: {date(bulletin?.current_conditions?.observed_at)}.</p>

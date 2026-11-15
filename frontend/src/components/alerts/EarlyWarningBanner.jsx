@@ -102,8 +102,8 @@ export default function EarlyWarningBanner({
 
   const primaryAlert = (!alertPolicy.usable ? {
     kind: "stable", severity: "unverified", semaforo: "cuidado",
-    bannerPill: "DATOS POR CONFIRMAR", cleanTitle: "Confirma tu ubicación para consultar el clima",
-    action: alerts[0].action_es,
+    bannerPill: "DATOS POR CONFIRMAR", cleanTitle: bulletin.offline_copy ? "Estás viendo un pronóstico guardado" : bulletin.weather_scope === "selected_point_model" ? "Falta actualizar el pronóstico" : "Confirma tu ubicación para consultar el clima",
+    action: bulletin.offline_copy ? "Revisa su fecha y comprueba cómo está tu parcela. Se intentará actualizar al recuperar la conexión." : alerts[0].action_es,
   } : cleanAlertForFarmer(alerts[0], voiceLang)) || {
     kind: "stable",
     severity: "info",
