@@ -20,7 +20,7 @@ export default function InstallPwa({ lang = "es" }) {
   if (state.installed) return null;
 
   return (
-    <div className="pwa-install-entry">
+    <div className="pwa-install-entry lg:hidden">
       <button
         type="button"
         className="pwa-install-trigger"

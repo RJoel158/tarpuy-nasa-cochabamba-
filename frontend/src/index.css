@@ -4,6 +4,12 @@
 @import "./styles/fonts.css";
 
 .pwa-install-entry { grid-column: 1 / -1; width: 100%; margin-top: 2px; }
+@media (min-width: 1024px) {
+  .pwa-install-entry,
+  .tarpuy-sidebar .pwa-install-entry {
+    display: none !important;
+  }
+}
 .pwa-install-trigger {
   display: flex;
   align-items: center;
@@ -112,19 +118,22 @@
  * ========================================================================== */
 .tarpuy-nav-map-highlight {
   position: relative !important;
-  animation: tarpuy-map-glow 2s infinite ease-in-out !important;
-  border-color: var(--dorado) !important;
+  animation: tarpuy-map-glow 1.5s infinite ease-in-out !important;
+  border-color: #ffd166 !important;
+  background-color: color-mix(in srgb, var(--dorado) 28%, var(--tinta-suave)) !important;
+  color: #fff !important;
+  z-index: 10;
 }
 
 @keyframes tarpuy-map-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(229, 160, 39, 0.75), 0 3px 0 var(--tinta);
-    border-color: var(--dorado);
+    box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.9), 0 0 10px 2px rgba(245, 166, 35, 0.5);
+    border-color: #ffd166;
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(229, 160, 39, 0), 0 0 16px 4px rgba(229, 160, 39, 0.8), 0 3px 0 var(--tinta);
-    border-color: #ffd54f;
+    box-shadow: 0 0 0 7px rgba(245, 166, 35, 0), 0 0 22px 6px rgba(245, 166, 35, 0.95);
+    border-color: #ffffff;
     transform: scale(1.03);
   }
 }
@@ -132,7 +141,7 @@
 @media (prefers-reduced-motion: reduce) {
   .tarpuy-nav-map-highlight {
     animation: none !important;
-    box-shadow: 0 0 12px 2px var(--dorado) !important;
+    box-shadow: 0 0 14px 3px var(--dorado) !important;
   }
 }
 .pwa-install-dialog { width:min(520px,calc(100% - 24px)); max-height:90dvh; margin:auto; padding:0; border:2px solid var(--tinta); border-radius:28px; background:var(--tarjeta); color:var(--tinta); overflow:auto; }

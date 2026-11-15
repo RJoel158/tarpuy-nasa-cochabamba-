@@ -98,6 +98,12 @@ export default function CochabambaMap({
     limite_distritos: "Límites de distritos",
   };
 
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("tarpuy_has_visited_map", "true");
+    } catch {}
+  }, []);
+
   const canUseLeaflet = !forceOffline && isOnline;
 
   useEffect(() => {
@@ -576,6 +582,8 @@ export default function CochabambaMap({
           appMode={isAdvanced ? "avanzado" : "facil"}
           voiceLang={lang}
           zIndex="z-[520]"
+          hasVisitedMap={true}
+          onMarkVisitedMap={() => {}}
         />
       ) : null}
 

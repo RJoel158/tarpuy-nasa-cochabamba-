@@ -110,7 +110,7 @@ function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }
 export function useHasVisitedMap() {
   const [visited, setVisited] = useState(() => {
     try {
-      return localStorage.getItem("tarpuy_has_visited_map") === "true";
+      return sessionStorage.getItem("tarpuy_has_visited_map") === "true";
     } catch {
       return false;
     }
@@ -118,7 +118,7 @@ export function useHasVisitedMap() {
 
   const markVisited = useCallback(() => {
     try {
-      localStorage.setItem("tarpuy_has_visited_map", "true");
+      sessionStorage.setItem("tarpuy_has_visited_map", "true");
     } catch {}
     setVisited(true);
   }, []);
@@ -200,9 +200,9 @@ export function MobileBottomNav({
             }}
           >
             {destacarMapa && (
-              <span className="absolute -top-1 -right-1 flex h-3 w-3" aria-hidden="true">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--dorado)] opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--dorado)] border border-[var(--tinta)]" />
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5" aria-hidden="true">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-85" />
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-400 border-2 border-[var(--tinta)] shadow-sm" />
               </span>
             )}
             <span className="flex items-center justify-center shrink-0">
@@ -273,13 +273,12 @@ export default function Navbar({
         }}
       >
         <div className="space-y-6">
-          {/* Logos en su etiqueta crema + título y casita simple */}
+          {/* Marca Mama Tomasa y casita simple */}
           <div
             className="space-y-3.5 pb-4"
             style={{ borderBottom: "1px solid var(--tinta-suave)" }}
           >
             <MamaTomasaBrand />
-            <InstitutionalBrandBar variant="inline" size="sm" />
           </div>
 
           {/* Las pestañas grandes: Dibujo + UNA palabra completa, sin botones interiores ni cortes */}
@@ -319,9 +318,9 @@ export default function Navbar({
                   }}
                 >
                   {destacarMapa && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5" aria-hidden="true">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--dorado)] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--dorado)] border-2 border-[var(--tinta)]" />
+                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4" aria-hidden="true">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-85" />
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-400 border-2 border-[var(--tinta)] shadow-sm" />
                     </span>
                   )}
                   <span className="flex items-center justify-center shrink-0">
