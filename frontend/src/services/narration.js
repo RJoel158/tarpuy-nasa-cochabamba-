@@ -62,7 +62,7 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
 export function buildWeatherNarration(bulletin, zoneName = "", lang = "es") {
   if (!bulletin?.seven_day_forecast?.length) return lang === "qu" ? "Mana pacha yachay kanchu." : "Falta el pronóstico para esta zona.";
   const days = bulletin.weather_provider === "WeatherAPI" ? (bulletin.fourteen_day_forecast || bulletin.seven_day_forecast).filter(day => day.forecast_provider === "WeatherAPI") : bulletin.seven_day_forecast;
-  if (!days.length) return "No hay un pronóstico WeatherAPI disponible.";
+  if (!days.length) return "No hay un pronóstico disponible.";
   if (lang === "qu") {
     return [zoneName, "Pacha willakuy.", ...days.map((day) =>
       `${day.date}. Para: ${number(day.precip_mm) ?? "—"} milímetros. Chiri: ${number(day.temp_min_c) ?? "—"} grados.`),

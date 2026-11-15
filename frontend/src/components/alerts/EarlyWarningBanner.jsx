@@ -1,10 +1,11 @@
+import { weatherTodayCards } from "../../services/weatherTodayCards.js";
 import { weatherAlertPolicy } from "../../services/weatherAlertPolicy.js";
 import HorizontalCarousel from "../ui/HorizontalCarousel.jsx";
 import React, { useState, useEffect } from "react";
 import { buildWeatherNarration } from "../../services/narration.js";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
-import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
+import { BotonGrande } from "../ui/TarpuyBaseComponents.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import { PatronPantalla } from "../personality/PatronesYSellos.jsx";
 import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
@@ -57,7 +58,7 @@ export default function EarlyWarningBanner({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [mostrarMasDetalle, setMostrarMasDetalle] = useState(isAdvanced);
-  const [forecastHorizon, setForecastHorizon] = useState("7d");
+  const [forecastHorizon, setForecastHorizon] = useState("14d");
 
   useEffect(() => {
     setMostrarMasDetalle(isAdvanced);
@@ -144,68 +145,19 @@ export default function EarlyWarningBanner({
           poseGuia: "saludo",
         };
 
-  /* Datos para las 3 tarjetas grandes de HOY (Frío/Calor, Lluvia, Viento) */
   const minTemp = Number(days[0]?.temp_min_c ?? cur.temp_c);
-  const tempActual = Number(cur.temp_c ?? 16);
-  const lluvia7d = Number(pred.total_precip_7d_mm ?? 0);
-  const vientoHoy = Number(days[0]?.wind_kmh ?? 12);
-
+  const lluvia7d = Number(pred.total_precip_7d_mm);
   const tempCard = describeTempCard(cur.temp_c, pred.min_temp_7d_c, voiceLang);
   const soilCard = describeSoilCard(cur.soil_moisture_top_pct, voiceLang);
   const rainCard = describeRainCard(pred.total_precip_7d_mm, voiceLang);
   const sunCard = describeSunCard(pred.net_water_balance_7d_mm, voiceLang);
-
-  const hoyTresTarjetas = [
-    {
-      id: "temperatura",
-      etiqueta: isQu ? "1. Chiri icha Rupha" : "1. Frío o Calor",
-      dibujoId: minTemp <= 5 ? "termometro_frio" : "termometro_calor",
-      palabra:
-        minTemp <= 2
-          ? isQu
-            ? "Qasa"
-            : "Helada"
-          : minTemp <= 6
-          ? isQu
-            ? "Chiri"
-            : "Frío"
-          : tempActual >= 23
-          ? isQu
-            ? "Rupha"
-            : "Calor"
-          : isQu
-          ? "Q'uñi"
-          : "Templado",
-      explicacion: tempCard.advice,
-      apoyoNumerico: `${cur.temp_c}°C del modelo · Mín ${days[0]?.temp_min_c ?? "—"}°C / Máx ${days[0]?.temp_max_c ?? "—"}°C hoy`,
-      bg: minTemp <= 5 ? "var(--cielo-suave)" : "var(--tierra-suave)",
-    },
-    {
-      id: "lluvia",
-      etiqueta: isQu ? "2. Para" : "2. Lluvia",
-      dibujoId: lluvia7d >= 5 ? "lluvia" : "sol",
-      palabra: `${days[0]?.precip_mm ?? "—"} mm previstos hoy · ${days[0]?.precip_prob_pct ?? "—"}%`,
-      explicacion: rainCard.advice,
-      apoyoNumerico: `${pred.total_precip_7d_mm} mm en 7 días · Humedad suelo: ${cur.soil_moisture_top_pct ?? "—"}%`,
-      bg: lluvia7d >= 5 ? "var(--cielo-suave)" : "var(--dorado-suave)",
-    },
-    {
-      id: "viento",
-      etiqueta: isQu ? "3. Wayra" : "3. Viento",
-      dibujoId: "viento",
-      palabra:
-        vientoHoy >= 18
-          ? isQu
-            ? "Sinchi wayra"
-            : "Viento fuerte"
-          : isQu
-          ? "Llanthu wayra"
-          : "Viento suave",
-      explicacion: sunCard.advice,
-      apoyoNumerico: `Viento: ${days[0]?.wind_kmh ?? "—"} km/h · Humedad aire: ${cur.humidity_pct ?? "—"}%`,
-      bg: vientoHoy >= 18 ? "var(--alerta-cuidado-suave)" : "var(--arena)",
-    },
-  ];
+  const hoyTresTarjetas = weatherTodayCards(days[0], alertPolicy.usable);
+  const cardTones = {
+    unknown: { bg: "var(--arena)", label: "Datos por confirmar" },
+    warning: { bg: "var(--alerta-cuidado-suave)", label: "Atención" },
+    rain: { bg: "var(--cielo-suave)", label: "Prepárate para la lluvia" },
+    calm: { bg: "var(--alerta-tranquilo-suave)", label: "Sin extremos previstos" },
+  };
 
   /* Las 4 tarjetas detalladas originales (conservadas íntegras para Ver más detalle / Modo Avanzado) */
   const weatherCards = [
@@ -219,7 +171,7 @@ export default function EarlyWarningBanner({
       key: "soil",
       category: isQu ? "ALLPAYKI" : "TU TIERRA",
       ...soilCard,
-      techText: `${cur.soil_moisture_top_pct}% · ${cur.humidity_pct}%`,
+      techText: `Humedad superficial del modelo: ${cur.soil_moisture_top_pct ?? "—"}% · Humedad del aire: ${cur.humidity_pct ?? "—"}%`,
     },
     {
       key: "rain",
@@ -372,13 +324,6 @@ export default function EarlyWarningBanner({
 
             {/* Botón de altavoz grande en la zona inferior/pulgar de la tarjeta */}
             <div className="shrink-0 w-full md:w-auto flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center gap-3">
-              <BotonAltavoz
-                sonando={estaHablandoAlerta}
-                mostrarTexto={true}
-                etiqueta={tr(voiceLang, "listenBtn")}
-                onClick={handleListen}
-                className="w-full sm:w-auto justify-center"
-              />
               {alerts.length > 0 && (
                 <button
                   type="button"
@@ -417,12 +362,13 @@ export default function EarlyWarningBanner({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
+        {isQu && <p className="text-sm text-[var(--tinta-suave)]">Interpretaciones en castellano; traducción al quechua pendiente de revisión local.</p>}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5">
           {hoyTresTarjetas.map((item) => (
             <article
               key={item.id}
-              className="tarpuy-card-physical p-2.5 sm:p-6 flex flex-col items-center text-center justify-between gap-2 sm:gap-4"
-              style={{ backgroundColor: "var(--tarjeta)" }}
+              className="tarpuy-card-physical p-5 sm:p-6 flex flex-col items-center text-center gap-3"
+              style={{ backgroundColor: cardTones[item.tone].bg }}
             >
               <span
                 className="text-sm font-medium leading-tight"
@@ -434,7 +380,7 @@ export default function EarlyWarningBanner({
               {/* Dibujo grande arriba en fondo suave */}
               <div
                 className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: item.bg }}
+                style={{ backgroundColor: "var(--tarjeta)" }}
               >
                 <IlustracionTarpuy id={item.dibujoId} size={52} />
               </div>
@@ -451,23 +397,8 @@ export default function EarlyWarningBanner({
                 {item.palabra}
               </h4>
 
-              {/* Números de apoyo (>= 14 px) */}
-              <span
-                className="hidden md:block text-sm font-normal pt-1"
-                style={{ color: "var(--tinta-suave)" }}
-              >
-                {item.apoyoNumerico}
-              </span>
-              <span
-                className="md:hidden text-sm font-medium"
-                style={{ color: "var(--tinta-suave)" }}
-              >
-                {item.id === "temperatura"
-                  ? `${cur.temp_c}°C`
-                  : item.id === "lluvia"
-                  ? `${pred.total_precip_7d_mm} mm`
-                  : `${days[0]?.wind_kmh ?? 12} km/h`}
-              </span>
+              <span className="text-xs font-extrabold rounded-full border border-current px-3 py-1">{cardTones[item.tone].label}</span>
+              <p className="text-base leading-relaxed text-[var(--tinta-suave)]">{item.explicacion}</p>
             </article>
           ))}
         </div>
@@ -477,10 +408,11 @@ export default function EarlyWarningBanner({
        * 3. LA SEMANA (Tira de 7 casillas grandes tocables, sin requerir scroll horizontal)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
+        <p className="text-sm text-[var(--tinta-suave)]">La segunda semana es orientativa y tiene mayor incertidumbre. Revisa las actualizaciones antes de decidir.</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <h3 className="tarpuy-subtitle">
-              {primaryWeather ? `Pronóstico WeatherAPI · ${days.length} días` : forecastHorizon === "14d"
+              {primaryWeather ? `Próximos ${days.length} días` : forecastHorizon === "14d"
                 ? (isQu ? "14 p'unchawkuna (2 semanas)" : "Próximos 14 días (2 semanas)")
                 : (isQu ? "Qhipa 7 p'unchawkuna (La semana)" : "La semana")}
             </h3>
@@ -552,12 +484,12 @@ export default function EarlyWarningBanner({
                   <span className="block text-base font-bold leading-snug">
                     {dv.word}
                   </span>
-                  <span
+                  {isAdvanced && (                  <span
                     className="block text-sm font-normal"
                     style={{ color: "var(--tinta-suave)" }}
                   >
                     {d.temp_min_c}° / {d.temp_max_c}°C
-                  </span>
+                  </span>)}
                 </div>
               </button>
             );
@@ -664,7 +596,6 @@ export default function EarlyWarningBanner({
         semaforoPrincipal={semaforoPrincipalClima}
         mensaje={primaryAlert.action}
         tarjetas={tarjetasMamaTomasa}
-        onListen={handleListen}
         isSpeaking={estaHablandoAlerta}
         badgeCount={tarjetasMamaTomasa.length}
         tonoAvisoPrincipal={estiloMensajeDia.tonoGlobo}

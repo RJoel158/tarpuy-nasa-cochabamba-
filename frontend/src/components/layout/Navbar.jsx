@@ -1,7 +1,7 @@
 import MamaTomasaBrand from "../MamaTomasaBrand.jsx";
 import React, { useState } from "react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
-import { EtiquetaLogo, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
+import { EtiquetaLogo } from "../ui/TarpuyBaseComponents.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
@@ -207,13 +207,6 @@ export default function Navbar({
         >
           <Preferencias voiceLang={voiceLang} onChangeVoiceLang={onChangeVoiceLang}
             appMode={appMode} onChangeAppMode={onChangeAppMode} />
-          <BotonAltavoz
-            sonando={isSpeaking}
-            mostrarTexto={true}
-            etiqueta={esQuechua ? "Yanapayta uyariy" : "Escuchar guía"}
-            onClick={isSpeaking ? onStopAudio : onSpeakGuide}
-            className="w-full"
-          />
         </div>
       </aside>
 

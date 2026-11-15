@@ -36,14 +36,12 @@ import {
   listCachedZoneIds,
 } from "./services/apiClient.js";
 import { loadDeviceSnapshotSync, getDeviceDbStats } from "./services/embeddedDb.js";
-import { speakQuechua, speakSpanish, stopSpeaking, speakStepByStepGuide } from "./services/speechService.js";
+import { speakQuechua, speakSpanish, stopSpeaking } from "./services/speechService.js";
 import { tr } from "./utils/quechuaI18n.js";
 
 export default function App() {
   const initialSnapRef = useRef(loadDeviceSnapshotSync());
   const initialSnap = initialSnapRef.current;
-  const [mapPreviewOpen, setMapPreviewOpen] = useState(false);
-  const [mapNextView, setMapNextView] = useState("clima");
   const [activeView, setActiveView] = useState("clima");
   const [appMode, setAppMode] = useState("facil");
   const isAdvanced = appMode === "avanzado";
@@ -72,6 +70,7 @@ export default function App() {
   const gpsAttemptRef = useRef(0);
   const [gpsNotice, setGpsNotice] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
   const [userPoint, setUserPoint] = useState(initialSnap?.userPoint || null);
   const [drainage, setDrainage] = useState(null);
@@ -250,25 +249,7 @@ export default function App() {
     }
   };
 
-  const handleStopAudio = () => { stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
-
-  const handleSpeakGuide = () => {
-    handleStopAudio();
-    if (recData?.zone_id !== zoneId || recData?.current_crop_id !== cropId) {
-      pushToast("Guía aún no disponible", "Espera a que se actualice la recomendación de tu cultivo y zona", "info");
-      return;
-    }
-    setIsSpeaking(true);
-    pushToast(`Voz (${voiceLang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo guía de siembra", "info");
-    speakStepByStepGuide(currentZone, recData?.strategies || [], voiceLang, {
-      onStart: () => setIsSpeaking(true),
-      onEnd: () => setIsSpeaking(false),
-      onError: () => {
-        setIsSpeaking(false);
-        pushToast("Audio no disponible", "Revisa el volumen o conexión", "warning");
-      },
-    });
-  };
+  const handleStopAudio = () => { setAudioLoading(false); stopSpeaking(); setIsSpeaking(false); setActiveAudioKey(null); };
 
   const handleSpeak = (text, lang, key, clipKey = null) => {
     if (activeAudioKey === key) {
@@ -279,16 +260,18 @@ export default function App() {
     handleStopAudio();
     setActiveAudioKey(key);
     setIsSpeaking(true);
-    pushToast(`Voz (${lang === "qu" ? "Quechua" : "Español"})`, "Reproduciendo aviso", "info");
+    setAudioLoading(true);
     const cb = {
+      onLoading: setAudioLoading,
       clipKey,
       neuralOnly: key.startsWith("water_"),
       onEngine: (engine) => {
         if (engine === "browser_fallback") pushToast("Voz básica del equipo", "La voz natural no está disponible en este momento", "info");
       },
 
-      onEnd: () => { setActiveAudioKey(null); setIsSpeaking(false); },
+      onEnd: () => { setAudioLoading(false); setActiveAudioKey(null); setIsSpeaking(false); },
       onError: () => {
+        setAudioLoading(false);
         setActiveAudioKey(null);
         setIsSpeaking(false);
         pushToast("Audio no disponible", "Intenta de nuevo", "warning");
@@ -321,8 +304,6 @@ export default function App() {
   };
 
   const handleSelectCommunity = (comm) => {
-    setMapPreviewOpen(true);
-    setMapNextView("clima");
     gpsAttemptRef.current += 1;
     setGpsNotice(null);
     setCommunityName(comm.name);
@@ -348,7 +329,6 @@ export default function App() {
   };
 
   const handlePickMapPoint = async (lat, lon, source = "mapa", accuracy = null) => {
-    setMapPreviewOpen(true);
     const attempt = ++gpsAttemptRef.current;
     setGpsNotice(null);
     const district = await findDistrictAt(lat, lon);
@@ -391,8 +371,6 @@ export default function App() {
   const handleDetectGps = async () => {
     const attempt = ++gpsAttemptRef.current;
     setActiveView("mapa");
-    setMapPreviewOpen(false);
-    setMapNextView("clima");
     setGpsNotice("Buscando tu ubicación. Permite el acceso si el navegador lo solicita.");
     try {
       if (!navigator.geolocation) throw new Error("GPS unavailable");
@@ -401,7 +379,6 @@ export default function App() {
         onRetry: () => {},
         onPosition: (pos) => {
           if (attempt !== gpsAttemptRef.current) return;
-          setMapPreviewOpen(true);
           setDistrictMeta(null);
           setUserPoint({ lat: pos.coords.latitude, lon: pos.coords.longitude, source: "GPS", accuracy: pos.coords.accuracy });
           setGpsNotice(`Ubicación aproximada: ±${Math.round(pos.coords.accuracy)} m. Mejorando precisión…`);
@@ -470,21 +447,13 @@ export default function App() {
   if (activeView === "mapa") {
     return <main className="tarpuy-map-screen" aria-label="Elige tu ubicación">
       <CochabambaMap
-        guided previewOpen={mapPreviewOpen}
-        onDismissPreview={() => setMapPreviewOpen(false)}
-        onNavigate={(view) => {
-          setMapNextView(view);
-          if (view === "mapa") { setMapPreviewOpen(false); return; }
-          if (userPoint) setMapPreviewOpen(true);
-          else setGpsNotice("Usa Ubícame, elige tu distrito o toca tu parcela para continuar.");
-        }}
-        nextView={mapNextView}
+        guided
+        onContinue={() => { setActiveProcess(null); setToasts([]); setActiveView("clima"); }}
         activeZoneId={zoneId} onSelectZone={handleSelectZone}
         selectedCommunityName={communityName} onSelectCommunity={handleSelectCommunity}
         onChooseDistrict={(district) => handleSelectCommunity(districtToCommunity(district))}
         userPoint={userPoint} onPickMapPoint={handlePickMapPoint}
         onDetectGps={handleDetectGps} forceOffline={forceOffline} isOnline={isOnline}
-        onContinue={() => { setActiveProcess(null); setToasts([]); setMapPreviewOpen(false); setActiveView(mapNextView); }}
         geoStatus={gpsNotice || ""}
       />
       <header className="tarpuy-map-brand">
@@ -512,7 +481,6 @@ export default function App() {
         voiceLang={voiceLang}
         onChangeVoiceLang={handleChangeVoiceLang}
         isSpeaking={isSpeaking}
-        onSpeakGuide={handleSpeakGuide}
         onStopAudio={handleStopAudio}
         isOnline={isOnline}
         forceOffline={forceOffline}
@@ -539,7 +507,6 @@ export default function App() {
               voiceLang={voiceLang}
               onChangeVoiceLang={handleChangeVoiceLang}
               isSpeaking={isSpeaking}
-              onSpeakGuide={handleSpeakGuide}
               onStopAudio={handleStopAudio}
               isOnline={isOnline}
               forceOffline={forceOffline}
@@ -583,6 +550,7 @@ export default function App() {
                 </div>
               ) : activeView === "siembra" ? (
                 <ProducerMode key={zoneId}
+                  onStopAudio={handleStopAudio} audioLoading={audioLoading}
                   municipalContext={recData?.municipal_context || null}
                   municipalChip={municipalChip} municipalTip={municipalTip}
                   zone={currentZone}

@@ -174,17 +174,11 @@
 
 .tarpuy-map-district { position:absolute; top:192px; left:16px; width:350px; max-width:calc(100% - 32px); z-index:500; padding:12px 16px; border:1px solid var(--color-border-subtle); border-radius:20px; background:var(--tarjeta); box-shadow:0 4px 20px #231a1426; }
 .tarpuy-map-district select { display:block; width:100%; margin-top:4px; min-height:48px; font-size:16px; border-width:1px; background:var(--tarjeta); }
-.tarpuy-map-preview { position:absolute; bottom:calc(88px + env(safe-area-inset-bottom)); left:16px; z-index:510; width:350px; max-width:calc(100% - 32px); max-height:35dvh; overflow:auto; padding:16px; border:1px solid var(--color-border-subtle); border-radius:24px; background:var(--tarjeta); box-shadow:0 4px 20px #231a1426; }
-.tarpuy-map-preview > p { margin:8px 0 12px; }
-.tarpuy-map-bottom-nav { position:absolute; bottom:0; inset-inline:0; z-index:520; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:8px 12px max(8px,env(safe-area-inset-bottom)); background:var(--tarjeta); border-top:1px solid var(--color-border-subtle); }
-.tarpuy-map-bottom-nav button { min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-radius:16px; font-weight:800; font-size:14px; }
-.tarpuy-map-bottom-nav button[aria-current] { background:var(--hoja-suave); }
 .tarpuy-map-screen .leaflet-top.leaflet-left { top:330px; }
 @media(max-width:640px) {
   .tarpuy-map-district { top:180px; left:12px; width:calc(100% - 24px); max-width:none; padding:10px 14px; }
   .tarpuy-map-layers { top:296px; right:12px; }
   .tarpuy-map-screen .leaflet-top.leaflet-left { top:296px; }
-  .tarpuy-map-preview { left:12px; width:calc(100% - 24px); max-width:none; padding:12px 16px; }
 }
 
 .tomasa-brand { display:flex; align-items:center; gap:12px; padding:8px 0; text-align:left; }
@@ -238,3 +232,14 @@
 .sowing-step-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .sowing-step-actions button:disabled { opacity:.4; cursor:default; }
 .sync-indicator { display:inline-block; padding:8px 0; font-size:13px; color:var(--tinta-suave); }
+
+.water-advice-visual { display:grid; grid-template-columns:144px minmax(0,1fr); align-items:center; gap:20px; padding:20px; border-radius:20px; }
+.water-advice-drawing { display:flex; align-items:center; justify-content:center; }
+.water-advice-drawing svg { max-width:100%; height:auto; }
+.water-advice-visual h2 { max-width:30ch; }
+.water-advice-visual p { max-width:65ch; }
+@media(max-width:480px) {
+  .water-advice-visual { grid-template-columns:minmax(0,1fr); gap:12px; padding:16px; }
+  .water-advice-drawing svg { width:100px; }
+  .water-advice-visual h2 { max-width:none; }
+}

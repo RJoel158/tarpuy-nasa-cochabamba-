@@ -1,3 +1,4 @@
+from backend.config import Settings
 import json
 from copy import deepcopy
 from pathlib import Path
@@ -16,7 +17,7 @@ def test_point_weather_uses_selected_coordinates_and_caches_without_nasa_relabel
         value['daily_forecast'][0]['precip_mm'] = 12
         return value
     monkeypatch.setattr(RealtimeWeatherClient, 'fetch_zone_realtime', fetch)
-    client = TestClient(create_app())
+    client = TestClient(create_app(settings=Settings(WEATHERAPI_KEY="")))
     url = '/api/alerts/punata_valle_alto?lat=-17.39919&lon=-66.190703&district_code=D4'
     first = client.get(url)
     assert first.status_code == 200
@@ -34,7 +35,7 @@ def test_point_failure_exposes_zonal_fallback_and_partial_coordinate_is_rejected
     def unavailable(*args, **kwargs):
         raise RuntimeError('provider unavailable')
     monkeypatch.setattr(RealtimeWeatherClient, 'fetch_zone_realtime', unavailable)
-    client = TestClient(create_app())
+    client = TestClient(create_app(settings=Settings(WEATHERAPI_KEY="")))
     result = client.get('/api/alerts/punata_valle_alto?lat=-17.4&lon=-66.19').json()
     assert result['weather_scope'] == 'stored_pilot_zone'
     assert result['weather_refresh_error'] is True
@@ -53,7 +54,7 @@ def test_zonal_refresh_fetches_provider_and_renews_after_five_minutes(monkeypatc
         return data
     monkeypatch.setattr(main, 'monotonic', lambda: clock[0])
     monkeypatch.setattr(RealtimeWeatherClient, 'fetch_zone_realtime', fetch)
-    client = TestClient(create_app())
+    client = TestClient(create_app(settings=Settings(WEATHERAPI_KEY="")))
     url = '/api/alerts/punata_valle_alto?refresh=true'
     assert client.get(url).json()['weather_scope'] == 'zone_reference_model'
     client.get(url)

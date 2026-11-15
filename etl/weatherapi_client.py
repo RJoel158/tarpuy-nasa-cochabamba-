@@ -76,7 +76,7 @@ class WeatherApiClient:
     def enrich(self, reference, lat, lon):
         lat, lon = validate_bolivia_coords(lat,lon)
         try:
-            response = requests.get("https://api.weatherapi.com/v1/forecast.json", params={"key":self.api_key,"q":f"{lat},{lon}","days":3,"aqi":"no","alerts":"no"},timeout=self.timeout,allow_redirects=False)
+            response = requests.get("https://api.weatherapi.com/v1/forecast.json", params={"key":self.api_key,"q":f"{lat},{lon}","days":14,"aqi":"no","alerts":"no"},timeout=self.timeout,allow_redirects=False)
         except requests.RequestException:
             raise RuntimeError("WeatherAPI connection unavailable") from None
         if response.status_code != 200:

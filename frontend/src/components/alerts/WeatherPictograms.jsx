@@ -165,8 +165,8 @@ export function describeSoilCard(soilPct, lang = "es") {
     badge: lang === "qu" ? "Qhaway" : "Estimación",
     tone: "sky",
     level: 0,
-    title: lang === "qu" ? "Allpa uqhu" : "Humedad superficial estimada",
-    advice: lang === "qu" ? "Allpata qhaway" : "Comprueba la tierra a la profundidad de las raíces",
+    title: lang === "qu" ? "Allpa uqhu" : "Comprueba cómo se siente la tierra",
+    advice: lang === "qu" ? "Allpata qhaway" : "Revisa al tacto la tierra junto a las raíces; que esté suelta o dura también depende de su textura",
     levels: [],
   };
 }

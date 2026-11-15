@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import { LocateFixed, MapPin, Layers } from "lucide-react";
-import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 import {
@@ -55,10 +54,6 @@ export default function CochabambaMap({
   isAdvanced = false,
   onChooseDistrict,
   guided = false,
-  previewOpen = false,
-  onDismissPreview,
-  onNavigate,
-  nextView = "clima",
   onContinue,
   onDistrictResolved,
 }) {
@@ -334,22 +329,12 @@ export default function CochabambaMap({
 
         {districtLayerError && <p role="status" className="text-sm text-amber-900">No se pudieron cargar los límites distritales. Revisa la conexión y la configuración del servicio GAMC.</p>}
       </div>
-      {guided && userPoint && previewOpen && <section className="tarpuy-map-preview" aria-label="Confirma tu ubicación">
-        <div className="flex items-start justify-between gap-3">
-          <div><h2 className="font-extrabold text-lg">¿Tu parcela está aquí?</h2>
-            <p>{districtCode ? districts.find(d => d.code === districtCode)?.name : "Punto seleccionado"}</p>
-          </div>
-          <button type="button" onClick={onDismissPreview} aria-label="Cerrar vista previa" className="min-h-11 min-w-11 font-bold">×</button>
-        </div>
-        <p className="text-sm">{userPoint.source === "GPS" ? `Ubicación aproximada, ±${Math.round(userPoint.accuracy || 0)} m.` : userPoint.bounds ? "Centro aproximado del distrito." : "Punto elegido en el mapa."} Toca el mapa para ajustar.</p>
-        <button type="button" className="flow-primary w-full" onClick={onContinue}>Confirmar y ver {nextView === "siembra" ? "qué sembrar" : "clima"} →</button>
-      </section>}
-      {guided && <nav className="tarpuy-map-bottom-nav" aria-label="Navegación principal">
-        {[{ id: "clima", label: "Clima", icon: "sol" }, { id: "siembra", label: "Qué sembrar", icon: "mano_siembra" }, { id: "mapa", label: "Mapa", icon: "mapa_chacra" }].map(item =>
-          <button type="button" key={item.id} aria-current={item.id === "mapa" ? "page" : undefined} onClick={() => onNavigate?.(item.id)}>
-            <IlustracionTarpuy id={item.icon} size={28} />{item.label}
-          </button>)}
-      </nav>}
+      {guided && onContinue && <button
+        type="button"
+        onClick={onContinue}
+        disabled={!userPoint}
+        className="flow-primary absolute bottom-6 right-4 left-4 sm:left-auto z-[510] disabled:opacity-60 disabled:cursor-not-allowed"
+      >Siguiente: ver clima →</button>}
       <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} tarpuy-map-canvas relative w-full bg-slate-900`}>
         {canUseLeaflet ? (
           <>

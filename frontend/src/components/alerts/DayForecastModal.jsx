@@ -1,240 +1,54 @@
-import { Volume2, X } from "lucide-react";
+import { X } from "lucide-react";
 import React from "react";
-import { WeatherIllustration, RainDropsVisual } from "./WeatherPictograms.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
-import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
-import { tr, buildDayInterpretation } from "../../utils/quechuaI18n.js";
+import { tr } from "../../utils/quechuaI18n.js";
+import { weatherTodayCards } from "../../services/weatherTodayCards.js";
 
-/**
- * TARPUY NASA COCHABAMBA — MODAL DE DETALLE DEL DÍA (FASE 3)
- * ==========================================================
- * - Dibujos grandes y palabras simples.
- * - Previsión por tramos del día como una franja dibujada de Mañana, Tarde y Noche
- *   en lugar de tabla fría (usando exactamente los mismos datos del día).
- * - Botón "Cerrar" enorme (mínimo 68 px) y botón de Altavoz grande.
- * - Cero códigos hexadecimales sueltos.
- */
-
-export default function DayForecastModal({
-  day,
-  dv,
-  zoneName = "",
-  lang = "es",
-  onClose,
-  onSpeak,
-}) {
+export default function DayForecastModal({ day, dv, zoneName = "", lang = "es", onClose }) {
   if (!day || !dv) return null;
-
-  const esQu = lang === "qu";
-  const interp = buildDayInterpretation(day, dv, lang);
-
-  const tmin = Number(day.temp_min_c ?? 8);
-  const tmax = Number(day.temp_max_c ?? 20);
-  const rain = Number(day.precip_mm ?? 0);
-  const wind = Number(day.wind_kmh ?? 10);
-
-  /* Franja dibujada de Mañana, Tarde y Noche usando los mismos datos del día */
-  const franjaMomentos = [
-    { id: "minima", momento: "Mínima diaria prevista", dibujoId: tmin <= 2 ? "helada" : "termometro_frio", palabra: `${day.temp_min_c ?? "—"} °C`, apoyoNumerico: "No indica la hora de la mínima", bg: "var(--cielo-suave)" },
-    { id: "lluvia", momento: "Lluvia acumulada del día", dibujoId: rain > 0 ? "lluvia" : "nube", palabra: `${day.precip_mm ?? "—"} mm`, apoyoNumerico: `Probabilidad: ${day.precip_prob_pct ?? "—"} %. Sin detalle por hora.`, bg: "var(--cielo-suave)" },
-    { id: "maxima", momento: "Máxima diaria prevista", dibujoId: "termometro_calor", palabra: `${day.temp_max_c ?? "—"} °C`, apoyoNumerico: `Viento máximo previsto: ${day.wind_kmh ?? "—"} km/h`, bg: "var(--tierra-suave)" },
-  ];
-
-  const alertaBg =
-    dv.tone === "rose"
-      ? "var(--alerta-critico-suave)"
-      : dv.tone === "amber"
-      ? "var(--alerta-cuidado-suave)"
-      : dv.tone === "sky"
-      ? "var(--cielo-suave)"
-      : "var(--hoja-suave)";
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${day.day_label} · ${dv.word}`}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5"
-      style={{ backgroundColor: "rgba(35, 26, 20, 0.65)" }}
-      onClick={onClose}
-    >
-      <div
-        className="tarpuy-card-physical max-w-2xl w-full max-h-[84vh] sm:max-h-[90vh] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
-        style={{
-          backgroundColor: "var(--tarjeta)",
-          border: "2px solid var(--tinta)",
-          boxShadow: "0 8px 0 var(--tinta)",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Barra indicadora de hoja inferior en móvil */}
-        <div className="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0" style={{ backgroundColor: "var(--arena)" }}>
-          <span
-            className="w-12 h-1.5 rounded-full inline-block"
-            style={{ backgroundColor: "var(--piedra)" }}
-            aria-hidden="true"
-          />
-        </div>
-
-        {/* Cabecera del modal */}
-        <div
-          className="px-5 sm:px-6 py-3.5 sm:py-4 flex flex-wrap items-center justify-between gap-3 shrink-0"
-          style={{
-            backgroundColor: "var(--arena)",
-            borderBottom: "1.5px solid var(--tinta)",
-          }}
-        >
-          <div>
-            <p
-              className="text-sm font-bold uppercase tracking-wider"
-              style={{ color: "var(--tinta-suave)" }}
-            >
-              {tr(lang, "dayDetailSub")} · {zoneName} · {day.date}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 mt-1">
-              <h3 className="tarpuy-title">{day.day_label}</h3>
-              <span
-                className="px-3.5 py-1 rounded-full font-bold text-base sm:text-lg"
-                style={{
-                  backgroundColor: alertaBg,
-                  color: "var(--tinta)",
-                  border: "1.5px solid var(--tinta)",
-                }}
-              >
-                {dv.word}
-              </span>
+  const cards = weatherTodayCards(day);
+  const tones = {
+    warning: { bg: "var(--alerta-cuidado-suave)", label: "Atención" },
+    rain: { bg: "var(--cielo-suave)", label: "Tenlo en cuenta" },
+    calm: { bg: "var(--hoja-suave)", label: "Sin extremos previstos" },
+    unknown: { bg: "var(--arena)", label: "Por confirmar" },
+  };
+  return <div role="dialog" aria-modal="true" aria-label={`Clima para ${day.day_label}`}
+    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5"
+    style={{ backgroundColor: "rgba(35, 26, 20, 0.65)" }} onClick={onClose}>
+    <div className="tarpuy-card-physical max-w-3xl w-full max-h-[88dvh] sm:max-h-[90vh] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
+      style={{ backgroundColor: "var(--tarjeta)", border: "2px solid var(--tinta)" }} onClick={e => e.stopPropagation()}>
+      <header className="px-5 sm:px-6 py-4 shrink-0 border-b border-[var(--color-border-subtle)] bg-[var(--arena)]">
+        <p className="text-sm text-[var(--tinta-suave)]">{zoneName}</p>
+        <h3 className="tarpuy-title mt-1">{day.day_label}</h3>
+        <p className="text-sm mt-1">Lo que se espera y cómo cuidar tu chacra</p>
+      </header>
+      <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
+        {lang === "qu" && <p className="text-sm">Interpretación en castellano; traducción al quechua pendiente de revisión local.</p>}
+        <div className="space-y-3">
+          {cards.map(card => <article key={card.id} className="rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-5" style={{ backgroundColor: tones[card.tone].bg }}>
+            <div className="shrink-0 rounded-full bg-[var(--tarjeta)] p-2"><IlustracionTarpuy id={card.dibujoId} size={56} /></div>
+            <div className="min-w-0 space-y-2">
+              <p className="text-sm font-bold">{card.etiqueta} · {tones[card.tone].label}</p>
+              <h4 className="text-lg sm:text-xl font-extrabold leading-tight">{card.palabra}</h4>
+              <p className="text-base leading-relaxed">{card.explicacion}</p>
             </div>
-          </div>
-
-          <div className="hidden sm:block">
-            <BotonAltavoz
-              sonando={false}
-              mostrarTexto={true}
-              etiqueta={tr(lang, "listenBtn")}
-              onClick={() =>
-                onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)
-              }
-            />
-          </div>
+          </article>)}
         </div>
-
-        {/* Cuerpo del modal */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto">
-          {/* Resumen visual principal del día */}
-          <div
-            className="p-4 sm:p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
-            style={{
-              backgroundColor: alertaBg,
-            }}
-          >
-            <div
-              className="w-24 h-24 rounded-full flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-              }}
-            >
-              <WeatherIllustration
-                kind={dv.kind}
-                animated={true}
-                className="w-18 h-18"
-              />
-            </div>
-
-            <div className="space-y-2 text-center sm:text-left">
-              <p className="tarpuy-subtitle">{interp.adviceText}</p>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                <RainDropsVisual count={dv.drops} text={dv.rainText} lang={lang} />
-                <span
-                  className="px-3 py-1 rounded-full text-base font-bold"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                  }}
-                >
-                  {dv.nightText}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* FRANJA DIBUJADA DE MAÑANA, TARDE Y NOCHE (en vez de tabla) */}
-          <div className="space-y-3">
-            <h4 className="tarpuy-subtitle">
-              {esQu
-                ? "¿Imayna pacha kanqa p'unchawpi?"
-                : "Así cambiará el tiempo en el día:"}
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              {franjaMomentos.map((tramo) => (
-                <div
-                  key={tramo.id}
-                  className="p-4 rounded-3xl flex flex-col items-center text-center justify-between gap-2.5"
-                  style={{
-                    backgroundColor: tramo.bg,
-                  }}
-                >
-                  <span
-                    className="px-3 py-0.5 rounded-full text-sm font-bold"
-                    style={{
-                      backgroundColor: "var(--tarjeta)",
-                      color: "var(--tinta)",
-                    }}
-                  >
-                    {tramo.momento}
-                  </span>
-
-                  <div
-                    className="w-18 h-18 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: "var(--tarjeta)",
-                    }}
-                  >
-                    <IlustracionTarpuy id={tramo.dibujoId} size={52} />
-                  </div>
-
-                  <p className="font-bold text-xl leading-tight">
-                    {tramo.palabra}
-                  </p>
-
-                  {/* Números de apoyo (>= 14 px) */}
-                  <span
-                    className="text-sm font-normal"
-                    style={{
-                      color: "var(--tinta-suave)",
-                    }}
-                  >
-                    {tramo.apoyoNumerico}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Explicación completa para la chacra */}
-          <div
-            className="p-4 sm:p-5 rounded-2xl space-y-2"
-            style={{
-              backgroundColor: "var(--arena)",
-            }}
-          >
-            <h4 className="font-bold text-lg">
-              {tr(lang, "farmMeaningTitle")}
-            </h4>
-            <p className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
-              {interp.dayText} {interp.nightText} {interp.rainText}
-              {day.forecast_provider && ` Fuente meteorológica: ${day.forecast_provider}. ET0: ${day.et0_provider || "Open-Meteo"}.`}
-            </p>
-            <p className="pt-1 font-bold text-lg" style={{ color: "var(--tinta)" }}>
-              {tr(lang, "doToday")} {interp.adviceText}
-            </p>
-          </div>
-        </div>
-
-        <div className="weather-modal-actions">
-          <button type="button" className="weather-action" onClick={() => onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)}><Volume2 size={22} aria-hidden="true" />{tr(lang, "listenBtn")}</button>
-          <button type="button" className="weather-action weather-action--primary" onClick={onClose}><X size={20} aria-hidden="true" />{tr(lang, "closeBtn")}</button>
-        </div>
+        <p className="text-sm text-[var(--tinta-suave)]">Es un pronóstico: puede cambiar. Comprueba cómo está tu parcela antes de decidir.</p>
+        <details className="text-sm border-t border-[var(--color-border-subtle)] pt-2">
+          <summary className="cursor-pointer font-bold min-h-11 flex items-center">Ver datos del pronóstico</summary>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-3">
+            {[["Temperatura más baja", `${day.temp_min_c ?? "—"} °C`], ["Temperatura más alta", `${day.temp_max_c ?? "—"} °C`],
+              ["Lluvia prevista para el día", `${day.precip_mm ?? "—"} mm`], ["Probabilidad de lluvia", `${day.precip_prob_pct ?? "—"} %`],
+              ["Viento previsto", `${day.wind_kmh ?? "—"} km/h`]].map(([name, value]) => <div key={name}><dt>{name}</dt><dd className="font-bold">{value}</dd></div>)}
+          </dl>
+          <p>Fecha: {day.date}. Los datos diarios no indican a qué hora lloverá ni cuánto durará la lluvia.</p>
+        </details>
+      </div>
+      <div className="weather-modal-actions grid-cols-1">
+        <button type="button" className="weather-action weather-action--primary" onClick={onClose}><X size={20} aria-hidden="true" />{tr(lang, "closeBtn")}</button>
       </div>
     </div>
-  );
+  </div>;
 }

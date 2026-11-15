@@ -46,3 +46,22 @@ def test_connection_failure_never_exposes_key():
 def test_http_failure_does_not_parse_or_merge_error_payload():
     with patch('etl.weatherapi_client.requests.get',return_value=Mock(status_code=403)):
         with pytest.raises(RuntimeError,match='HTTP 403'):WeatherApiClient('test').enrich(reference(),-17.4,-66.19)
+
+def test_full_fourteen_day_forecast_is_preserved_when_supplied():
+    base=reference();body=payload()
+    base['daily_forecast']=[{'date':f'2026-11-{d}','precip_mm':0,'et0_mm':4,'temp_min_c':10,'temp_max_c':20} for d in range(15,29)]
+    day=body['forecast']['forecastday'][0]['day']
+    body['forecast']['forecastday']=[{'date':f'2026-11-{d}','day':dict(day)} for d in range(15,29)]
+    result=merge_weatherapi(base,body)
+    assert result['provider_forecast_days']==14
+    assert all(d['forecast_provider']=='WeatherAPI' for d in result['daily_forecast'])
+    assert result['daily_forecast'][-1]['date']=='2026-11-28'
+
+
+def test_client_requests_fourteen_days_without_changing_point():
+    response=Mock(status_code=200)
+    response.json.return_value=payload()
+    with patch('etl.weatherapi_client.requests.get',return_value=response) as get:
+        WeatherApiClient('test').enrich(reference(),-17.4,-66.19)
+    assert get.call_args.kwargs['params']['days']==14
+    assert get.call_args.kwargs['params']['q']=='-17.4,-66.19'
