@@ -50,7 +50,7 @@ export default function App() {
   const [crops, setCrops] = useState([]);
   const [zoneId, setZoneId] = useState(initialSnap?.zoneId || "punata_valle_alto");
   const [communityName, setCommunityName] = useState(initialSnap?.communityName || "Punata");
-  const [cropId, setCropId] = useState(initialSnap?.cropId || "maiz_valle");
+  const [cropId, setCropId] = useState(initialSnap?.cropId || "cereales");
   const [priorities, setPriorities] = useState(["water_conservation", "nitrogen_fixation", "erosion_control"]);
   const [irrigation, setIrrigation] = useState(initialSnap?.irrigation || "deficit_auxiliary");
   const [equipment, setEquipment] = useState("manual_yunta");
@@ -567,7 +567,7 @@ export default function App() {
                     drainage={drainage} district={municipalChip} tip={municipalTip}
                     lang={voiceLang} onSpeak={handleSpeak} activeAudioKey={activeAudioKey}
                     onPlant={() => setActiveView("siembra")} advanced={isAdvanced}
-                    crop={crops.find((c) => c.crop_id === cropId) || null}
+                    crop={crops.find((c) => c.crop_id === cropId) || { crop_id: cropId, name_es: cropId === "cereales" ? "Cereales y Granos" : cropId === "tuberculos" ? "Tubérculos" : cropId === "hortalizas" ? "Hortalizas" : cropId === "frutales" ? "Frutales" : cropId, name_qu: cropId }}
                     onOpenMunicipalAlert={() => setMunicipalModalOpen(true)}
                   />
                 </div>
