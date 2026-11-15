@@ -369,7 +369,7 @@ export default function TechnicalMode({
       Math.round((m.soil_moisture_index || 0) * 100),
       m.ndvi_mean ?? "",
       m.frost_risk_days ?? 0,
-      m.bare_soil_flag ? "Suelo desnudo" : "Cubierto",
+      m.bare_soil_flag ? "Descanso de la tierra" : "Cubierto",
     ]);
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -761,7 +761,7 @@ export default function TechnicalMode({
                               color: "var(--tinta)",
                             }}
                           >
-                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                            {m.bare_soil_flag ? "⚠️ Descanso de la tierra" : "🌱 Cubierto"}
                           </span>
                         </div>
 
@@ -850,7 +850,7 @@ export default function TechnicalMode({
                           <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
                           <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
                           <td className="py-2.5 px-3 font-extrabold">
-                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                            {m.bare_soil_flag ? "⚠️ Descanso de la tierra" : "🌱 Cubierto"}
                           </td>
                         </tr>
                       ))}

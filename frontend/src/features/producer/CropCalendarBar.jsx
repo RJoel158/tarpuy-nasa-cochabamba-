@@ -67,18 +67,48 @@ export default function CropCalendarBar({
       case "suelo_pelado":
         return {
           dibujoId: "tierra_seca",
-          palabra: qu ? "Q'ara" : "Tierra pelada",
+          palabra: qu ? "Allpa samay" : "Descanso de la tierra",
           bg: "var(--alerta-critico-suave)",
           muestra: "var(--alerta-critico)",
+        };
+      case "aporcar":
+        return {
+          dibujoId: "brote",
+          palabra: qu ? "Allpachay (Aporque)" : "Aporque",
+          bg: "var(--tierra-suave)",
+          muestra: "var(--tierra)",
+        };
+      case "abonar":
+        return {
+          dibujoId: "mano_siembra",
+          palabra: qu ? "Wanuchay (Abono)" : "Abonar",
+          bg: "var(--dorado-suave)",
+          muestra: "var(--dorado)",
         };
       case "regar":
       default:
         return {
           dibujoId: "gota_agua",
-          palabra: qu ? "Parqoy" : "Regar",
+          palabra: qu ? "Parqoy" : "Regar y cuidar",
           bg: "var(--cielo-suave)",
           muestra: "var(--cielo)",
         };
+    }
+  };
+
+  const tareaDelMes = (accion) => {
+    if (qu) return "";
+    switch (accion) {
+      case "aporcar":
+        return "Cuando la plantita empieza a salir, se le echa tierra alrededor para que el tallo no se rompa, y se abren nuevos surcos para regar.";
+      case "abonar":
+        return "Es el momento de poner el abono al pie de la planta.";
+      case "regar":
+        return "Riega por los surcos y revisa que la planta esté sana.";
+      case "suelo_pelado":
+        return "La tierra descansa. Si puedes, cúbrela con chala o rastrojo para que el viento no se la lleve.";
+      default:
+        return "";
     }
   };
 
@@ -214,6 +244,24 @@ export default function CropCalendarBar({
           <span className="inline-flex items-center gap-2">
             <span
               className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--tierra)", border: "2px solid var(--tinta)" }}
+            />
+            <IlustracionTarpuy id="brote" size={28} />
+            <span>{qu ? "Allpachay (Aporque)" : "Brote = Aporque"}</span>
+          </span>
+
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--dorado)", border: "2px solid var(--tinta)" }}
+            />
+            <IlustracionTarpuy id="mano_siembra" size={28} />
+            <span>{qu ? "Wanuchay (Abonar)" : "Mano = Abonar"}</span>
+          </span>
+
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
               style={{ backgroundColor: "var(--dorado)", border: "2px solid var(--tinta)" }}
             />
             <IlustracionTarpuy id="cosecha" size={28} />
@@ -335,6 +383,12 @@ export default function CropCalendarBar({
               <p className="tarpuy-body font-bold" style={{ color: "var(--tinta-suave)" }}>
                 {activeCell.role}
               </p>
+              {tareaDelMes(activeCell.accionVisual) ? (
+                <p className="tarpuy-body" style={{ color: "var(--tinta)" }}>
+                  <strong>{obtenerEstiloAccion(activeCell).palabra}:</strong>{" "}
+                  {tareaDelMes(activeCell.accionVisual)}
+                </p>
+              ) : null}
             </div>
           </div>
 

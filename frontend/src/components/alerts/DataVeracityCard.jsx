@@ -5,7 +5,7 @@ import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 const GLOSSARY = [
   {
     term: "Verdor de plantas (NDVI satélite)",
-    plain: "Mide si la parcela está cubierta con plantas verdes o si está tierra pelada sufriendo con el sol.",
+    plain: "Mide si la parcela está cubierta con plantas verdes o si la tierra está en descanso, sin cobertura, sufriendo con el sol.",
     icon: "planta_crecida",
   },
   {

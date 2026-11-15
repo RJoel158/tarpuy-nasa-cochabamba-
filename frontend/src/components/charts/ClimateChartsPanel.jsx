@@ -323,7 +323,7 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
                   fontSize: "0.85rem",
                 }}
               >
-                Franja: Suelo desnudo
+                Franja: Descanso de la tierra
               </span>
             </div>
           </div>
@@ -523,7 +523,7 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
               fontSize: "0.95rem",
             }}
           >
-            {active.bare_soil_flag ? "⚠️ Suelo Desnudo" : "🌱 Cobertura Activa"}
+            {active.bare_soil_flag ? "⚠️ Descanso de la tierra" : "🌱 Cobertura Activa"}
           </span>
         </div>
 
