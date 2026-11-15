@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import { LocateFixed, Layers } from "lucide-react";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
+import { MobileBottomNav } from "../layout/Navbar.jsx";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 import {
@@ -53,6 +54,7 @@ export default function CochabambaMap({
   isOnline,
   tall = false,
   isAdvanced = false,
+  lang = "es",
   onChooseDistrict,
   guided = false,
   previewOpen = false,
@@ -161,6 +163,7 @@ export default function CochabambaMap({
         Math.ceil(dock.getBoundingClientRect().bottom - rootTop + gap)
       );
       if (canvas) canvas.style.setProperty("--tarpuy-map-chrome-bottom", `${offset}px`);
+      root.style.setProperty("--tarpuy-map-chrome-bottom", `${offset}px`);
     };
     syncChrome();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncChrome) : null;
@@ -170,6 +173,7 @@ export default function CochabambaMap({
       ro?.disconnect();
       window.removeEventListener("resize", syncChrome);
       canvas?.style.removeProperty("--tarpuy-map-chrome-bottom");
+      root?.style.removeProperty("--tarpuy-map-chrome-bottom");
     };
   }, [guided, layersOpen]);
 
@@ -515,22 +519,39 @@ export default function CochabambaMap({
           role="region"
           aria-label="Leyenda de capas"
         >
-          {gamcServices
-            .filter((svc) => enabledIds.has(svc.service_id))
-            .map((svc) => (
-              <ul key={`legend-${svc.service_id}`} className="space-y-1">
-                <li className="text-xs font-extrabold mb-1">{LAYER_CHIP_LABEL[svc.id] || svc.short_title}</li>
-                {(svc.legend_classes || []).map((cls) => (
-                  <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-[var(--tinta-suave)]">
-                    <span
-                      className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
-                      style={{ background: cls.color }}
-                    />
-                    <span>{cls.label}</span>
-                  </li>
-                ))}
-              </ul>
-            ))}
+          <div className="flex items-center justify-between gap-2 border-b border-[var(--color-border-subtle)] pb-1.5 mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--tinta-suave)]">
+              Leyenda de capas
+            </span>
+            <button
+              type="button"
+              onClick={() => setLayersOpen(false)}
+              aria-label="Cerrar leyenda"
+              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5 text-sm font-bold text-[var(--tinta)] cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+          {gamcServices.filter((svc) => enabledIds.has(svc.service_id)).length === 0 ? (
+            <p className="text-xs text-[var(--tinta-suave)]">No hay capas activas. Toca un chip arriba para activar.</p>
+          ) : (
+            gamcServices
+              .filter((svc) => enabledIds.has(svc.service_id))
+              .map((svc) => (
+                <ul key={`legend-${svc.service_id}`} className="space-y-1">
+                  <li className="text-xs font-extrabold mb-1">{LAYER_CHIP_LABEL[svc.id] || svc.short_title}</li>
+                  {(svc.legend_classes || []).map((cls) => (
+                    <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-[var(--tinta-suave)]">
+                      <span
+                        className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
+                        style={{ background: cls.color }}
+                      />
+                      <span>{cls.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              ))
+          )}
         </div>
       ) : null}
 
@@ -546,26 +567,16 @@ export default function CochabambaMap({
       ) : null}
 
       {guided ? (
-        <nav className="tarpuy-map-bottom-nav" aria-label="Navegación principal">
-          {[
-            { id: "clima", label: "Clima", icon: "sol" },
-            { id: "siembra", label: "Qué sembrar", icon: "mano_siembra" },
-            { id: "mapa", label: "Mapa", icon: "mapa_chacra" },
-          ].map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              aria-current={item.id === "mapa" ? "page" : undefined}
-              onClick={() => {
-                if (onNavigate) onNavigate(item.id);
-                else if (item.id !== "mapa") onContinue?.();
-              }}
-            >
-              <IlustracionTarpuy id={item.icon} size={28} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        <MobileBottomNav
+          activeView="mapa"
+          onChangeView={(view) => {
+            if (onNavigate) onNavigate(view);
+            else if (view !== "mapa") onContinue?.();
+          }}
+          appMode={isAdvanced ? "avanzado" : "facil"}
+          voiceLang={lang}
+          zIndex="z-[520]"
+        />
       ) : null}
 
       {geoStatus ? <p className="sr-only">{geoStatus}</p> : null}

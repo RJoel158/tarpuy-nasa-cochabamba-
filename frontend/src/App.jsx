@@ -464,6 +464,8 @@ export default function App() {
         geoStatus={gpsNotice || ""}
         onBack={() => setActiveView("clima")}
         onNavigate={setActiveView}
+        isAdvanced={isAdvanced}
+        lang={voiceLang}
       />
     </main>;
   }

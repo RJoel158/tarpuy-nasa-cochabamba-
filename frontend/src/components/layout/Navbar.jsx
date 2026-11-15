@@ -107,6 +107,69 @@ function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }
   </div>;
 }
 
+export function MobileBottomNav({
+  activeView = "clima",
+  onChangeView,
+  appMode = "facil",
+  voiceLang = "es",
+  className = "",
+  style = {},
+  zIndex = "z-40",
+}) {
+  const esQuechua = voiceLang === "qu";
+  const visibleNavItems =
+    appMode === "avanzado" ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "datos");
+
+  return (
+    <nav
+      aria-label="Navegación inferior móvil"
+      className={`lg:hidden fixed bottom-0 inset-x-0 ${zIndex} grid ${
+        visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"
+      } gap-1.5 sm:gap-3 px-2 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] ${className}`}
+      style={{
+        backgroundColor: "var(--tinta)",
+        borderTop: "2px solid var(--tinta-suave)",
+        ...style,
+      }}
+    >
+      {visibleNavItems.map(({ id, ilustracionId, palabraEs, palabraQu }) => {
+        const activa = activeView === id;
+        const palabra = esQuechua ? palabraQu : palabraEs;
+
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => irDirectoASeccion(onChangeView, id)}
+            aria-current={activa ? "page" : undefined}
+            className="flex flex-col items-center justify-center gap-1 px-1 py-1.5 cursor-pointer transition-all"
+            style={{
+              minHeight: "64px",
+              backgroundColor: activa ? "var(--dorado)" : "transparent",
+              color: activa ? "var(--tinta)" : "var(--tarjeta)",
+              border: activa ? "2px solid var(--tarjeta)" : "2px solid transparent",
+              borderRadius: "var(--radius-btn)",
+            }}
+          >
+            <span className="flex items-center justify-center shrink-0">
+              <IlustracionTarpuy id={ilustracionId} size={activa ? 32 : 28} />
+            </span>
+            <span
+              className={activa ? "font-bold leading-tight" : "font-medium leading-tight"}
+              style={{
+                fontSize: "clamp(0.875rem, 3.6vw, 1.05rem)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {palabra}
+            </span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 export default function Navbar({
   activeView = "clima",
   onChangeView,
@@ -217,51 +280,13 @@ export default function Navbar({
        * 2. BARRA INFERIOR FIJA EN CELULAR (Las 4 pestañas en la zona del pulgar,
        *    respetando safe-area-inset y >= 64 px de altura, apta desde 320 px)
        * ===================================================================== */}
-      <nav
-        aria-label="Navegación inferior móvil"
-        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 grid ${
-          visibleNavItems.length === 3 ? "grid-cols-3" : "grid-cols-4"
-        } gap-1.5 sm:gap-3 px-2 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]`}
-        style={{
-          backgroundColor: "var(--tinta)",
-          borderTop: "2px solid var(--tinta-suave)",
-        }}
-      >
-        {visibleNavItems.map(({ id, ilustracionId, palabraEs, palabraQu }) => {
-          const activa = activeView === id;
-          const palabra = esQuechua ? palabraQu : palabraEs;
-
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => irDirectoASeccion(onChangeView, id)}
-              aria-current={activa ? "page" : undefined}
-              className="flex flex-col items-center justify-center gap-1 px-1 py-1.5 cursor-pointer transition-all"
-              style={{
-                minHeight: "64px",
-                backgroundColor: activa ? "var(--dorado)" : "transparent",
-                color: activa ? "var(--tinta)" : "var(--tarjeta)",
-                border: activa ? "2px solid var(--tarjeta)" : "2px solid transparent",
-                borderRadius: "var(--radius-btn)",
-              }}
-            >
-              <span className="flex items-center justify-center shrink-0">
-                <IlustracionTarpuy id={ilustracionId} size={activa ? 32 : 28} />
-              </span>
-              <span
-                className={activa ? "font-bold leading-tight" : "font-medium leading-tight"}
-                style={{
-                  fontSize: "clamp(0.875rem, 3.6vw, 1.05rem)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {palabra}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+      <MobileBottomNav
+        activeView={activeView}
+        onChangeView={onChangeView}
+        appMode={appMode}
+        voiceLang={voiceLang}
+        zIndex="z-40"
+      />
     </>
   );
 }
