@@ -115,12 +115,23 @@ def create_app(
         return zone
 
     @app.get("/api/alerts/{zone_id}")
-    def get_zone_alerts(zone_id: str) -> dict[str, Any]:
+    def get_zone_alerts(
+        zone_id: str,
+        district_code: str | None = None,
+        comuna: str | None = None,
+        drainage: str | None = None,
+    ) -> dict[str, Any]:
         valid_id = validate_safe_id(zone_id, "zone_id")
         zone = zone_repo.get_zone(valid_id)
         if not zone:
             raise HTTPException(status_code=404, detail=f"Zone '{valid_id}' not found")
-        return alert_evaluator.evaluate_zone(valid_id, zone)
+        return alert_evaluator.evaluate_zone(
+            valid_id,
+            zone,
+            district_code=district_code,
+            comuna=comuna,
+            drainage_type=drainage,
+        )
 
     @app.post("/api/tts/quechua")
     def synthesize_quechua_audio(req: QuechuaTtsRequest) -> Response:
@@ -149,11 +160,13 @@ def create_app(
     @app.post("/api/recommend")
     def recommend(req: RecommendationRequest) -> dict[str, Any]:
         try:
+            muni = req.municipal_context.model_dump() if req.municipal_context else None
             return service.recommend(
                 zone_id=req.zone_id,
                 current_crop_id=req.current_crop_id,
                 farmer_priorities=req.farmer_priorities,
                 constraints=req.constraints.model_dump(),
+                municipal_context=muni,
             )
         except ValueError as err:
             raise HTTPException(status_code=404, detail=str(err))

@@ -20,6 +20,9 @@
         "max": 3800
       },
       "water_demand": "high",
+      "kc_ini": 0.5,
+      "kc_mid": 1.15,
+      "kc_end": 0.75,
       "frost_tolerance": "medium",
       "drought_tolerance": "medium",
       "nitrogen_fixing": {
@@ -49,6 +52,9 @@
         "max": 2900
       },
       "water_demand": "high",
+      "kc_ini": 0.3,
+      "kc_mid": 1.2,
+      "kc_end": 0.6,
       "frost_tolerance": "low",
       "drought_tolerance": "low",
       "nitrogen_fixing": {
@@ -78,6 +84,9 @@
         "max": 3600
       },
       "water_demand": "medium",
+      "kc_ini": 0.5,
+      "kc_mid": 1.05,
+      "kc_end": 0.9,
       "frost_tolerance": "high",
       "drought_tolerance": "medium",
       "nitrogen_fixing": {
@@ -224,6 +233,9 @@
         "max": 3200
       },
       "water_demand": "medium",
+      "kc_ini": 0.4,
+      "kc_mid": 1.15,
+      "kc_end": 1.1,
       "frost_tolerance": "medium",
       "drought_tolerance": "high",
       "nitrogen_fixing": {

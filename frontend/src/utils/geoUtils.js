@@ -1,3 +1,5 @@
+import { resolvePeriurbanProfile } from "../services/periurbanProfiles.js";
+
 export const ZONE_GEO_CATALOG = [
   {
     id: "tapacari_zona_andina",
@@ -89,6 +91,36 @@ export function searchCommunities(query = "") {
   if (!q) return COCHABAMBA_COMMUNITIES;
   return COCHABAMBA_COMMUNITIES.filter(
     (c) => normText(c.name).includes(q) || normText(c.region).includes(q) || normText(c.alt).includes(q)
+  );
+}
+
+/** Adapt a GAMC district to the community shape used by the combobox and the app. */
+export function districtToCommunity(district) {
+  const { lat, lon } = district.center;
+  const profile = resolvePeriurbanProfile(district.code);
+  const nearest = findNearestZone(lat, lon).zone.id;
+  const display = profile?.label_es || (profile?.alias ? `${district.name} · ${profile.alias}` : district.name);
+  return {
+    id: `distrito_${String(district.code).toLowerCase()}`,
+    name: display,
+    code: district.code,
+    comuna: district.comuna,
+    region: profile?.alias || "Cercado",
+    alt: district.comuna,
+    zoneId: profile?.zone_id || nearest,
+    coords: [lat, lon],
+    bounds: district.bounds,
+    isDistrict: true,
+    periurbanProfile: profile,
+  };
+}
+
+export function searchDistricts(districts = [], query = "") {
+  const q = normText(query);
+  const items = districts.map(districtToCommunity);
+  if (!q) return items;
+  return items.filter((d) =>
+    [d.name, d.code, d.comuna, d.region].some((field) => normText(field).includes(q))
   );
 }
 

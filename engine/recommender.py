@@ -23,6 +23,7 @@ def _normalize_json_numbers(obj: Any) -> Any:
 from etl.security import compute_sha256
 from engine.alerts import AgroclimaticAlertEvaluator
 from engine.interfaces import CropRepository, RotationScorer, ZoneRepository
+from engine.periurban import build_municipal_context
 from engine.scoring import MultiCriteriaRotationScorer
 
 
@@ -77,6 +78,7 @@ class RotationRecommendationService:
         current_crop_id: str,
         farmer_priorities: list[str],
         constraints: dict[str, Any],
+        municipal_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Generate ranked rotation strategies with live NASA telemetry."""
         zone = self.zone_repo.get_zone(zone_id)
@@ -87,9 +89,27 @@ class RotationRecommendationService:
         if current_crop_id not in crops_map:
             raise ValueError(f"Unknown crop: '{current_crop_id}'")
 
+        muni = None
+        if municipal_context and municipal_context.get("district_code"):
+            muni = build_municipal_context(
+                district_code=municipal_context.get("district_code"),
+                comuna=municipal_context.get("comuna"),
+                periurban_class=municipal_context.get("periurban_pressure")
+                or municipal_context.get("periurban_class"),
+                periurban_detail=municipal_context.get("periurban_detail"),
+                near_drainage=bool(municipal_context.get("near_drainage")),
+                drainage_tipo=municipal_context.get("drainage_tipo"),
+                drainage_clasificacion=municipal_context.get("drainage_clasificacion"),
+                wet_bulletin=bool(municipal_context.get("wet_bulletin")),
+            )
+        elif municipal_context:
+            muni = municipal_context
+
         raw_strats = zone.get("strategies", [])
         scored = [
-            self.scorer.score_strategy(s, zone, crops_map, farmer_priorities, constraints, current_crop_id)
+            self.scorer.score_strategy(
+                s, zone, crops_map, farmer_priorities, constraints, current_crop_id, muni
+            )
             for s in raw_strats
         ]
 
@@ -121,7 +141,7 @@ class RotationRecommendationService:
 
         bulletin = _normalize_json_numbers(self.alert_evaluator.evaluate_zone(zone_id, zone))
 
-        return {
+        payload = {
             "zone_id": zone_id,
             "evaluated_at": datetime.now(timezone.utc).isoformat(),
             "current_crop_id": current_crop_id,
@@ -130,6 +150,9 @@ class RotationRecommendationService:
             "data_provenance": provenance,
             "realtime_bulletin": bulletin,
         }
+        if muni:
+            payload["municipal_context"] = _normalize_json_numbers(muni)
+        return payload
 
     def build_offline_bundle(self, zone_id: str) -> dict[str, Any]:
         """Package all zone profiles, crops, and recommendations for offline PWA sync."""

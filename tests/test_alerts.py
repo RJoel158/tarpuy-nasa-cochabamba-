@@ -71,9 +71,60 @@ def test_api_alerts_endpoint_and_security():
     assert len(data["active_alerts"]) >= 1
     assert len(data["veracity_manifest"]) == 4
     assert "alerts_spoken_es" in data
+    assert "predictions_summary_14d" in data
+    assert "municipal_alert" in data
+    assert data["municipal_alert"]["audience"] == "regantes_gamc"
     assert "media-src 'self'" in res.headers["content-security-policy"]
     assert client.get("/api/alerts/bad$zone").status_code == 400
     assert client.get("/api/alerts/unknown_zone_xyz").status_code == 404
+
+
+def test_municipal_alert_rules_anegamiento_and_desabastecimiento(tmp_path):
+    tel_file = tmp_path / "rt_14d.json"
+    # Scenario A: Flood / Canal saturation (Rain + D9 / drainage)
+    tel_file.write_text(json.dumps({
+        "fetched_at_utc": "2026-11-14T00:00:00Z",
+        "zones": {"punata_valle_alto": {
+            "data_status": "live_open_meteo_and_nasa_daily",
+            "current": {"temp_c": 16.0, "soil_moisture_top_pct": 58.0},
+            "daily_forecast": [
+                {"date": f"2026-11-{14+i:02d}", "temp_max_c": 22.0, "temp_min_c": 11.0, "precip_mm": 18.0 if i < 3 else 0.0, "precip_prob_pct": 90 if i < 3 else 5, "et0_mm": 4.0, "wind_kmh": 10.0}
+                for i in range(14)
+            ],
+            "nasa_recent_daily": [],
+        }},
+    }), encoding="utf-8")
+    evaluator = AgroclimaticAlertEvaluator(tel_file)
+    res_flood = evaluator.evaluate_zone("punata_valle_alto", district_code="D9", comuna="Itocta", drainage_type="Quebradas")
+    alert_f = res_flood["municipal_alert"]
+    assert alert_f["theme"] == "anegamiento_canales"
+    assert alert_f["district_code"] == "D9"
+    assert "Distrito 9" in alert_f["title_es"]
+    assert "cerrar compuertas" in alert_f["actions_es"][0].lower()
+    assert "🚨 AVISO A REGANTES" in alert_f["share_text"]
+    assert len(res_flood["fourteen_day_forecast"]) == 14
+    assert len(res_flood["seven_day_forecast"]) == 7
+
+    # Scenario B: Drought / Desabastecimiento
+    tel_file.write_text(json.dumps({
+        "fetched_at_utc": "2026-11-14T00:00:00Z",
+        "zones": {"punata_valle_alto": {
+            "data_status": "live_open_meteo_and_nasa_daily",
+            "current": {"temp_c": 25.0, "soil_moisture_top_pct": 19.0},
+            "daily_forecast": [
+                {"date": f"2026-11-{14+i:02d}", "temp_max_c": 28.0, "temp_min_c": 12.0, "precip_mm": 0.0, "precip_prob_pct": 0, "et0_mm": 6.5, "wind_kmh": 14.0}
+                for i in range(14)
+            ],
+            "nasa_recent_daily": [],
+        }},
+    }), encoding="utf-8")
+    evaluator_dry = AgroclimaticAlertEvaluator(tel_file)
+    res_dry = evaluator_dry.evaluate_zone("punata_valle_alto", district_code="D13", comuna="Tunari")
+    alert_d = res_dry["municipal_alert"]
+    assert alert_d["theme"] == "desabastecimiento"
+    assert "déficit hídrico" in alert_d["title_es"].lower()
+    assert "turnos" in alert_d["actions_es"][0].lower()
+    assert "⚠️ AVISO A REGANTES" in alert_d["share_text"]
 
 
 def test_quechua_tts_clean_and_api_endpoint():

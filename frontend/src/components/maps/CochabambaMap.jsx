@@ -1,843 +1,389 @@
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
-import { ZONE_GEO_CATALOG } from "../../utils/geoUtils.js";
+import { LocateFixed, MapPin, Layers } from "lucide-react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
-import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
-import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
-import { PatronPantalla, SelloCartilla } from "../personality/PatronesYSellos.jsx";
-import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
-import MamaTomasaAyuda from "../personality/MamaTomasaAyuda.jsx";
-import { speakSpanish, speakQuechua } from "../../services/speechService.js";
+import { useGamcDistricts } from "../../services/useGamcDistricts.js";
+import {
+  GAMC_WMS_PATH,
+  fetchGamcServices,
+  fetchGamcFeatureInfo,
+  featureInfoRows,
+  wmsTileOptions,
+  fetchDistrictAt,
+} from "../../services/gamcClient.js";
 
-/**
- * TARPUY NASA COCHABAMBA — PANTALLA DE MAPA (FASE 5)
- * ==================================================
- * Mismo mapa Leaflet, mismas zonas, mismos polígonos y pines, mismo GPS
- * y mismo clic en el mapa, rediseñado para comprensión inmediata:
- * 1. Mapa base cálido (crema y arena) + controles de zoom +/- grandes (58 px).
- * 2. Pines de comunidades grandes y distintos entre sí:
- *    - Tapacarí: cordillera con helada (--piedra)
- *    - Punata: valle plano con acequia (--dorado)
- *    - Mizque / Chapare: vegetación con lluvia/sol (--hoja)
- * 3. Tarjeta inferior grande al tocar una comunidad: dibujo del paisaje,
- *    nombre, 3 datos con dibujo ("Altura: alto, frío", "Riesgo: heladas",
- *    "El suelo"), botón enorme "Usar esta comunidad" y botón de altavoz.
- * 4. Botón gigante de GPS "¿Dónde estoy?" + mensaje amable con el personaje
- *    guía si falla ("No pude encontrarte. Toca tu comunidad en el mapa").
- * 5. Leyenda mínima con dibujos.
- * 6. Modo Fácil pliega capas técnicas sin eliminarlas; Modo Avanzado las muestra.
- *
- * Cero códigos hexadecimales sueltos.
- */
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
 
-const PERFIL_VISUAL_ZONA = {
-  tapacari_zona_andina: {
-    tokenAcento: "--piedra",
-    tokenSuave: "--piedra-suave",
-    zonaKey: "tapacari",
-    paisajeKey: "cordillera",
-    alturaSimpleEs: "Altura: alto, frío",
-    alturaSimpleQu: "ura/wichay: Jatun urqu, chiri",
-    dibujoAltura: "termometro_frio",
-    riesgoSimpleEs: "Riesgo: heladas",
-    riesgoSimpleQu: "Manchay: Qasa",
-    dibujoRiesgo: "helada",
-    sueloSimpleEs: "El suelo: ladera firme y pedregosa",
-    sueloSimpleQu: "Allpa: Qaqa qhata allpa",
-    dibujoSuelo: "tierra_humeda",
-  },
-  punata_valle_alto: {
-    tokenAcento: "--dorado",
-    tokenSuave: "--dorado-suave",
-    zonaKey: "punata",
-    paisajeKey: "valle",
-    alturaSimpleEs: "Altura: valle templado",
-    alturaSimpleQu: "Pampa: Q'uñi qhichwa",
-    dibujoAltura: "termometro_calor",
-    riesgoSimpleEs: "Riesgo: poca lluvia",
-    riesgoSimpleQu: "Manchay: Pisi para",
-    dibujoRiesgo: "tierra_seca",
-    sueloSimpleEs: "El suelo: tierra plana y profunda de valle",
-    sueloSimpleQu: "Allpa: Pampa uqhu allpa",
-    dibujoSuelo: "tierra_humeda",
-  },
-  mizque_cono_sur: {
-    tokenAcento: "--hoja",
-    tokenSuave: "--hoja-suave",
-    zonaKey: "chapare",
-    paisajeKey: "selva",
-    alturaSimpleEs: "Altura: bajo y cálido",
-    alturaSimpleQu: "Ura pampa: Rupha pacha",
-    dibujoAltura: "termometro_calor",
-    riesgoSimpleEs: "Riesgo: sol fuerte y viento",
-    riesgoSimpleQu: "Manchay: Sinchi inti",
-    dibujoRiesgo: "sol",
-    sueloSimpleEs: "El suelo: vega fértil junto al río",
-    sueloSimpleQu: "Allpa: Mayu patapi sumaq allpa",
-    dibujoSuelo: "tierra_humeda",
-  },
-};
-
-/* Genera el SVG del pin ilustrado para Leaflet según la zona (sin hex sueltos) */
-function construirPinSvgZona(zoneId, nombre, activo) {
-  const perf = PERFIL_VISUAL_ZONA[zoneId] || PERFIL_VISUAL_ZONA.punata_valle_alto;
-  const size = activo ? 66 : 54;
-
-  let dibujoInterno = "";
-  if (zoneId === "tapacari_zona_andina") {
-    /* Cordillera con cristal de helada */
-    dibujoInterno = `
-      <path d="M8 38L20 18L29 30L38 14L50 38Z" fill="var(--piedra)" stroke="var(--tinta)" stroke-width="2.4" stroke-linejoin="round"/>
-      <path d="M20 18L15 26L20 24L25 26Z" fill="var(--tarjeta)" stroke="var(--tinta)" stroke-width="1.6"/>
-      <path d="M38 14L33 22L38 20L43 22Z" fill="var(--tarjeta)" stroke="var(--tinta)" stroke-width="1.6"/>
-      <path d="M16 11V17M13 14H19" stroke="var(--cielo-oscuro)" stroke-width="2.2" stroke-linecap="round"/>
-    `;
-  } else if (zoneId === "punata_valle_alto") {
-    /* Valle plano con acequia de agua y sol */
-    dibujoInterno = `
-      <circle cx="42" cy="15" r="6" fill="var(--dorado)" stroke="var(--tinta)" stroke-width="2"/>
-      <path d="M8 36C18 28 38 28 50 36V42H8V36Z" fill="var(--tierra)" stroke="var(--tinta)" stroke-width="2.2"/>
-      <path d="M24 42C26 35 30 32 34 29" stroke="var(--cielo)" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M14 28C16 23 20 23 22 28" stroke="var(--hoja)" stroke-width="2.6" stroke-linecap="round"/>
-    `;
-  } else {
-    /* Selva / Valle cálido con vegetación y lluvia */
-    dibujoInterno = `
-      <path d="M10 38C18 24 40 24 48 38Z" fill="var(--hoja)" stroke="var(--tinta)" stroke-width="2.2"/>
-      <circle cx="22" cy="24" r="8" fill="var(--hoja-oscura)" stroke="var(--tinta)" stroke-width="2"/>
-      <circle cx="35" cy="25" r="7" fill="var(--hoja)" stroke="var(--tinta)" stroke-width="2"/>
-      <path d="M20 11L18 16M30 10L28 15M40 11L38 16" stroke="var(--cielo-oscuro)" stroke-width="2.4" stroke-linecap="round"/>
-    `;
-  }
-
-  return `
-    <div style="
-      transform: translate(-50%, -92%);
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-    ">
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: 9999px;
-        background: ${activo ? `var(${perf.tokenAcento})` : "var(--tarjeta)"};
-        border: ${activo ? "4px" : "3px"} solid var(--tinta);
-        box-shadow: 0 4px 0 var(--tinta);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px;
-      ">
-        <svg viewBox="0 0 58 48" width="${size - 10}" height="${size - 12}" fill="none">
-          <rect x="3" y="4" width="52" height="40" rx="18" fill="var(--tarjeta)" stroke="var(--tinta)" stroke-width="2"/>
-          ${dibujoInterno}
-        </svg>
-      </div>
-      <div style="
-        margin-top: 4px;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        background: ${activo ? "var(--dorado)" : "var(--tarjeta)"};
-        color: var(--tinta);
-        border: 2.5px solid var(--tinta);
-        box-shadow: 0 3px 0 var(--tinta);
-        font-family: var(--font-family-display);
-        font-size: ${activo ? "17px" : "15px"};
-        font-weight: 800;
-        white-space: nowrap;
-      ">
-        ${activo ? "★ " : ""}${nombre}
-      </div>
-    </div>
-  `;
+function popupHtml(chunks) {
+  const blocks = chunks.map((chunk) => {
+    const rows = chunk.rows
+      .map((props) =>
+        Object.entries(props)
+          .filter(([key]) => !String(key).startsWith("_"))
+          .slice(0, 8)
+          .map(
+            ([key, val]) =>
+              `<tr><th style="text-align:left;padding:2px 8px 2px 0;color:var(--tinta-suave);font-weight:600;">${escapeHtml(key)}</th><td>${escapeHtml(val)}</td></tr>`
+          )
+          .join("")
+      )
+      .join("");
+    return `<p style="margin:0 0 6px;font-weight:700;color:var(--tinta);">${escapeHtml(chunk.title)}</p><table style="font-size:12px;border-collapse:collapse;">${rows}</table>`;
+  });
+  return `<div style="max-width:240px;font-family:system-ui,sans-serif;">${blocks.join("<hr style='margin:8px 0;border:0;border-top:1px solid var(--arena);'/>")}</div>`;
 }
 
 export default function CochabambaMap({
-  zones = [],
   activeZoneId,
   onSelectZone,
-  selectedCommunityName = "Punata",
+  selectedCommunityName = "Distrito 9",
   onSelectCommunity,
   userPoint = null,
   onPickMapPoint,
   onDetectGps,
+  geoStatus = "",
   forceOffline,
   isOnline,
   tall = false,
-  lang = "es",
   isAdvanced = false,
-  onSpeak = null,
-  activeAudioKey = null,
+  onChooseDistrict,
+  guided = false,
+  onContinue,
+  onDistrictResolved,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
+  const wmsRef = useRef({});
+  const didFitDistrictsRef = useRef(false);
   const pickRef = useRef(onPickMapPoint);
   const selectRef = useRef(onSelectZone);
   pickRef.current = onPickMapPoint;
   selectRef.current = onSelectZone;
 
-  const [errorGpsAmable, setErrorGpsAmable] = useState(false);
-  const [mostrarCapasTecnicas, setMostrarCapasTecnicas] = useState(isAdvanced);
+  const [mapEpoch, setMapEpoch] = useState(0);
+  const districts = useGamcDistricts();
+  const [districtCode, setDistrictCode] = useState("");
+  const [locationMessage, setLocationMessage] = useState("");
+  const [districtLayerError, setDistrictLayerError] = useState(false);
+  const [gamcTheme, setGamcTheme] = useState("");
+  const [gamcServices, setGamcServices] = useState([]);
+  const [enabledIds, setEnabledIds] = useState(() => new Set());
+  const enabledRef = useRef(enabledIds);
+  const servicesRef = useRef(gamcServices);
+  const districtResolvedRef = useRef(onDistrictResolved);
+  districtResolvedRef.current = onDistrictResolved;
+  enabledRef.current = enabledIds;
+  servicesRef.current = gamcServices;
 
-  useEffect(() => {
-    setMostrarCapasTecnicas(isAdvanced);
-  }, [isAdvanced]);
-
-  const qu = lang === "qu";
   const canUseLeaflet = !forceOffline && isOnline;
 
-  const zoneList = useMemo(() => {
-    return ZONE_GEO_CATALOG.map((p) => {
-      const match = zones.find((z) => (z.zone_id || z.id) === p.id);
-      return {
-        ...p,
-        zoneData: match || null,
-        coords: match?.coordinates ? [match.coordinates.lat, match.coordinates.lon] : p.coords,
-        elevation: match?.elevation_msnm ? `${match.elevation_msnm} m` : p.alt,
-      };
-    });
-  }, [zones]);
-
-  const zonaActivaObj =
-    zoneList.find((z) => z.id === activeZoneId) || zoneList[1] || zoneList[0];
-  const perfilActivo =
-    PERFIL_VISUAL_ZONA[zonaActivaObj?.id] || PERFIL_VISUAL_ZONA.punata_valle_alto;
-
-  /* 4. Botón gigante "¿Dónde estoy?" con manejo amable de error en la ventana de Mamá Tomasa */
-  const [abiertoMamaTomasa, setAbiertoMamaTomasa] = useState(false);
-
-  const handleDondeEstoy = () => {
-    setErrorGpsAmable(false);
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setErrorGpsAmable(true);
-      setAbiertoMamaTomasa(true);
-      onDetectGps?.();
+  useEffect(() => {
+    if (!canUseLeaflet) {
+      setGamcServices([]);
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        setErrorGpsAmable(false);
-        onDetectGps?.();
-      },
-      () => {
-        setErrorGpsAmable(true);
-        setAbiertoMamaTomasa(true);
-        onDetectGps?.();
-      },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
-    );
-  };
+    let cancelled = false;
+    fetchGamcServices()
+      .then((data) => {
+        if (cancelled) return;
+        setGamcTheme(data.theme || "");
+        setGamcServices(data.services || []);
+      })
+      .catch(() => {
+        if (!cancelled) setGamcServices([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canUseLeaflet]);
 
-  /* Audio de la tarjeta inferior de la comunidad */
-  const handleEscucharComunidad = () => {
-    const texto = qu
-      ? `${selectedCommunityName || zonaActivaObj.name}. ${perfilActivo.alturaSimpleQu}. ${perfilActivo.riesgoSimpleQu}. ${perfilActivo.sueloSimpleQu}.`
-      : `Estás viendo ${selectedCommunityName || zonaActivaObj.name}. ${perfilActivo.alturaSimpleEs}. ${perfilActivo.riesgoSimpleEs}. ${perfilActivo.sueloSimpleEs}.`;
-
-    if (onSpeak) {
-      onSpeak(texto, lang, `mapa_zona_${zonaActivaObj.id}`);
-    } else if (qu) {
-      speakQuechua(texto);
-    } else {
-      speakSpanish(texto);
+  useEffect(() => {
+    if (!gamcServices.length) {
+      setEnabledIds(new Set());
+      return;
     }
+    if (isAdvanced) {
+      setEnabledIds(new Set(gamcServices.filter((s) => s.default_on).map((s) => s.service_id)));
+    } else {
+      setEnabledIds(new Set(gamcServices.filter((s) => s.simple_mode).map((s) => s.service_id)));
+    }
+  }, [gamcServices, isAdvanced]);
+
+  const focusDistrict = (code) => {
+    setDistrictCode(code);
+    const map = mapRef.current;
+    if (!map || !districts.length) return;
+    const selected = code ? districts.filter((d) => d.code === code) : districts;
+    const bounds = selected.map((d) => [[d.bounds.south, d.bounds.west], [d.bounds.north, d.bounds.east]]).flat();
+    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24] });
   };
+
+  useEffect(() => {
+    if (!mapRef.current || !districts.length || didFitDistrictsRef.current || userPoint) return;
+    const bounds = districts.flatMap((d) => [[d.bounds.south, d.bounds.west], [d.bounds.north, d.bounds.east]]);
+    mapRef.current.fitBounds(bounds, { padding: [24, 24] });
+    didFitDistrictsRef.current = true;
+  }, [districts, mapEpoch, userPoint]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const b = userPoint?.bounds;
+    if (!map || !mapEpoch || !b) return;
+    map.fitBounds([[b.south, b.west], [b.north, b.east]], { padding: [24, 24], maxZoom: 14 });
+  }, [userPoint, mapEpoch]);
+
+  useEffect(() => {
+    if (!userPoint || !canUseLeaflet || !districts.length) return;
+    let cancelled = false;
+    setDistrictCode("");
+    setLocationMessage("Identificando tu distrito…");
+    fetchDistrictAt(userPoint.lat, userPoint.lon).then((district) => {
+      if (cancelled) return;
+      districtResolvedRef.current?.(district);
+      if (!district) { setLocationMessage("La ubicación está fuera de los distritos municipales de Cochabamba."); return; }
+      setDistrictCode(district.code);
+      setLocationMessage(`Tu ubicación: Distrito ${district.code.replace(/^D/, "")} · ${district.comuna}`);
+    }).catch(() => { if (!cancelled) setLocationMessage("Ubicación marcada. No se pudo consultar el distrito; puedes elegirlo en la lista."); });
+    return () => { cancelled = true; };
+  }, [userPoint, districts, canUseLeaflet]);
+
+  const queryGamc = useCallback(async (e) => {
+    const map = mapRef.current;
+    const enabled = [...enabledRef.current];
+    if (!map || enabled.length === 0) return;
+    const size = map.getSize();
+    const bounds = map.getBounds();
+    const sw = L.CRS.EPSG3857.project(bounds.getSouthWest());
+    const ne = L.CRS.EPSG3857.project(bounds.getNorthEast());
+    const pt = map.latLngToContainerPoint(e.latlng);
+    const bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    const chunks = [];
+    for (const serviceId of enabled) {
+      const geo = await fetchGamcFeatureInfo({
+        serviceId,
+        bbox,
+        width: size.x,
+        height: size.y,
+        x: pt.x,
+        y: pt.y,
+      });
+      const rows = featureInfoRows(geo);
+      if (!rows.length) continue;
+      const svc = servicesRef.current.find((s) => s.service_id === serviceId);
+      chunks.push({ title: svc?.title || "Capa GAMC", rows });
+    }
+    if (!chunks.length) return;
+    L.popup().setLatLng(e.latlng).setContent(popupHtml(chunks)).openOn(map);
+  }, []);
+
+  const queryRef = useRef(queryGamc);
+  queryRef.current = queryGamc;
 
   useEffect(() => {
     if (!canUseLeaflet || !containerRef.current) return;
     if (!mapRef.current) {
-      const map = L.map(containerRef.current, {
-        center: [-17.68, -65.95],
-        zoom: 8,
-        zoomControl: true,
-      });
+      const map = L.map(containerRef.current, { center: [-17.40, -66.16], zoom: 12, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 14,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
       }).addTo(map);
-      const allPts = ZONE_GEO_CATALOG.flatMap((z) => z.polygon);
-      map.fitBounds(L.latLngBounds(allPts), { padding: [44, 54] });
-      map.on("click", (e) => {
-        pickRef.current?.(e.latlng.lat, e.latlng.lng, "mapa");
+      map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [24, 24] });
+      map.on("click", (evt) => {
+        pickRef.current?.(evt.latlng.lat, evt.latlng.lng, "mapa");
+        if (!guided) queryRef.current?.(evt);
       });
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
+      setMapEpoch((n) => n + 1);
     }
 
     const layer = layerRef.current;
     if (layer) {
       layer.clearLayers();
-      const rootStyles =
-        typeof window !== "undefined"
-          ? getComputedStyle(document.documentElement)
-          : null;
-      const tokenVal = (name) => rootStyles?.getPropertyValue(name).trim() || "";
-
-      const colorTinta = tokenVal("--tinta");
-      const colorLadrillo = tokenVal("--ladrillo");
-      const colorTarjeta = tokenVal("--tarjeta");
-
-      zoneList.forEach((z) => {
-        const active = z.id === activeZoneId;
-        const perf = PERFIL_VISUAL_ZONA[z.id] || PERFIL_VISUAL_ZONA.punata_valle_alto;
-        const colorZona = tokenVal(perf.tokenAcento);
-
-        /* Mismos polígonos existentes con el color de acento de su zona */
-        const polygon = L.polygon(z.polygon, {
-          color: colorTinta,
-          fillColor: colorZona,
-          fillOpacity: active ? 0.38 : 0.18,
-          weight: active ? 3.5 : 2,
-          dashArray: active ? null : "6 6",
-        });
-        polygon.on("click", (e) => {
-          L.DomEvent.stopPropagation(e);
-          selectRef.current?.(z.id);
-        });
-        polygon.addTo(layer);
-
-        /* Mismo punto de referencia */
-        const pinpoint = L.circleMarker(z.coords, {
-          radius: active ? 8 : 6,
-          fillColor: colorZona,
-          color: colorTinta,
-          weight: 2.5,
-          fillOpacity: 1,
-        });
-        pinpoint.on("click", (e) => {
-          L.DomEvent.stopPropagation(e);
-          selectRef.current?.(z.id);
-        });
-        pinpoint.addTo(layer);
-
-        /* 2. Pin ilustrado grande y distinto por zona con su nombre en letra grande */
-        const labelMarker = L.marker(z.coords, {
-          zIndexOffset: active ? 600 : 150,
-          icon: L.divIcon({
-            className: "tarpuy-map-pin-wrapper",
-            html: construirPinSvgZona(z.id, z.name, active),
-            iconSize: null,
-          }),
-        });
-        labelMarker.on("click", (e) => {
-          L.DomEvent.stopPropagation(e);
-          selectRef.current?.(z.id);
-        });
-        labelMarker.addTo(layer);
-      });
-
-      /* Pin "Estás aquí" en --ladrillo cuando el usuario tocó o usó GPS */
-      if (
-        userPoint &&
-        Number.isFinite(userPoint.lat) &&
-        Number.isFinite(userPoint.lon)
-      ) {
+      if (userPoint && Number.isFinite(userPoint.lat) && Number.isFinite(userPoint.lon)) {
+        if (userPoint.source === "GPS" && Number.isFinite(userPoint.accuracy) && userPoint.accuracy > 0) {
+          L.circle([userPoint.lat, userPoint.lon], { radius: userPoint.accuracy, color: "var(--cielo-oscuro)", fillOpacity: 0.12, weight: 1 }).addTo(layer);
+        }
         const pin = L.circleMarker([userPoint.lat, userPoint.lon], {
-          radius: 10,
-          fillColor: colorLadrillo,
-          color: colorTarjeta,
-          weight: 3.5,
-          fillOpacity: 1,
+          radius: 8,
+          fillColor: "#7E57C2",
+          color: "#4A148C",
+          weight: 3,
+          fillOpacity: 0.9,
         });
-        pin.bindTooltip(qu ? "Kaypi kachkanki" : "Estás aquí", {
-          permanent: true,
-          direction: "bottom",
-        });
+        pin.bindTooltip(userPoint.district || (guided ? "Tu parcela" : "Tu ubicación seleccionada"), { permanent: true, direction: "bottom" });
         pin.addTo(layer);
+        mapRef.current.setView([userPoint.lat, userPoint.lon], userPoint.accuracy > 1000 ? 13 : 16);
       }
     }
-  }, [canUseLeaflet, activeZoneId, zoneList, userPoint, qu]);
+  }, [canUseLeaflet, userPoint]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!canUseLeaflet || !map || !mapEpoch) return;
+    const wanted = enabledIds;
+    Object.entries(wmsRef.current).forEach(([sid, layer]) => {
+      if (!wanted.has(sid)) {
+        map.removeLayer(layer);
+        delete wmsRef.current[sid];
+      }
+    });
+    gamcServices.forEach((svc) => {
+      if (!wanted.has(svc.service_id) || wmsRef.current[svc.service_id]) return;
+      const layer = L.tileLayer.wms(GAMC_WMS_PATH, wmsTileOptions(svc));
+      if (svc.id === "limite_distritos") {
+        layer.on("tileerror", () => setDistrictLayerError(true));
+        layer.on("tileload", () => setDistrictLayerError(false));
+      }
+      layer.addTo(map);
+      wmsRef.current[svc.service_id] = layer;
+    });
+  }, [canUseLeaflet, enabledIds, gamcServices, mapEpoch]);
 
   useEffect(() => {
     if (!canUseLeaflet && mapRef.current) {
+      Object.values(wmsRef.current).forEach((layer) => {
+        try {
+          mapRef.current.removeLayer(layer);
+        } catch {
+          /* map already tearing down */
+        }
+      });
+      wmsRef.current = {};
       mapRef.current.remove();
       mapRef.current = null;
       layerRef.current = null;
     }
   }, [canUseLeaflet]);
 
+  const toggleService = (serviceId) => {
+    setEnabledIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(serviceId)) next.delete(serviceId);
+      else next.add(serviceId);
+      return next;
+    });
+  };
+
+  const resetDistrictsView = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [16, 16] });
+  };
+
   return (
-    <div className="space-y-6" data-zona={activeZoneId}>
-      {/* Patrón fijo de Mapa: Caminos y zig-zag de aguayo */}
-      <PatronPantalla tipo="caminos" />
-
-      {/* 4. BARRA SUPERIOR DEL MAPA: Buscador de comunidad */}
-      <div className="tarpuy-card-physical p-4 sm:p-5 space-y-3">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="flex-1">
-            <CommunitySearchCombobox
-              selectedZoneId={activeZoneId}
-              selectedCommunityName={selectedCommunityName}
-              onSelectCommunity={onSelectCommunity}
-              variant="light"
-            />
-          </div>
-
-          <div className="hidden md:block">
-            <BotonGrande
-              variante="primario"
-              ilustracionId="pin_ubicacion"
-              texto={qu ? "¿Maypitaq kachkani? (GPS)" : "¿Dónde estoy?"}
-              onClick={handleDondeEstoy}
-              className="text-xl px-7"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 1. MAPA BASE CÁLIDO (45% a 60% de la altura en celular, con controles +/- de 58 px) */}
-      <div className="tarpuy-card-physical overflow-hidden">
-        <div
-          className={`tarpuy-warm-map ${
-            tall
-              ? "h-[52vh] min-h-[300px] max-h-[460px] sm:h-[460px]"
-              : "h-[48vh] min-h-[280px] sm:h-96"
-          } relative w-full`}
-          style={{ backgroundColor: "var(--arena)" }}
-        >
-          {canUseLeaflet ? (
-            <div ref={containerRef} className="w-full h-full z-10" />
-          ) : (
-            /* Mapa vectorial sin internet con el mismo estilo cálido de papel y arena */
-            <div
-              className="w-full h-full relative flex items-center justify-center p-4 select-none"
-              style={{ backgroundColor: "var(--papel)" }}
-            >
-              <svg viewBox="0 0 360 220" className="w-full h-full">
-                {/* Contorno cálido de Cochabamba */}
-                <path
-                  d="M 24 66 Q 98 22 195 34 T 330 88 Q 315 186 215 202 T 44 156 Z"
-                  fill="var(--arena)"
-                  stroke="var(--tinta)"
-                  strokeWidth="3"
-                  strokeDasharray="6 4"
-                />
-                {/* Camino dibujado entre las zonas */}
-                <path
-                  d="M 75 90 Q 135 95 190 110 T 285 155"
-                  stroke="var(--ladrillo)"
-                  strokeWidth="3"
-                  strokeDasharray="5 5"
-                  fill="none"
-                />
-                {zoneList.map((z) => {
-                  const active = z.id === activeZoneId;
-                  const perf =
-                    PERFIL_VISUAL_ZONA[z.id] || PERFIL_VISUAL_ZONA.punata_valle_alto;
-                  return (
-                    <g
-                      key={z.id}
-                      onClick={() => onSelectZone(z.id)}
-                      className="cursor-pointer"
-                    >
-                      <circle
-                        cx={z.svgPos.x + 12}
-                        cy={z.svgPos.y + 8}
-                        r={active ? 26 : 20}
-                        fill={`var(${perf.tokenAcento})`}
-                        stroke="var(--tinta)"
-                        strokeWidth={active ? "3.5" : "2.5"}
-                      />
-                      <rect
-                        x={z.svgPos.x - 32}
-                        y={z.svgPos.y + 38}
-                        width="88"
-                        height="24"
-                        rx="12"
-                        fill={active ? "var(--dorado)" : "var(--tarjeta)"}
-                        stroke="var(--tinta)"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x={z.svgPos.x + 12}
-                        y={z.svgPos.y + 54}
-                        textAnchor="middle"
-                        fill="var(--tinta)"
-                        fontSize="13"
-                        fontWeight="800"
-                      >
-                        {z.name}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-
-              <span
-                className="absolute top-4 left-4 px-4 py-1.5 rounded-full text-sm font-extrabold"
-                style={{
-                  backgroundColor: "var(--hoja-suave)",
-                  color: "var(--tinta)",
-                  border: "var(--border-width-medium) solid var(--tinta)",
-                }}
-              >
-                {qu ? "Saywiti mana internetwan" : "Mapa guardado sin internet"}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* En celular: Botón gigante "¿Dónde estoy?" justo debajo del mapa (zona del pulgar) */}
-        <div
-          className="md:hidden p-3.5"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderTop: "1.5px solid var(--tinta)",
-          }}
-        >
-          <BotonGrande
-            variante="primario"
-            ilustracionId="pin_ubicacion"
-            texto={qu ? "¿Maypitaq kachkani? (GPS)" : "¿Dónde estoy?"}
-            onClick={handleDondeEstoy}
-            className="w-full text-xl justify-center"
+    <div className={`${guided ? "flow-location-map" : "tarpuy-card-physical"} overflow-hidden flex flex-col`}>
+      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] sm:max-w-xs">
+          <MapPin className="w-4 h-4 text-[#0284C7] shrink-0" />
+          <CommunitySearchCombobox
+            selectedZoneId={activeZoneId}
+            selectedCommunityName={selectedCommunityName}
+            onSelectCommunity={onSelectCommunity}
+            variant="light"
           />
         </div>
-
-        {/* 5. LEYENDA CON BOTONES GRANDES (>= 64 px) PARA ELEGIR ZONA DIRECTO */}
-        <div
-          className="p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-base font-bold"
-          style={{
-            backgroundColor: "var(--arena)",
-            borderTop: "1.5px solid var(--tinta)",
-          }}
-        >
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => onSelectZone("tapacari_zona_andina")}
-            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
-            style={{
-              backgroundColor:
-                activeZoneId === "tapacari_zona_andina"
-                  ? "var(--piedra-suave)"
-                  : "var(--tarjeta)",
-              border: "2px solid var(--tinta)",
-              boxShadow:
-                activeZoneId === "tapacari_zona_andina" ? "none" : "0 3px 0 var(--tinta)",
-            }}
+            onClick={resetDistrictsView}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <span
-              className="w-4 h-4 rounded-full inline-block shrink-0"
-              style={{ backgroundColor: "var(--piedra)", border: "1.5px solid var(--tinta)" }}
-            />
-            <IlustracionTarpuy id="helada" size={28} />
-            <span>Tapacarí (Altura y frío)</span>
+            <span>Ver todo Cochabamba</span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => onSelectZone("punata_valle_alto")}
-            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
-            style={{
-              backgroundColor:
-                activeZoneId === "punata_valle_alto"
-                  ? "var(--dorado-suave)"
-                  : "var(--tarjeta)",
-              border: "2px solid var(--tinta)",
-              boxShadow:
-                activeZoneId === "punata_valle_alto" ? "none" : "0 3px 0 var(--tinta)",
-            }}
-          >
-            <span
-              className="w-4 h-4 rounded-full inline-block shrink-0"
-              style={{ backgroundColor: "var(--dorado)", border: "1.5px solid var(--tinta)" }}
-            />
-            <IlustracionTarpuy id="riego_gravedad" size={28} />
-            <span>Punata (Valle y acequia)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onSelectZone("mizque_cono_sur")}
-            className="min-h-[64px] inline-flex items-center justify-center gap-2.5 px-3.5 py-2 rounded-2xl cursor-pointer"
-            style={{
-              backgroundColor:
-                activeZoneId === "mizque_cono_sur"
-                  ? "var(--hoja-suave)"
-                  : "var(--tarjeta)",
-              border: "2px solid var(--tinta)",
-              boxShadow:
-                activeZoneId === "mizque_cono_sur" ? "none" : "0 3px 0 var(--tinta)",
-            }}
-          >
-            <span
-              className="w-4 h-4 rounded-full inline-block shrink-0"
-              style={{ backgroundColor: "var(--hoja)", border: "1.5px solid var(--tinta)" }}
-            />
-            <IlustracionTarpuy id="planta_crecida" size={28} />
-            <span>Mizque / Trópico</span>
-          </button>
+          {!guided && (
+            <button
+              type="button"
+              onClick={onDetectGps}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--hoja-oscura)] hover:bg-[#1E5631] text-white text-xs font-bold transition cursor-pointer shadow-sm"
+            >
+              <LocateFixed className="w-3.5 h-3.5 shrink-0" />
+              <span>Ubícame (GPS)</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 3. AL TOCAR UNA COMUNIDAD: TARJETA INFERIOR GRANDE CON PAISAJE, 3 DATOS CON DIBUJO,
-             BOTÓN ENORME "USAR ESTA COMUNIDAD" Y ALTAVOZ */}
-      {zonaActivaObj && (
-        <section
-          aria-label={`Comunidad seleccionada: ${zonaActivaObj.name}`}
-          data-zona={zonaActivaObj.id}
-          className="tarpuy-card-physical overflow-hidden"
-          style={{ backgroundColor: "var(--tarjeta)" }}
-        >
-          {/* Franja de acento suave de la zona */}
-          <div
-            className="px-6 py-4 flex flex-wrap items-center justify-between gap-3"
-            style={{ backgroundColor: "var(--acento-zona-suave)" }}
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="w-4 h-4 rounded-full inline-block"
-                style={{ backgroundColor: "var(--acento-zona)" }}
-              />
-              <h3 className="tarpuy-title">
-                {selectedCommunityName || zonaActivaObj.name} · {zonaActivaObj.sub}
-              </h3>
-            </div>
+      <div className="px-4 py-3 border-b border-slate-200 space-y-2">
+        <p className="text-sm font-semibold">Encuentra tu distrito con tu ubicación o elígelo por su número.</p>
+        <label className="flex flex-wrap items-center gap-3 text-sm font-semibold">
+          {guided ? "Tu distrito" : "Distritos municipales"}
+          <select aria-label="Distrito municipal" value={districtCode} onChange={(e) => { focusDistrict(e.target.value); const district = districts.find(d=>d.code === e.target.value); if (district) onChooseDistrict?.(district); }} disabled={!districts.length || !canUseLeaflet}
+            className="min-h-14 min-w-0 max-w-full flex-1 rounded-2xl border-2 border-[var(--tinta)] bg-white px-3 text-base font-bold">
+            <option value="">{districts.length ? "Todos los distritos" : "Catálogo no disponible"}</option>
+            {districts.map((d) => <option key={d.code} value={d.code}>{d.name} · {d.comuna}</option>)}
+          </select>
+        </label>
+        {!guided && <p className="text-xs text-slate-600">Límites municipales del GAMC. Elegir un distrito acerca el mapa; las recomendaciones agrícolas siguen referidas a la zona piloto seleccionada.</p>}
+        {locationMessage && <p role="status" className={guided && locationMessage.startsWith("Tu ubicación:") ? "sr-only" : "text-sm text-slate-600"}>{locationMessage}</p>}
+        {guided && <button className="flow-primary w-full" disabled={!userPoint} onClick={onContinue}>Ver clima →</button>}
+        {userPoint?.source === "GPS" && Number.isFinite(userPoint.accuracy) && <p className="text-sm text-slate-600" role="status">Precisión del dispositivo: ±{Math.round(userPoint.accuracy)} m.{userPoint.accuracy > 200 ? " Es aproximada. Toca el mapa para corregir tu parcela." : " Puedes ajustar el punto tocando el mapa."}</p>}
 
-            <SelloCartilla
-              texto={qu ? "Llaqta akllasqa" : "Chacra ubicada"}
-              subtitulo={zonaActivaObj.name}
-              color="ladrillo"
-            />
+        {districtLayerError && <p role="status" className="text-sm text-amber-900">No se pudieron cargar los límites distritales. Revisa la conexión y la configuración del servicio GAMC.</p>}
+      </div>
+      <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} relative w-full bg-slate-900`}>
+        {canUseLeaflet ? (
+          <>
+            <div ref={containerRef} className="w-full h-full z-10" />
+            {gamcServices.length > 0 ? (
+              <p className="absolute bottom-2 left-2 z-20 max-w-[60%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
+                Haz clic sobre el mapa para consultar atributos · GetFeatureInfo
+              </p>
+            ) : null}
+            {!guided && gamcServices.length > 0 ? (
+              <details className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] max-h-[80%] overflow-auto rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
+                <summary className="text-xs font-bold text-[var(--cielo-oscuro)] cursor-pointer">Capas del mapa</summary>
+                <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2">{gamcTheme}</p>
+                <div className="mt-2 space-y-2">
+                  {gamcServices.map((svc) => {
+                    const on = enabledIds.has(svc.service_id);
+                    return (
+                      <label key={svc.service_id} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 accent-[var(--cielo-oscuro)]"
+                          checked={on}
+                          onChange={() => toggleService(svc.service_id)}
+                        />
+                        <span className="text-xs font-semibold text-[var(--tinta)] leading-snug">{svc.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {gamcServices
+                  .filter((svc) => enabledIds.has(svc.service_id))
+                  .map((svc) => (
+                    <ul key={`legend-${svc.service_id}`} className="mt-2 space-y-1 border-t border-slate-100 pt-2">
+                      {(svc.legend_classes || []).map((cls) => (
+                        <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+                          <span
+                            className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
+                            style={{ background: cls.color }}
+                          />
+                          <span>{cls.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+              </details>
+            ) : null}
+          </>
+        ) : (
+          <div className="w-full h-full relative flex items-center justify-center p-4 select-none">
+            <span className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold">
+              Mapa municipal sin conexión a internet
+            </span>
           </div>
-
-          <div className="p-6 sm:p-7 space-y-6">
-            {/* Dibujo del paisaje de la zona */}
-            <PaisajePorHora momento="amanecer" zona={perfilActivo.paisajeKey} />
-
-            {/* Los 3 datos con dibujo (sin bordes gruesos ni cajas dentro de cajas) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
-                style={{ backgroundColor: "var(--arena)" }}
-              >
-                <div
-                  className="w-18 h-18 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--cielo-suave)" }}
-                >
-                  <IlustracionTarpuy id={perfilActivo.dibujoAltura} size={50} />
-                </div>
-                <p className="font-bold text-xl leading-snug">
-                  {qu ? perfilActivo.alturaSimpleQu : perfilActivo.alturaSimpleEs}
-                </p>
-                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
-                  {zonaActivaObj.elevation}
-                </span>
-              </div>
-
-              <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
-                style={{ backgroundColor: "var(--arena)" }}
-              >
-                <div
-                  className="w-18 h-18 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--alerta-cuidado-suave)" }}
-                >
-                  <IlustracionTarpuy id={perfilActivo.dibujoRiesgo} size={50} />
-                </div>
-                <p className="font-bold text-xl leading-snug">
-                  {qu ? perfilActivo.riesgoSimpleQu : perfilActivo.riesgoSimpleEs}
-                </p>
-                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
-                  {zonaActivaObj.risk}
-                </span>
-              </div>
-
-              <div
-                className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
-                style={{ backgroundColor: "var(--arena)" }}
-              >
-                <div
-                  className="w-18 h-18 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--tierra-suave)" }}
-                >
-                  <IlustracionTarpuy id={perfilActivo.dibujoSuelo} size={50} />
-                </div>
-                <p className="font-bold text-xl leading-snug">
-                  {qu ? perfilActivo.sueloSimpleQu : perfilActivo.sueloSimpleEs}
-                </p>
-                <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
-                  {zonaActivaObj.zoneData?.soil_context?.texture_class ||
-                    zonaActivaObj.sub}
-                </span>
-              </div>
-            </div>
-
-            {/* Botón enorme "Usar esta comunidad" + Botón de Altavoz */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-              <BotonGrande
-                variante="primario"
-                ilustracionId="casa"
-                texto={
-                  qu
-                    ? `Kay llaqtata akllay (${zonaActivaObj.name})`
-                    : `Usar esta comunidad (${zonaActivaObj.name})`
-                }
-                onClick={() => onSelectZone(zonaActivaObj.id)}
-                className="flex-1 text-2xl py-4 justify-center"
-              />
-
-              <BotonAltavoz
-                sonando={activeAudioKey === `mapa_zona_${zonaActivaObj.id}`}
-                mostrarTexto={true}
-                etiqueta={qu ? "Uyariy" : "Escuchar zona"}
-                onClick={handleEscucharComunidad}
-              />
-            </div>
-
-            {/* 6. MODO FÁCIL vs AVANZADO: Capas técnicas plegadas sin eliminarlas */}
-            <div className="pt-2 space-y-3">
-              <BotonGrande
-                variante="secundario"
-                ilustracionId="lupa"
-                estado={mostrarCapasTecnicas ? "presionado" : "normal"}
-                texto={
-                  mostrarCapasTecnicas
-                    ? qu
-                      ? "Allpa yupaykunata pakay"
-                      : "Ocultar capas técnicas del terreno"
-                    : qu
-                    ? "Allpa yupaykunata qhaway"
-                    : "Ver capas técnicas (altura exacta, pendiente y suelo)"
-                }
-                onClick={() => setMostrarCapasTecnicas((v) => !v)}
-              />
-
-              {mostrarCapasTecnicas && (
-                <div
-                  className="p-5 rounded-3xl space-y-4"
-                  style={{
-                    backgroundColor: "var(--arena)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div
-                      className="p-4 rounded-2xl"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "1.5px solid var(--tinta)",
-                      }}
-                    >
-                      <span
-                        className="text-sm font-bold block"
-                        style={{ color: "var(--tinta-suave)" }}
-                      >
-                        Altura sobre el nivel del mar
-                      </span>
-                      <strong className="text-xl font-extrabold">
-                        {zonaActivaObj.zoneData?.elevation_msnm || zonaActivaObj.elevation}
-                      </strong>
-                    </div>
-
-                    <div
-                      className="p-4 rounded-2xl"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "1.5px solid var(--tinta)",
-                      }}
-                    >
-                      <span
-                        className="text-sm font-bold block"
-                        style={{ color: "var(--tinta-suave)" }}
-                      >
-                        Pendiente del terreno
-                      </span>
-                      <strong className="text-xl font-extrabold">
-                        {zonaActivaObj.zoneData?.slope_category || zonaActivaObj.risk}
-                      </strong>
-                    </div>
-
-                    <div
-                      className="p-4 rounded-2xl"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "1.5px solid var(--tinta)",
-                      }}
-                    >
-                      <span
-                        className="text-sm font-bold block"
-                        style={{ color: "var(--tinta-suave)" }}
-                      >
-                        Textura del suelo
-                      </span>
-                      <strong className="text-xl font-extrabold">
-                        {zonaActivaObj.zoneData?.soil_context?.texture_class ||
-                          "Franco andino"}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <p className="text-base font-bold" style={{ color: "var(--tinta)" }}>
-                    <strong>Comunidades y pueblos en esta zona:</strong> {zonaActivaObj.towns}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Ventana emergente de Mamá Tomasa en la pantalla de Mapa */}
-      <MamaTomasaAyuda
-        titulo={
-          qu
-            ? `Saywiti · ${selectedCommunityName || zonaActivaObj?.name || ""}`
-            : `Tu comunidad: ${selectedCommunityName || zonaActivaObj?.name || ""}`
-        }
-        pose={errorGpsAmable ? "alerta" : "mapa"}
-        semaforoPrincipal={errorGpsAmable ? "amarillo" : "verde"}
-        mensaje={
-          errorGpsAmable
-            ? qu
-              ? "Mana GPS tarirparisunkichu. Saywitipi llaqtaykita ñit'iy."
-              : "No pude ubicarte con el GPS. Toca tu comunidad en el mapa."
-            : qu
-            ? `${selectedCommunityName || zonaActivaObj?.name} llaqtaq pachanta qhaway:`
-            : `Semáforo del terreno en ${selectedCommunityName || zonaActivaObj?.name}:`
-        }
-        tarjetas={[
-          {
-            id: "riesgo_zona",
-            dibujoId: perfilActivo.dibujoRiesgo,
-            pose: "alerta",
-            semaforo:
-              zonaActivaObj?.id === "tapacari_zona_andina" ? "rojo" : "amarillo",
-            titulo: qu ? perfilActivo.riesgoSimpleQu : perfilActivo.riesgoSimpleEs,
-            frase: zonaActivaObj?.risk || "Cuidar los cultivos según la temporada.",
-          },
-          {
-            id: "suelo_zona",
-            dibujoId: perfilActivo.dibujoSuelo,
-            pose: "siembra",
-            semaforo: "verde",
-            titulo: qu ? perfilActivo.sueloSimpleQu : perfilActivo.sueloSimpleEs,
-            frase: `${qu ? perfilActivo.alturaSimpleQu : perfilActivo.alturaSimpleEs} (${
-              zonaActivaObj?.elevation || ""
-            }).`,
-          },
-          {
-            id: "ayuda_gps",
-            dibujoId: "pin_ubicacion",
-            pose: "mapa",
-            semaforo: errorGpsAmable ? "amarillo" : "verde",
-            titulo: qu ? "Kay suyupi llaqtakuna" : "Pueblos de esta zona",
-            frase: zonaActivaObj?.towns || "Toca el mapa para cambiar de comunidad.",
-          },
-        ]}
-        onListen={handleEscucharComunidad}
-        isSpeaking={activeAudioKey === `mapa_zona_${zonaActivaObj?.id}`}
-        badgeCount={3}
-        tonoAvisoPrincipal={errorGpsAmable ? "cuidado" : "normal"}
-        lang={lang}
-        abiertoControlado={abiertoMamaTomasa}
-        onCambiarAbierto={setAbiertoMamaTomasa}
-      />
+        )}
+      </div>
+      {geoStatus ? <p className="sr-only">{geoStatus}</p> : null}
     </div>
   );
 }

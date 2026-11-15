@@ -238,6 +238,11 @@ async function speakNeuralVoice(text, cfg, callbacks = {}) {
   } catch {}
   if (session !== playbackSession) return false;
   callbacks.onLoading?.(false);
+  if (callbacks.neuralOnly) {
+    callbacks.onError?.(new Error("Native audio unavailable"));
+    callbacks.onEnd?.();
+    return false;
+  }
   if (!cfg.isSpanish) {
     callbacks.onError?.(new Error("South Bolivian Quechua voice unavailable"));
     callbacks.onEnd?.();

@@ -43,6 +43,41 @@
         }
       }
     },
+    "/api/alerts/{zone_id}": {
+      "method": "GET",
+      "summary": "Get real-time meteorological alerts, 7/14-day forecasts, and municipal irrigation warnings",
+      "description": "Returns current observations, 7-day and 14-day forecast horizons, active agroclimatic alerts, and tailored municipal canal/irrigation alerts (regantes_gamc) considering local district and drainage characteristics.",
+      "parameters": [
+        {
+          "name": "zone_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "district_code",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "comuna",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "drainage",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "status_code": 200,
+        "content_type": "application/json"
+      }
+    },
     "/api/recommend": {
       "method": "POST",
       "summary": "Generate comparative crop rotation strategies",
@@ -498,6 +533,21 @@
               "enum": ["es", "qu", "bilingual"]
             }
           }
+        },
+        "municipal_context": {
+          "type": "object",
+          "description": "Optional GAMC district / periurban / drainage signals (Phase 2).",
+          "properties": {
+            "district_code": { "type": "string" },
+            "comuna": { "type": "string" },
+            "periurban_class": { "type": "string" },
+            "periurban_pressure": { "type": "string", "enum": ["none", "growth", "consolidated"] },
+            "periurban_detail": { "type": "string" },
+            "near_drainage": { "type": "boolean" },
+            "drainage_tipo": { "type": "string" },
+            "drainage_clasificacion": { "type": "string" },
+            "wet_bulletin": { "type": "boolean" }
+          }
         }
       }
     },
@@ -532,6 +582,20 @@
             "nasa_datasets": { "type": "array", "items": { "type": "string" } },
             "soil_dataset": { "type": "string" },
             "etl_status": { "type": "string" }
+          }
+        },
+        "municipal_context": {
+          "type": "object",
+          "description": "Normalized municipal periurban context when provided in the request.",
+          "properties": {
+            "district_code": { "type": "string" },
+            "label_es": { "type": "string" },
+            "alias": { "type": "string" },
+            "periurban_pressure": { "type": "string" },
+            "flood_sensitive": { "type": "boolean" },
+            "near_drainage": { "type": "boolean" },
+            "wet_bulletin": { "type": "boolean" },
+            "tip_es": { "type": "string" }
           }
         }
       }

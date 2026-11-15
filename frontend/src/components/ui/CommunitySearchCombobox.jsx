@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useId } from "react";
 import { Search, MapPin, ChevronDown, Check, X } from "lucide-react";
-import { searchCommunities } from "../../utils/geoUtils.js";
+import { searchDistricts } from "../../utils/geoUtils.js";
+
+import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 
 const REGION_TOKEN_STYLE = {
   "Valle Alto": {
@@ -22,7 +24,7 @@ export default function CommunitySearchCombobox({
   selectedCommunityName = "",
   onSelectCommunity,
   variant = "sidebar",
-  placeholder = "Buscar otra comunidad o pueblo...",
+  placeholder = "Buscar distrito...",
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -31,7 +33,8 @@ export default function CommunitySearchCombobox({
   const inputRef = useRef(null);
   const listId = useId();
 
-  const results = searchCommunities(open ? query : "");
+  const districts = useGamcDistricts();
+  const results = searchDistricts(districts, open ? query : "");
   const isSidebar = variant === "sidebar";
 
   useEffect(() => {
@@ -88,9 +91,9 @@ export default function CommunitySearchCombobox({
           aria-expanded={open}
           aria-controls={listId}
           aria-autocomplete="list"
-          aria-label="Buscar comunidad o municipio"
+          aria-label="Buscar distrito"
           value={open ? query : selectedCommunityName}
-          placeholder={selectedCommunityName ? `Cambiar comunidad (${selectedCommunityName})...` : placeholder}
+          placeholder={selectedCommunityName ? `Cambiar distrito (${selectedCommunityName})...` : placeholder}
           onFocus={() => {
             setOpen(true);
             setQuery("");

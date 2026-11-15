@@ -20,11 +20,13 @@ class MultiCriteriaRotationScorer(RotationScorer):
         priorities: list[str],
         constraints: dict[str, Any],
         current_crop_id: str,
+        municipal_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Score strategy and enrich telemetry evidence without mutating input."""
         scored = copy.deepcopy(strategy)
         crops = [crops_map.get(c.get("crop_id", "")) for c in scored.get("crop_sequence", [])]
         crops = [c for c in crops if c is not None]
+        muni = municipal_context or {}
 
         w_save = sum(WATER_SAVINGS.get(c.get("water_demand", "medium"), 0.5) for c in crops) / max(len(crops), 1)
         d_tol = sum(LEVEL_SCORES.get(c.get("drought_tolerance", "medium"), 0.5) for c in crops) / max(len(crops), 1)
@@ -81,8 +83,45 @@ class MultiCriteriaRotationScorer(RotationScorer):
         if bare_months >= 3 and has_fallow:
             climate_adj -= 0.10
 
-        final_score = round(max(0.0, min(1.0, base_score + pest_bonus + climate_adj)), 2)
+        # GAMC periurban / drainage adjustments (Field Shift Cochabamba)
+        muni_adj = 0.0
+        pressure = str(muni.get("periurban_pressure") or "none")
+        seq_len = len(scored.get("crop_sequence") or [])
+        cover_ok = eros >= 0.55 or any(
+            c.get("botanical_family") in {"Poaceae", "Fabaceae"} for c in crops
+        )
+        if pressure == "consolidated":
+            if seq_len >= 4:
+                muni_adj -= 0.10
+            if cover_ok and not has_fallow:
+                muni_adj += 0.08
+            if has_fallow:
+                muni_adj -= 0.06
+        elif pressure == "growth":
+            if cover_ok and not has_fallow:
+                muni_adj += 0.04
+
+        near_drain = bool(muni.get("near_drainage"))
+        flood_sensitive = bool(muni.get("flood_sensitive"))
+        wet = bool(muni.get("wet_bulletin"))
+        high_water = any(c.get("water_demand") == "high" for c in crops)
+        if near_drain and wet and high_water:
+            muni_adj -= 0.12
+        elif flood_sensitive and wet and high_water:
+            muni_adj -= 0.05
+        if near_drain and wet and any(c.get("water_demand") == "low" for c in crops):
+            muni_adj += 0.05
+
+        if muni.get("slope_bias") == "ladera" and eros >= 0.55:
+            muni_adj += 0.04
+
+        final_score = round(max(0.0, min(1.0, base_score + pest_bonus + climate_adj + muni_adj)), 2)
         scored["priority_alignment_score"] = float(final_score)
+
+        tl = dict(scored.get("visual_traffic_light") or {})
+        if near_drain and wet:
+            tl["water"] = "red" if high_water else "yellow"
+            scored["visual_traffic_light"] = tl
 
         # Append live telemetry summary to nasa_evidence
         tag = "Telemetría NASA POWER:"
@@ -94,5 +133,13 @@ class MultiCriteriaRotationScorer(RotationScorer):
                 f"Días con riesgo de helada {frost_days}."
             )
             scored["nasa_evidence"] = f"{evidence} {telemetry_line}".strip()
+
+        if muni.get("label_es") or muni.get("tip_es"):
+            gamc_line = (
+                f"Contexto GAMC: {muni.get('label_es') or 'distrito municipal'}. "
+                f"{muni.get('tip_es') or ''}"
+            ).strip()
+            if "Contexto GAMC:" not in scored.get("nasa_evidence", ""):
+                scored["nasa_evidence"] = f"{scored.get('nasa_evidence', '')} {gamc_line}".strip()
 
         return scored

@@ -81,10 +81,18 @@ export async function fetchCrops(forceOffline = false) {
   ];
 }
 
-export async function fetchAlerts(zoneId, forceOffline = false) {
+export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, comuna, drainage } = {}) {
   if (!forceOffline) {
     try {
-      const res = await fetch(`/api/alerts/${zoneId}`);
+      const params = new URLSearchParams();
+      if (districtCode) params.set("district_code", districtCode);
+      if (comuna) params.set("comuna", comuna);
+      if (drainage) {
+        const dText = typeof drainage === "string" ? drainage : drainage.clasificacion || drainage.tipo || "";
+        if (dText) params.set("drainage", dText);
+      }
+      const qs = params.toString();
+      const res = await fetch(`/api/alerts/${zoneId}${qs ? `?${qs}` : ""}`);
       if (res.ok) return await res.json();
     } catch {}
   }
@@ -104,13 +112,16 @@ export async function fetchRecommendations(payload, forceOffline = false) {
   }
   const bundle = loadOfflineBundle(payload.zone_id);
   const strats = bundle?.precomputed_recommendations || bundle?.zone_profile?.strategies || [];
+  const muni = payload.municipal_context || null;
   const scored = strats.map((s) => {
     let score = s.strategy_type === "current_baseline" ? 0.38 : 0.82;
     const txt = JSON.stringify(s).toLowerCase();
     (payload.farmer_priorities || []).forEach((p) => {
       if (txt.includes(p.replace("_", " ").slice(0, 5))) score += 0.04;
     });
-    return { ...s, priority_alignment_score: Math.min(0.98, Number(score.toFixed(2))) };
+    if (muni?.periurban_pressure === "consolidated" && (s.crop_sequence || []).length >= 4) score -= 0.06;
+    if (muni?.near_drainage && muni?.wet_bulletin && txt.includes("high")) score -= 0.05;
+    return { ...s, priority_alignment_score: Math.min(0.98, Math.max(0.05, Number(score.toFixed(2)))) };
   });
   return {
     zone_id: payload.zone_id,
@@ -119,6 +130,7 @@ export async function fetchRecommendations(payload, forceOffline = false) {
     priorities_considered: payload.farmer_priorities,
     strategies: scored,
     realtime_bulletin: bundle?.realtime_bulletin || null,
+    municipal_context: muni,
     data_provenance: {
       nasa_datasets: ["NASA POWER", "SMAP L4", "MODIS/Sentinel-2", "GPM/IMERG", "SRTM"],
       soil_dataset: "ISRIC SoilGrids 250m & FAO GAEZ v4 (Offline Sync)",

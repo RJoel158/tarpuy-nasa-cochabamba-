@@ -24,6 +24,25 @@
       ]
     },
     {
+      "id": "drenaje_e_influencia",
+      "service_id": "d4cea6e3-fc7f-482a-94ad-bd377df78886",
+      "title": "Drenaje e Influencia",
+      "short_title": "Drenaje",
+      "description": "Red de drenaje e influencia hídrica municipal (atributos: Tipo y Clasificación: Princ. Tributarios, Quebradas).",
+      "layers": "",
+      "enabled_by_default": true,
+      "bounds": {
+        "south": -17.53119,
+        "west": -66.280703,
+        "north": -17.257306,
+        "east": -66.06952
+      },
+      "legend_classes": [
+        { "id": "tributarios", "label": "Princ. Tributarios", "color": "#0288D1" },
+        { "id": "quebradas", "label": "Quebradas", "color": "#4FC3F7" }
+      ]
+    },
+    {
       "id": "limite_distritos",
       "service_id": "7eb13092-bf0e-493b-aae6-03c43eedda2c",
       "title": "Límite de Distritos",

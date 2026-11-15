@@ -1,4 +1,4 @@
-const CACHE_NAME = "tarpuy-nasa-v7";
+const CACHE_NAME = "tarpuy-nasa-v8-unified";
 const STATIC_ASSETS = [
   "/fonts/atkinson-hyperlegible-0.ttf",
   "/fonts/atkinson-hyperlegible-1.ttf",
@@ -17,6 +17,9 @@ const STATIC_ASSETS = [
   "/audio/quh/guide_tapacari_zona_andina.wav",
   "/audio/quh/guide_mizque_cono_sur.wav",
   "/audio/es/manifest.json",
+  ...["es", "quh"].flatMap((lang) =>
+    ["frost", "rain", "drainage", "dry", "missing", "check", "stable"]
+      .map((reason) => `/audio/${lang}/water_${reason}.wav`)),
 ];
 
 self.addEventListener("install", (event) => {

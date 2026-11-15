@@ -150,6 +150,7 @@
       "code": "D9",
       "number": 9,
       "name": "Distrito 9",
+      "alias": "La Maica",
       "comuna": "Itocta",
       "center": {
         "lat": -17.46519,
@@ -222,6 +223,7 @@
       "code": "D13",
       "number": 13,
       "name": "Distrito 13",
+      "alias": "Pie de Tunari",
       "comuna": "Tunari",
       "center": {
         "lat": -17.31519,

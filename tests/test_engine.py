@@ -90,6 +90,58 @@ class TestScoring:
         assert "Telemetría NASA POWER:" in scored["nasa_evidence"]
         assert "Precipitación anual" in scored["nasa_evidence"]
 
+    def test_near_drainage_wet_bulletin_changes_score_or_water_light(self, setup_data):
+        zone, crops_map, scorer = setup_data
+        strat = zone["strategies"][1]
+        constraints = {"irrigation_access": "deficit_auxiliary"}
+        base = scorer.score_strategy(strat, zone, crops_map, ["water_conservation"], constraints, "maiz_valle")
+        wet_drain = scorer.score_strategy(
+            strat,
+            zone,
+            crops_map,
+            ["water_conservation"],
+            constraints,
+            "maiz_valle",
+            {
+                "periurban_pressure": "growth",
+                "near_drainage": True,
+                "wet_bulletin": True,
+                "flood_sensitive": True,
+                "label_es": "Distrito 9 · La Maica",
+                "tip_es": "Valle periurbano",
+            },
+        )
+        assert wet_drain["priority_alignment_score"] <= base["priority_alignment_score"]
+        assert wet_drain.get("visual_traffic_light", {}).get("water") in {"red", "yellow"}
+        assert "Contexto GAMC" in wet_drain.get("nasa_evidence", "")
+
+    def test_consolidated_periurban_penalizes_long_sequences(self, setup_data):
+        zone, crops_map, scorer = setup_data
+        long_strat = {
+            "strategy_id": "test_long",
+            "strategy_type": "adaptive_alternative",
+            "crop_sequence": [
+                {"crop_id": "maiz_valle"},
+                {"crop_id": "haba"},
+                {"crop_id": "quinua"},
+                {"crop_id": "cebada"},
+            ],
+            "nasa_evidence": "Test",
+            "visual_traffic_light": {"water": "green", "soil": "green", "frost": "green", "erosion": "green"},
+        }
+        constraints = {"irrigation_access": "deficit_auxiliary"}
+        plain = scorer.score_strategy(long_strat, zone, crops_map, ["erosion_control"], constraints, "maiz_valle")
+        consolid = scorer.score_strategy(
+            long_strat,
+            zone,
+            crops_map,
+            ["erosion_control"],
+            constraints,
+            "maiz_valle",
+            {"periurban_pressure": "consolidated", "near_drainage": False, "wet_bulletin": False},
+        )
+        assert consolid["priority_alignment_score"] < plain["priority_alignment_score"]
+
 
 class TestRecommenderService:
     """Validate recommendation ordering, input checks, and offline bundle integrity."""
@@ -118,6 +170,26 @@ class TestRecommenderService:
         assert "soil_dataset" in prov
         assert "etl_status" in prov
         assert len(prov["integrity_sha256"]) == 64
+
+    def test_recommend_with_d9_municipal_context(self):
+        service = RotationRecommendationService()
+        res = service.recommend(
+            zone_id="punata_valle_alto",
+            current_crop_id="maiz_valle",
+            farmer_priorities=["water_conservation", "erosion_control"],
+            constraints={"irrigation_access": "deficit_auxiliary"},
+            municipal_context={
+                "district_code": "D9",
+                "comuna": "Itocta",
+                "periurban_class": "growth",
+                "near_drainage": True,
+                "wet_bulletin": True,
+            },
+        )
+        assert res["municipal_context"]["district_code"] == "D9"
+        assert "La Maica" in (res["municipal_context"].get("label_es") or "")
+        assert res["municipal_context"]["flood_sensitive"] is True
+        assert len(res["strategies"]) >= 3
 
     def test_recommend_validation_raises_on_unknown(self):
         service = RotationRecommendationService()

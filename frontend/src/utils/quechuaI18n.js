@@ -1,3 +1,25 @@
+// Quechua draft: requires validation with a local speaker before field use.
+export function waterActionText(action, lang = "es") {
+  const qu = lang === "qu";
+  const messages = {
+    frost: ["Noche muy fría: protege brotes; no riegues de madrugada.", "Chiri tuta hamun: mallkikunata p'istuy; ama paqarin yakuchaychu."],
+    rain: ["Viene lluvia fuerte: limpia surcos; no satures el canal.", "Sinchi para hamun: surk'akunata pichay; ama yarq'ata hunt'achiychu."],
+    drainage: ["La tierra está húmeda y hay drenaje cerca: limpia surcos para que salga el agua.", "Allpa ch'aran, yakup purinan qayllapi: surk'akunata pichay, yaku lluqsinanpaq."],
+    dry: ["La tierra está seca: pide turno de canal o riega al atardecer; revisa primero las raíces.", "Allpa ch'aki: yarq'a yakuta mañakuy utaq inti yaykuqtin yakuchay; ñawpaqta sap'ita qhaway."],
+    missing: ["Faltan datos: revisa la humedad de la tierra antes de decidir regar.", "Mana tukuy yachay kanchu: manaraq yakuchaspa allpata qhaway."],
+    check: ["Hay drenaje cerca: revisa la tierra y el canal antes de regar.", "Yakup purinan qayllapi: manaraq yakuchaspa allpata, yarq'ata qhaway."],
+    stable: ["Agua aceptable: revisa la chacra mañana.", "Yaku allillan: paqarin chakrata qhaway."],
+  };
+  const titles = { IRRIGATE: ["RIEGA", "YAKUCHAY"], WAIT: ["ESPERA", "SUYAY"], CAUTION: ["CUIDADO CON EL AGUA", "YAKUMANTA QHAWAKUY"] };
+  return {
+    heading: qu ? "Chakrayki kunan" : "Tu chacra hoy",
+    title: titles[action.code][qu ? 1 : 0], message: messages[action.reason][qu ? 1 : 0],
+    plant: qu ? "Ima tarpunata qhaway" : "Ver qué sembrar",
+    scope: qu ? "Llaqtapa yachaynin. Chakraykipa allpanta qhaway." : "Orientación de la zona: comprueba también la tierra de tu parcela.",
+    details: qu ? "Astawan yachay" : "Ver datos del agua",
+  };
+}
+
 const UI_STRINGS = {
   es: {
     subtitle: "Guía agrícola por satélite",
