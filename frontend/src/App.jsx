@@ -1,3 +1,4 @@
+import { locateDevice } from "./services/locationService.js";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import Navbar, { CabeceraNavegacion } from "./components/layout/Navbar.jsx";
@@ -295,6 +296,8 @@ export default function App() {
   };
 
   const handleSelectCommunity = (comm) => {
+    gpsAttemptRef.current += 1;
+    setGpsNotice(null);
     setCommunityName(comm.name);
     setDistrictMeta(comm.isDistrict ? { code: comm.code, comuna: comm.comuna } : null);
     setUserPoint({ lat: comm.coords[0], lon: comm.coords[1], source: comm.name, bounds: comm.bounds, district: comm.name });
@@ -318,9 +321,10 @@ export default function App() {
   };
 
   const handlePickMapPoint = async (lat, lon, source = "mapa", accuracy = null) => {
-    gpsAttemptRef.current += 1;
+    const attempt = ++gpsAttemptRef.current;
     setGpsNotice(null);
     const district = await findDistrictAt(lat, lon);
+    if (attempt !== gpsAttemptRef.current) return;
     if (district) {
       const comm = districtToCommunity(district);
       const profile = resolvePeriurbanProfile(district.code);
@@ -356,22 +360,24 @@ export default function App() {
     });
   };
 
-  const handleDetectGps = () => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setActiveView("mapa");
-      pushToast("Elige en el mapa", "Toca tu comunidad para ubicarte", "warning");
-      return;
+  const handleDetectGps = async () => {
+    const attempt = ++gpsAttemptRef.current;
+    setActiveView("mapa");
+    setGpsNotice("Buscando tu ubicación. Permite el acceso si el navegador lo solicita.");
+    try {
+      if (!navigator.geolocation) throw new Error("GPS unavailable");
+      const pos = await locateDevice(navigator.geolocation, {
+        isCurrent: () => attempt === gpsAttemptRef.current,
+        onRetry: () => setGpsNotice("Mejorando la precisión de tu ubicación..."),
+      });
+      if (!pos || attempt !== gpsAttemptRef.current) return;
+      await handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS", pos.coords.accuracy);
+      if (attempt + 1 !== gpsAttemptRef.current) return;
+      setGpsNotice(`Precisión del dispositivo: ±${Math.round(pos.coords.accuracy)} m. Toca el mapa para corregir tu parcela si hace falta.`);
+    } catch (error) {
+      if (attempt !== gpsAttemptRef.current) return;
+      setGpsNotice(error.code === 1 ? "Permite la ubicación en tu navegador o elige tu distrito." : "No pudimos ubicarte. Intenta otra vez o toca tu parcela en el mapa.");
     }
-    setActiveProcess({ label: "Buscando tu GPS...", pct: 35 });
-    navigator.geolocation.getCurrentPosition(
-      (pos) => handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS"),
-      () => {
-        setActiveProcess(null);
-        setActiveView("mapa");
-        pushToast("GPS no disponible", "Toca tu comunidad en el mapa", "warning");
-      },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
-    );
   };
 
   const handleChangeCrop = (id) => {
@@ -587,6 +593,7 @@ export default function App() {
                       {tr(voiceLang, "mapTitle")} · {communityName || currentZone?.name || ""}
                     </h2>
                   </div>
+                  {gpsNotice && <p role="status" className="rounded-2xl border border-[var(--tinta)] bg-[var(--tarjeta)] p-4 font-bold">{gpsNotice}</p>}
                   <CochabambaMap
                     zones={zones}
                     activeZoneId={zoneId}

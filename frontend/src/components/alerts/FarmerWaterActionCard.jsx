@@ -20,7 +20,7 @@ export default function FarmerWaterActionCard({
   const action = decideFarmerWaterAction(bulletin, drainage);
   const text = waterActionText(action, lang);
   const Icon = { IRRIGATE: Droplets, WAIT: Hand, CAUTION: TriangleAlert }[action.code];
-  const tone = { IRRIGATE: "bg-sky-50 border-sky-300", WAIT: "bg-emerald-50 border-emerald-300", CAUTION: "bg-amber-50 border-amber-400" }[action.code];
+  const tone = { IRRIGATE: "bg-sky-100 text-sky-800", WAIT: "bg-emerald-100 text-emerald-800", CAUTION: "bg-amber-100 text-amber-900" }[action.code];
   const audioKey = `water_${bulletin?.zone_id}_${lang}_${action.reason}`;
   const summary = bulletin?.predictions_summary || {};
   const summary14d = bulletin?.predictions_summary_14d || {};
@@ -29,17 +29,23 @@ export default function FarmerWaterActionCard({
   const etcEstimate = Number.isFinite(et0) && Number.isFinite(kc) ? Math.round(et0 * kc * 10) / 10 : null;
   const municipalAlert = bulletin?.municipal_alert;
 
-  return <section aria-label={text.heading} className={`rounded-3xl border-2 p-5 space-y-4 ${tone}`}>
-    <p className="font-bold text-slate-700">{text.heading}{district ? ` · ${district}` : ""}</p>
-    {tip ? <p className="text-sm font-medium text-slate-700 bg-white/70 rounded-xl px-3 py-2 border border-slate-200">{tip}</p> : null}
-    <div className="flex items-center gap-4">
-      <Icon aria-hidden="true" className="w-16 h-16 shrink-0" />
-      <h2 className="text-3xl font-black break-words">{text.title}</h2>
+  const date = bulletin?.fetched_at_utc ? new Date(bulletin.fetched_at_utc) : null;
+  const dateLabel = date && Number.isFinite(date.getTime())
+    ? date.toLocaleString("es-BO", { timeZone: "America/La_Paz", dateStyle: "short", timeStyle: "short" }) : "";
+  return <section aria-label={text.heading} className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--tarjeta)] p-4 sm:p-6 space-y-4 text-[var(--tinta)]">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+      <p className="text-sm font-bold">{text.heading}</p>
+      {district && <p className="text-sm text-slate-600 break-words">{district}</p>}
     </div>
-    <p className="text-lg leading-relaxed">{text.message}</p>
+    {tip ? <p className="text-sm font-medium">{tip}</p> : null}
+    <div className="flex items-center gap-4">
+      <span className={`rounded-xl p-3 shrink-0 ${tone}`}><Icon aria-hidden="true" className="w-10 h-10" /></span>
+      <h2 className={`rounded-full px-3 py-1 text-lg sm:text-xl font-bold leading-snug ${tone}`}>{text.title}</h2>
+    </div>
+    <p className="text-base sm:text-lg leading-relaxed font-medium">{text.message}</p>
     <p className="text-sm text-slate-600">{text.scope}</p>
-    {bulletin?.fetched_at_utc && <p className="text-sm text-slate-600">
-      {lang === "qu" ? "Yachaypa p'unchawnin" : "Fecha del boletín"}: {bulletin.fetched_at_utc}
+    {dateLabel && <p className="text-sm text-slate-500">
+      {lang === "qu" ? "Yachaypa p'unchawnin" : "Fecha del boletín"}: {dateLabel}
     </p>}
     <div className="grid gap-3 sm:grid-cols-2">
       <button type="button" aria-pressed={activeAudioKey === audioKey}
