@@ -14,6 +14,7 @@ import CochabambaMap from "./components/maps/CochabambaMap.jsx";
 import { IlustracionTarpuy } from "./components/illustrations/TarpuyIllustrations.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { BotonGrande } from "./components/ui/TarpuyBaseComponents.jsx";
+import IntroInicio from "./components/IntroInicio.jsx";
 
 
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
@@ -634,6 +635,10 @@ export default function App() {
           activeProcess={activeProcess}
           toasts={toasts}
           onDismissToast={(id) => setToasts((p) => p.filter((x) => x.id !== id))}
+        />
+        <IntroInicio
+          voiceLang={voiceLang}
+          isAppReady={!loading || Boolean(recData || alertBulletin)}
         />
       </div>
       );
