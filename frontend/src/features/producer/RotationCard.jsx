@@ -81,6 +81,7 @@ function EstrellaDorada({ size = 40 }) {
 export default function RotationCard({
   strategy = {},
   index = 1,
+  choiceLabel = null,
   indicators = [],
   onSpeak,
   activeAudioKey,
@@ -105,7 +106,7 @@ export default function RotationCard({
   const tl = strategy.visual_traffic_light || {};
 
   /* Etiqueta clara de las 3 estrategias */
-  const etiquetaEstrategia = isBase
+  const etiquetaEstrategia = choiceLabel || (isBase
     ? isQu
       ? "Ñawpaqman jina (Como siempre se hizo)"
       : "Como siempre se hizo"
@@ -115,7 +116,7 @@ export default function RotationCard({
       : "La mejor para ti"
     : isQu
     ? "Wakin allin tarpuy (Otra buena opción)"
-    : "Otra buena opción";
+    : "Otra buena opción");
 
   const primerCultivo = strategy.crop_sequence?.[0] || {
     crop_id: "maiz_valle",

@@ -1,3 +1,4 @@
+import HorizontalCarousel from "./ui/HorizontalCarousel.jsx";
 import React, { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import PrioritySelectorGrid from "../features/producer/PrioritySelectorGrid.jsx";
@@ -55,12 +56,10 @@ export default function ProducerMode({
   const qu = lang === "qu";
 
   /* Orden: 1. La mejor para ti, 2. Otra buena opción, 3. Como siempre se hizo (baseline) */
-  const ordered = [
-    ...strategies.filter((s) => s.strategy_type !== "current_baseline"),
-    ...strategies.filter((s) => s.strategy_type === "current_baseline"),
-  ];
+  const ordered = [...strategies].sort((a, b) =>
+    (b.priority_alignment_score ?? -1) - (a.priority_alignment_score ?? -1));
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [showComparison, setShowComparison] = useState(true);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     setSelectedIdx(0);
@@ -182,92 +181,34 @@ export default function ProducerMode({
 
   const handleVerMiPlan = () => {
     setShowComparison(true);
-    if (resultadosRef.current) {
-      resultadosRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    requestAnimationFrame(() => resultadosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
   const tabInfo = (s, idx) => {
-    const isBase = s.strategy_type === "current_baseline";
-    if (isBase) {
-      return {
-        etiqueta: qu ? "3. Ñawpaqman jina" : "3. Como siempre se hizo",
-        sub: qu ? "Allpa sayk'uchiq" : "Para comparar con tu práctica actual",
-        bg: "var(--alerta-cuidado-suave)",
-        estrella: false,
-      };
-    }
-    if (idx === 0) {
-      return {
-        etiqueta: qu ? "1. Aswan allin qampaq" : "1. La mejor para ti",
-        sub: qu ? "Chakraykipaq akllasqa" : "Opción óptima recomendada",
-        bg: "var(--dorado-suave)",
-        estrella: true,
-      };
-    }
+    const baseline = s.strategy_type === "current_baseline";
+    const score = s.priority_alignment_score;
+    const best = ordered[0]?.priority_alignment_score;
+    const evaluated = Number.isFinite(score) && Number.isFinite(best);
+    const recommended = evaluated && score === best;
+    const lower = evaluated && idx === ordered.length - 1 && score < best && ordered.length > 2;
     return {
-      etiqueta: qu ? "2. Wakin allin tarpuy" : "2. Otra buena opción",
-      sub: qu ? "Iskay ñiqin yanapa" : "Alternativa recomendada",
-      bg: "var(--hoja-suave)",
-      estrella: false,
+      etiqueta: !evaluated ? (qu ? "Tarpuy ñan" : "Opción por evaluar")
+        : recommended ? (qu ? "Aswan allin · Recomendada" : "Recomendada")
+        : lower ? (qu ? "Pisi tupaq · Menor ajuste" : "Menor ajuste a tus prioridades")
+        : (qu ? "Wakin tarpuy · Alternativa" : "Alternativa"),
+      sub: !evaluated ? "Faltan datos para comparar esta opción."
+        : recommended ? "Es la que mejor responde a tus prioridades actuales."
+        : lower ? "Responde menos a tus prioridades que las otras opciones."
+        : "Otra posibilidad para tus condiciones y prioridades.",
+      bg: recommended ? "var(--dorado-suave)" : lower ? "var(--alerta-cuidado-suave)" : "var(--hoja-suave)",
+      estrella: recommended,
+      baseline,
     };
   };
 
   return (
     <div className="space-y-8" data-zona={currentZoneId}>
-      {/* Cabecera de la Pantalla de Siembra */}
-      <div className="tarpuy-card-physical p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <span
-            className="inline-block px-3 py-0.5 rounded-full text-sm font-extrabold uppercase tracking-wider"
-            style={{
-              backgroundColor: "var(--acento-zona-suave)",
-              color: "var(--acento-zona-oscuro)",
-              border: "1.5px solid var(--tinta)",
-            }}
-          >
-            {tr(lang, "rotationSubtitle")} · {zone?.name || currentZoneId}
-          </span>
-          <h2 className="tarpuy-title">{tr(lang, "rotationTitle")}</h2>
-          {chip ? (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full bg-[#7E57C2]/15 text-[#4A148C] border border-[#7E57C2]/40 px-3 py-1 text-xs font-bold">
-                {chip}
-              </span>
-              {tip ? <span className="text-xs text-slate-600 max-w-xl">{tip}</span> : null}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <BotonGrande
-            variante="secundario"
-            ilustracionId="pin_ubicacion"
-            texto={tr(lang, "myGps")}
-            onClick={onDetectGps}
-          />
-          <BotonGrande
-            variante="secundario"
-            ilustracionId="mapa_chacra"
-            texto={tr(lang, "map")}
-            onClick={onOpenMap}
-          />
-          <a
-            href={`/api/poster/${currentZoneId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tarpuy-btn-physical tarpuy-btn-physical--secondary inline-flex items-center justify-center gap-3 px-5 py-3 no-underline"
-          >
-            <span
-              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "var(--tarjeta)" }}
-            >
-              <IlustracionTarpuy id="cartilla_grafico" size={34} />
-            </span>
-            <span className="font-bold">{tr(lang, "posterBtn")}</span>
-          </a>
-        </div>
-      </div>
+      <h2 className="tarpuy-title">{tr(lang, "rotationTitle")}</h2>
 
       {/* 1. LAS 4 PREGUNTAS CONVERSACIONALES + 2. BOTÓN GRANDE "VER MI PLAN" */}
       <PrioritySelectorGrid
@@ -289,7 +230,7 @@ export default function ProducerMode({
       <PatronPantalla tipo="terrazas" />
 
       {/* 3. LOS RESULTADOS (Las 3 estrategias ordenadas) */}
-      <div ref={resultadosRef} className="space-y-6">
+      <div ref={resultadosRef} className="space-y-6" hidden={!showComparison}>
         {isCalculating ? (
           <div className="tarpuy-card-physical p-10 flex flex-col items-center justify-center gap-3 text-center">
             <Loader2 className="w-10 h-10 animate-spin" style={{ color: "var(--hoja-oscura)" }} />
@@ -306,7 +247,7 @@ export default function ProducerMode({
                 <p className="tarpuy-body font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {qu
                     ? "Hukta ñit'iy 12 killa tarpuyta rikunapaq"
-                    : "Toca cualquiera de las 3 tarjetas para ver su calendario de 12 meses"}
+                    : "Desliza para comparar y selecciona una opción para ver su plan. El orden depende de tus prioridades."}
                 </p>
               </div>
 
@@ -318,7 +259,7 @@ export default function ProducerMode({
             </div>
 
             {/* Selector visual de las 3 estrategias */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <HorizontalCarousel label="Opciones de siembra" kind="strategy">
               {ordered.map((s, idx) => {
                 const info = tabInfo(s, idx);
                 const activa = selectedIdx === idx;
@@ -330,9 +271,7 @@ export default function ProducerMode({
                     type="button"
                     aria-pressed={activa}
                     onClick={() => setSelectedIdx(idx)}
-                    className={`tarpuy-btn-physical ${
-                      activa ? "tarpuy-btn-physical--pressed" : ""
-                    } p-4 flex flex-col justify-between gap-3 text-left cursor-pointer`}
+                    className={`strategy-choice ${activa ? "strategy-choice--selected" : ""}`}
                     style={{
                       minHeight: "140px",
                       backgroundColor: activa ? info.bg : "var(--tarjeta)",
@@ -347,7 +286,7 @@ export default function ProducerMode({
                           color: "var(--tinta)",
                         }}
                       >
-                        {info.etiqueta}
+                        {idx + 1}. {info.etiqueta}
                       </span>
 
                       {info.estrella && (
@@ -376,7 +315,7 @@ export default function ProducerMode({
                         />
                       </span>
                       <div className="min-w-0">
-                        <p className="font-extrabold text-lg leading-snug line-clamp-2">
+                        <p className="font-extrabold text-lg leading-snug break-words">
                           {s.title_es}
                         </p>
                         <p
@@ -387,14 +326,19 @@ export default function ProducerMode({
                         </p>
                       </div>
                     </div>
+                    <div className="strategy-choice-footer">
+                      <span>{info.baseline ? "Práctica actual" : "Plan propuesto"}</span>
+                      <strong>{activa ? "✓ Seleccionada" : "Ver este plan →"}</strong>
+                    </div>
                   </button>
                 );
               })}
-            </div>
+            </HorizontalCarousel>
 
             {/* Tarjeta completa de la estrategia seleccionada */}
             <RotationCard
               strategy={shownStrategy}
+              choiceLabel={tabInfo(shownStrategy, selectedIdx).etiqueta}
               index={selectedIdx + 1}
               indicators={indicators}
               onSpeak={onSpeak}

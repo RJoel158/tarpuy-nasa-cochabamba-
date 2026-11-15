@@ -20,7 +20,7 @@ export default function FarmerWaterActionCard({
   const action = decideFarmerWaterAction(bulletin, drainage);
   const text = waterActionText(action, lang);
   const Icon = { IRRIGATE: Droplets, WAIT: Hand, CAUTION: TriangleAlert }[action.code];
-  const tone = { IRRIGATE: "bg-sky-100 text-sky-800", WAIT: "bg-emerald-100 text-emerald-800", CAUTION: "bg-amber-100 text-amber-900" }[action.code];
+
   const audioKey = `water_${bulletin?.zone_id}_${lang}_${action.reason}`;
   const summary = bulletin?.predictions_summary || {};
   const summary14d = bulletin?.predictions_summary_14d || {};
@@ -32,28 +32,28 @@ export default function FarmerWaterActionCard({
   const date = bulletin?.fetched_at_utc ? new Date(bulletin.fetched_at_utc) : null;
   const dateLabel = date && Number.isFinite(date.getTime())
     ? date.toLocaleString("es-BO", { timeZone: "America/La_Paz", dateStyle: "short", timeStyle: "short" }) : "";
-  return <section aria-label={text.heading} className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--tarjeta)] p-4 sm:p-6 space-y-4 text-[var(--tinta)]">
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+  return <section aria-label={text.heading} className={`water-advice water-advice--${action.code.toLowerCase()}`}>
+    <div className="water-advice-heading">
       <p className="text-sm font-bold">{text.heading}</p>
       {district && <p className="text-sm text-slate-600 break-words">{district}</p>}
     </div>
     {tip ? <p className="text-sm font-medium">{tip}</p> : null}
-    <div className="flex items-center gap-4">
-      <span className={`rounded-xl p-3 shrink-0 ${tone}`}><Icon aria-hidden="true" className="w-10 h-10" /></span>
-      <h2 className={`rounded-full px-3 py-1 text-lg sm:text-xl font-bold leading-snug ${tone}`}>{text.title}</h2>
+    <div className="water-advice-title">
+      <span className="water-advice-icon"><Icon aria-hidden="true" className="w-10 h-10" /></span>
+      <h2 className="text-2xl font-extrabold">{text.title}</h2>
     </div>
     <p className="text-base sm:text-lg leading-relaxed font-medium">{text.message}</p>
     <p className="text-sm text-slate-600">{text.scope}</p>
-    {dateLabel && <p className="text-sm text-slate-500">
+    {dateLabel && <p className="water-advice-date">
       {lang === "qu" ? "Yachaypa p'unchawnin" : "Fecha del boletín"}: {dateLabel}
     </p>}
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="water-advice-actions">
       <button type="button" aria-pressed={activeAudioKey === audioKey}
         onClick={() => onSpeak(buildWaterActionNarration(action, lang), lang, audioKey)}
-        className="min-h-16 rounded-2xl bg-slate-900 text-white p-3 font-bold flex items-center justify-center gap-2 cursor-pointer transition">
+        className="weather-action weather-action--primary">
         <Volume2 aria-hidden="true" />{tr(lang, activeAudioKey === audioKey ? "stopAudio" : "listenBtn")}
       </button>
-      <button type="button" onClick={onPlant} className="min-h-16 rounded-2xl border border-slate-400 bg-white p-3 font-bold flex items-center justify-center gap-2 cursor-pointer transition">
+      <button type="button" onClick={onPlant} className="weather-action">
         <Sprout aria-hidden="true" />{text.plant}
       </button>
     </div>
@@ -62,10 +62,10 @@ export default function FarmerWaterActionCard({
       <button
         type="button"
         onClick={() => onOpenMunicipalAlert?.(municipalAlert)}
-        className="w-full min-h-12 px-4 py-3 rounded-2xl border-2 border-slate-900 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-sm cursor-pointer transition"
+        className="water-advice-share"
       >
         <Megaphone className="w-5 h-5" />
-        <span>{lang === "qu" ? "Larq'a runakunaman willay (WhatsApp)" : "Avisar al canal / regantes (WhatsApp)"}</span>
+        <span>{lang === "qu" ? "Larq'a runakunaman willay (WhatsApp)" : "Coordinar con regantes"}</span>
       </button>
     )}
 

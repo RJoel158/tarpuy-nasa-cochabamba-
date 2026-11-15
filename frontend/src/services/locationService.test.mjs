@@ -30,3 +30,23 @@ test("waits for an updated precise position and releases the watch",async()=>{
   assert.equal(result.coords.accuracy,20);
   assert.deepEqual(cleared,[42]);
 });
+
+
+test("publishes the first fix immediately and only publishes improvements", async () => {
+  const updates = [];
+  const geo = { watchPosition(ok) {
+    queueMicrotask(() => { ok(position(500)); ok(position(900)); ok(position(130)); ok(position(30)); });
+    return 7;
+  }, clearWatch() {} };
+  const result = await trackBestPosition(geo, { onPosition: p => updates.push(p.coords.accuracy), timeoutMs: 100 });
+  assert.deepEqual(updates, [500, 130, 30]);
+  assert.equal(result.coords.accuracy, 30);
+});
+
+test("returns the best approximate fix at the deadline and releases GPS", async () => {
+  const cleared = [];
+  const geo = { watchPosition(ok) { queueMicrotask(() => ok(position(139))); return 8; }, clearWatch(id) { cleared.push(id); } };
+  const result = await trackBestPosition(geo, { timeoutMs: 15 });
+  assert.equal(result.coords.accuracy, 139);
+  assert.deepEqual(cleared, [8]);
+});

@@ -284,7 +284,7 @@ export function BotonAltavoz({
   ariaLabel = "Escuchar en voz alta",
 }) {
   return (
-    <div className={`relative inline-flex items-center justify-center ${className}`}>
+    <div className={`tarpuy-speaker relative inline-flex items-center justify-center ${className}`}>
       {sonando && (
         <>
           <span

@@ -569,43 +569,9 @@ export default function EarlyWarningBanner({
        *    Conserva toda la información técnica y tarjetas originales sin eliminar nada.
        * =================================================================== */}
       <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <BotonGrande
-            variante="secundario"
-            ilustracionId="lupa"
-            estado={mostrarMasDetalle ? "presionado" : "normal"}
-            texto={
-              mostrarMasDetalle
-                ? isQu
-                  ? "Sut'inchayta pakay"
-                  : "Ocultar más detalle"
-                : isQu
-                ? "Astawan sut'inta qhaway"
-                : "Ver más detalle"
-            }
-            onClick={() => setMostrarMasDetalle((v) => !v)}
-          />
-
-          <div className="flex flex-wrap items-center gap-3">
-            <BotonGrande
-              variante="secundario"
-              ilustracionId="pin_ubicacion"
-              texto={tr(voiceLang, "myGps")}
-              onClick={onDetectGps}
-            />
-            <BotonGrande
-              variante="secundario"
-              ilustracionId="mapa_chacra"
-              texto={tr(voiceLang, "map")}
-              onClick={onOpenMap}
-            />
-            <BotonGrande
-              variante="secundario"
-              ilustracionId="altavoz"
-              texto={tr(voiceLang, "seeAlerts")}
-              onClick={() => setModalOpen(true)}
-            />
-          </div>
+        <div className="weather-quick-actions">
+          <button type="button" className="weather-action" aria-expanded={mostrarMasDetalle} onClick={() => setMostrarMasDetalle(v => !v)}><IlustracionTarpuy id="lupa" size={24} />{isQu ? (mostrarMasDetalle ? "Sut’inchayta pakay" : "Pacha sut’inchay") : (mostrarMasDetalle ? "Ocultar detalle" : "Detalle del clima")}</button>
+          <button type="button" className="weather-action" onClick={onOpenMap}><IlustracionTarpuy id="mapa_chacra" size={24} />{tr(voiceLang, "map")}</button>
         </div>
 
         {mostrarMasDetalle && (

@@ -1,3 +1,4 @@
+import { Volume2, X } from "lucide-react";
 import React from "react";
 import { WeatherIllustration, RainDropsVisual } from "./WeatherPictograms.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
@@ -279,32 +280,9 @@ export default function DayForecastModal({
           </div>
         </div>
 
-        {/* Pie del modal en la zona del pulgar: Escuchar + Cerrar (>= 64 px) */}
-        <div
-          className="px-5 sm:px-6 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] flex flex-wrap items-center justify-between gap-3 shrink-0"
-          style={{
-            backgroundColor: "var(--arena)",
-            borderTop: "1.5px solid var(--tinta)",
-          }}
-        >
-          <div className="sm:hidden flex-1">
-            <BotonAltavoz
-              sonando={false}
-              mostrarTexto={true}
-              etiqueta={tr(lang, "listenBtn")}
-              onClick={() =>
-                onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)
-              }
-              className="w-full justify-center"
-            />
-          </div>
-
-          <BotonGrande
-            variante="primario"
-            texto={tr(lang, "closeBtn")}
-            onClick={onClose}
-            className="flex-1 sm:w-full text-xl justify-center"
-          />
+        <div className="weather-modal-actions">
+          <button type="button" className="weather-action" onClick={() => onSpeak?.(interp.spokenSummary, lang, `day_${day.date}_${lang}`)}><Volume2 size={22} aria-hidden="true" />{tr(lang, "listenBtn")}</button>
+          <button type="button" className="weather-action weather-action--primary" onClick={onClose}><X size={20} aria-hidden="true" />{tr(lang, "closeBtn")}</button>
         </div>
       </div>
     </div>

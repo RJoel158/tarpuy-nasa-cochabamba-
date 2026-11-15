@@ -4,6 +4,27 @@ import {
   getDeviceDbStats,
 } from "./embeddedDb.js";
 
+const RESPONSE_CACHE_KEY = "tarpuy_api_responses_v1";
+function readResponseCache(key) {
+  try { return JSON.parse(localStorage.getItem(RESPONSE_CACHE_KEY) || "{}")[key]?.data || null; } catch { return null; }
+}
+function cacheResponse(key, data) {
+  try {
+    const entries = JSON.parse(localStorage.getItem(RESPONSE_CACHE_KEY) || "{}");
+    delete entries[key];
+    entries[key] = { data, savedAt: new Date().toISOString() };
+    const recent = Object.fromEntries(Object.entries(entries).slice(-24));
+    localStorage.setItem(RESPONSE_CACHE_KEY, JSON.stringify(recent));
+  } catch { /* Storage limits must not interrupt a successful online request. */ }
+}
+async function freshJson(url) {
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+  cacheResponse(url, data);
+  return data;
+}
+
 export function canonicalJsonStringify(obj) {
   if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
   if (Array.isArray(obj)) return `[${obj.map(canonicalJsonStringify).join(",")}]`;
@@ -49,10 +70,11 @@ const FALLBACK_ZONES = [
 export async function fetchZones(forceOffline = false) {
   if (!forceOffline) {
     try {
-      const res = await fetch("/api/zones");
-      if (res.ok) return await res.json();
+      return await freshJson("/api/zones");
     } catch {}
   }
+  const stored = readResponseCache("/api/zones");
+  if (stored) return stored;
   const cachedIds = listCachedZoneIds();
   const cached = cachedIds.map((id) => loadOfflineBundle(id)?.zone_profile).filter(Boolean);
   return cached.length > 0 ? cached : FALLBACK_ZONES;
@@ -61,10 +83,11 @@ export async function fetchZones(forceOffline = false) {
 export async function fetchCrops(forceOffline = false) {
   if (!forceOffline) {
     try {
-      const res = await fetch("/api/crops");
-      if (res.ok) return await res.json();
+      return await freshJson("/api/crops");
     } catch {}
   }
+  const stored = readResponseCache("/api/crops");
+  if (stored) return stored;
   for (const zid of listCachedZoneIds()) {
     const b = loadOfflineBundle(zid);
     if (b?.crops_catalog?.length) return b.crops_catalog;
@@ -82,6 +105,7 @@ export async function fetchCrops(forceOffline = false) {
 }
 
 export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, comuna, drainage } = {}) {
+  const cacheKey = `alerts:${canonicalJsonStringify({ zoneId, districtCode: districtCode || null, comuna: comuna || null, drainage: drainage || null })}`;
   if (!forceOffline) {
     try {
       const params = new URLSearchParams();
@@ -92,24 +116,32 @@ export async function fetchAlerts(zoneId, forceOffline = false, { districtCode, 
         if (dText) params.set("drainage", dText);
       }
       const qs = params.toString();
-      const res = await fetch(`/api/alerts/${zoneId}${qs ? `?${qs}` : ""}`);
-      if (res.ok) return await res.json();
+      const res = await fetch(`/api/alerts/${zoneId}${qs ? `?${qs}` : ""}`, { cache: "no-store" });
+      if (res.ok) { const data = await res.json(); cacheResponse(cacheKey, data); return data; }
     } catch {}
   }
-  return loadOfflineBundle(zoneId)?.realtime_bulletin || null;
+  return readResponseCache(cacheKey) || loadOfflineBundle(zoneId)?.realtime_bulletin || null;
 }
 
 export async function fetchRecommendations(payload, forceOffline = false) {
+  const cacheKey = `recommend:${canonicalJsonStringify(payload)}`;
   if (!forceOffline) {
     try {
       const res = await fetch("/api/recommend", {
         method: "POST",
+        cache: "no-store",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        cacheResponse(cacheKey, data);
+        return data;
+      }
     } catch {}
   }
+  const previous = readResponseCache(cacheKey);
+  if (previous) return { ...previous, data_provenance: { ...previous.data_provenance, etl_status: "offline_cached_recommendation" } };
   const bundle = loadOfflineBundle(payload.zone_id);
   const strats = bundle?.precomputed_recommendations || bundle?.zone_profile?.strategies || [];
   const muni = payload.municipal_context || null;
@@ -140,12 +172,13 @@ export async function fetchRecommendations(payload, forceOffline = false) {
   };
 }
 
-export async function autoSyncZoneSnapshot(zoneId, meta = {}) {
-  const res = await fetch(`/api/offline-bundle/${encodeURIComponent(zoneId)}`);
+export async function autoSyncZoneSnapshot(zoneId, meta = {}, { signal } = {}) {
+  const res = await fetch(`/api/offline-bundle/${encodeURIComponent(zoneId)}`, { cache: "no-store", signal });
   if (!res.ok) throw new Error(`HTTP ${res.status} al sincronizar base local`);
   const bundle = await res.json();
   const verified = await verifyBundleIntegrity(bundle);
   if (!verified) throw new Error("Firma SHA-256 del paquete satelital inválida");
+  if (signal?.aborted) throw new Error("Sincronización cancelada");
   const saved = await saveDeviceSnapshot({ zoneId, ...meta, bundle });
   return {
     success: true,

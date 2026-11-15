@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "../../components/ui/TarpuyBaseComponents.jsx";
@@ -180,6 +180,9 @@ export default function PrioritySelectorGrid({
   lang = "es",
 }) {
   const qu = lang === "qu";
+  const [step, setStep] = useState(0);
+  const headingRef = useRef(null);
+  useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, [step]);
   const cropItems =
     crops.length > 0
       ? crops
@@ -190,15 +193,14 @@ export default function PrioritySelectorGrid({
 
   return (
     <div className="space-y-6">
-      {/* Barra de avance dibujada (la explicación larga vive en la ventana de Mamá Tomasa) */}
-      <div className="tarpuy-card-physical p-5 sm:p-6">
-        <BarraAvanceDibujada qu={qu} />
+      <div className="sowing-progress" ref={headingRef} tabIndex={-1}>
+        <p className="font-bold">{qu ? "Tapuy" : "Paso"} {step + 1} / 4 · {["Cultivo anterior", "Riego", "Herramientas", "Tus prioridades"][step]}</p>
+        <progress value={step + 1} max={4} aria-label="Progreso del plan de siembra" />
       </div>
-
       {/* ===================================================================
        * BLOQUE 1: "¿Qué sembraste antes?" (fondo --hoja-suave y check dibujado)
        * =================================================================== */}
-      <section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
+      {step === 0 && (<section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-xl shrink-0"
@@ -277,12 +279,12 @@ export default function PrioritySelectorGrid({
             );
           })}
         </div>
-      </section>
+      </section>)}
 
       {/* ===================================================================
        * BLOQUE 2: "¿Cómo riegas?" (gravedad, goteo o solo lluvia con --cielo)
        * =================================================================== */}
-      <section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
+      {step === 1 && (<section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-xl shrink-0"
@@ -349,12 +351,12 @@ export default function PrioritySelectorGrid({
             );
           })}
         </div>
-      </section>
+      </section>)}
 
       {/* ===================================================================
        * BLOQUE 3: "¿Con qué trabajas?" (yunta de bueyes o tractor)
        * =================================================================== */}
-      <section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
+      {step === 2 && (<section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-xl shrink-0"
@@ -421,12 +423,12 @@ export default function PrioritySelectorGrid({
             );
           })}
         </div>
-      </section>
+      </section>)}
 
       {/* ===================================================================
        * BLOQUE 4: "¿Qué te importa más?" (4 botones grandes con dibujo)
        * =================================================================== */}
-      <section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
+      {step === 3 && (<section className="tarpuy-card-physical p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-xl shrink-0"
@@ -487,21 +489,11 @@ export default function PrioritySelectorGrid({
           })}
         </div>
 
-        {/* 2. BOTÓN GRANDE "VER MI PLAN" FIJO EN ZONA DEL PULGAR EN MÓVIL (sin tapar a Mamá Tomasa) */}
-        <div className="sticky bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] z-20 lg:static pt-3 pr-20 lg:pr-0">
-          <BotonGrande
-            variante="primario"
-            ilustracionId="brote"
-            texto={qu ? "Tarpuyniyta qhaway" : "Ver mi plan"}
-            onClick={onVerPlan}
-            className="w-full text-xl sm:text-2xl py-3.5 sm:py-4 justify-center"
-          />
-        </div>
-
-        {/* TODO-FUNCIONALIDAD: Si el equipo decide activar un asistente paso a paso
-            (1 pregunta por pantalla con botones "Atrás" y "Siguiente"), conectar el
-            estado de paso activo (1..4) en este contenedor de controles. */}
-      </section>
+      </section>)}
+      <div className="sowing-step-actions">
+        <button type="button" className="weather-action" disabled={step === 0} onClick={() => setStep(s => s - 1)}>{qu ? "Ñawpaq" : "Atrás"}</button>
+        <button type="button" className="weather-action weather-action--primary" onClick={() => step < 3 ? setStep(s => s + 1) : onVerPlan?.()}>{step === 3 ? (qu ? "Tarpuyniyta qhaway" : "Ver mi plan") : (qu ? "Qatiq" : "Siguiente")}</button>
+      </div>
     </div>
   );
 }

@@ -9,9 +9,9 @@ const valid = (position) => {
     && Number.isFinite(c.accuracy) && c.accuracy >= 0;
 };
 
-export async function locateDevice(geolocation, { isCurrent = () => true, onRetry = () => {} } = {}) {
+export async function locateDevice(geolocation, { isCurrent = () => true, onRetry = () => {}, onPosition = () => {} } = {}) {
   if (typeof geolocation.watchPosition === "function") {
-    return trackBestPosition(geolocation, { isCurrent, onRetry });
+    return trackBestPosition(geolocation, { isCurrent, onRetry, onPosition });
   }
   let best = null;
   let failure;
@@ -24,7 +24,7 @@ export async function locateDevice(geolocation, { isCurrent = () => true, onRetr
       const position = await readPosition(geolocation, options);
       if (!isCurrent()) return null;
       if (!valid(position)) throw Object.assign(new Error("Invalid location"), { code: 2 });
-      if (!best || position.coords.accuracy < best.coords.accuracy) best = position;
+      if (!best || position.coords.accuracy < best.coords.accuracy) { best = position; onPosition(best); }
       if (best.coords.accuracy <= 75) return best;
     } catch (error) {
       failure = error;
@@ -37,7 +37,7 @@ export async function locateDevice(geolocation, { isCurrent = () => true, onRetr
 }
 
 // Network fixes can arrive before the more precise fix. Keep listening briefly.
-export function trackBestPosition(geolocation, { isCurrent = () => true, onRetry = () => {}, timeoutMs = 20000 } = {}) {
+export function trackBestPosition(geolocation, { isCurrent = () => true, onRetry = () => {}, onPosition = () => {}, timeoutMs = 8000 } = {}) {
   return new Promise((resolve, reject) => {
     let best=null, watchId, settled=false;
     const finish=(error)=>{
@@ -55,8 +55,8 @@ export function trackBestPosition(geolocation, { isCurrent = () => true, onRetry
       watchId=geolocation.watchPosition(position=>{
         if(!isCurrent()){finish();return;}
         if(!valid(position))return;
-        if(!best || position.coords.accuracy<=best.coords.accuracy)best=position;
-        if(best.coords.accuracy<=50)finish();
+        if(!best || position.coords.accuracy<best.coords.accuracy) { best=position; onPosition(best); }
+        if(best.coords.accuracy<=75)finish();
         else onRetry(best.coords.accuracy);
       },error=>{
         if(error.code===1)finish(error);

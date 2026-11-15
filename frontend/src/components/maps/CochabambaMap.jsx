@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import { LocateFixed, MapPin, Layers } from "lucide-react";
+import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 import {
@@ -54,6 +55,10 @@ export default function CochabambaMap({
   isAdvanced = false,
   onChooseDistrict,
   guided = false,
+  previewOpen = false,
+  onDismissPreview,
+  onNavigate,
+  nextView = "clima",
   onContinue,
   onDistrictResolved,
 }) {
@@ -135,7 +140,7 @@ export default function CochabambaMap({
   useEffect(() => {
     const map = mapRef.current;
     const b = userPoint?.bounds;
-    if (!map || !mapEpoch || !b) return;
+    if (!map || !mapEpoch || !b || userPoint?.source === "GPS") return;
     map.fitBounds([[b.south, b.west], [b.north, b.east]], { padding: [24, 24], maxZoom: 14 });
   }, [userPoint, mapEpoch]);
 
@@ -197,7 +202,7 @@ export default function CochabambaMap({
       map.fitBounds([[-17.53119, -66.280703], [-17.257306, -66.06952]], { padding: [24, 24] });
       map.on("click", (evt) => {
         pickRef.current?.(evt.latlng.lat, evt.latlng.lng, "mapa");
-        if (!guided) queryRef.current?.(evt);
+        if (!guided || [...enabledRef.current].some(id => servicesRef.current.find(s => s.service_id === id)?.id !== "limite_distritos")) queryRef.current?.(evt);
       });
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
@@ -213,8 +218,8 @@ export default function CochabambaMap({
         }
         const pin = L.circleMarker([userPoint.lat, userPoint.lon], {
           radius: 8,
-          fillColor: "#7E57C2",
-          color: "#4A148C",
+          fillColor: "var(--dorado)",
+          color: "var(--tinta)",
           weight: 3,
           fillOpacity: 0.9,
         });
@@ -280,7 +285,7 @@ export default function CochabambaMap({
 
   return (
     <div className={`${guided ? "flow-location-map" : "tarpuy-card-physical"} overflow-hidden flex flex-col`}>
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex flex-wrap items-center justify-between gap-2.5">
+      <div className={`${guided ? "hidden" : "flex"} px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl relative z-20 flex-wrap items-center justify-between gap-2.5`}>
         <div className="flex items-center gap-2 flex-1 min-w-[200px] sm:max-w-xs">
           <MapPin className="w-4 h-4 text-[#0284C7] shrink-0" />
           <CommunitySearchCombobox
@@ -311,8 +316,8 @@ export default function CochabambaMap({
         </div>
       </div>
 
-      <div className="px-4 py-3 border-b border-slate-200 space-y-2">
-        <p className="text-sm font-semibold">Encuentra tu distrito con tu ubicación o elígelo por su número.</p>
+      <div className={`${guided ? "tarpuy-map-district" : "tarpuy-map-sheet"} px-4 py-3 border-b border-slate-200 space-y-2`}>
+        {!guided && <p className="text-sm font-semibold">Encuentra tu distrito con tu ubicación o elígelo por su número.</p>}
         <label className="flex flex-wrap items-center gap-3 text-sm font-semibold">
           {guided ? "Tu distrito" : "Distritos municipales"}
           <select aria-label="Distrito municipal" value={districtCode} onChange={(e) => { focusDistrict(e.target.value); const district = districts.find(d=>d.code === e.target.value); if (district) onChooseDistrict?.(district); }} disabled={!districts.length || !canUseLeaflet}
@@ -323,32 +328,49 @@ export default function CochabambaMap({
         </label>
         {!guided && <p className="text-xs text-slate-600">Límites municipales del GAMC. Elegir un distrito acerca el mapa; las recomendaciones agrícolas siguen referidas a la zona piloto seleccionada.</p>}
         {locationMessage && <p role="status" className={guided && locationMessage.startsWith("Tu ubicación:") ? "sr-only" : "text-sm text-slate-600"}>{locationMessage}</p>}
-        {guided && <button className="flow-primary w-full" disabled={!userPoint} onClick={onContinue}>Ver clima →</button>}
-        {userPoint?.source === "GPS" && Number.isFinite(userPoint.accuracy) && <p className="text-sm text-slate-600" role="status">Precisión del dispositivo: ±{Math.round(userPoint.accuracy)} m.{userPoint.accuracy > 200 ? " Es aproximada. Toca el mapa para corregir tu parcela." : " Puedes ajustar el punto tocando el mapa."}</p>}
+        {guided && geoStatus && <p role="status" className="text-sm font-semibold">{geoStatus}</p>}
+
+        {!guided && !geoStatus && userPoint?.source === "GPS" && Number.isFinite(userPoint.accuracy) && <p className="text-sm text-slate-600" role="status">Precisión del dispositivo: ±{Math.round(userPoint.accuracy)} m.{userPoint.accuracy > 200 ? " Es aproximada. Toca el mapa para corregir tu parcela." : " Puedes ajustar el punto tocando el mapa."}</p>}
 
         {districtLayerError && <p role="status" className="text-sm text-amber-900">No se pudieron cargar los límites distritales. Revisa la conexión y la configuración del servicio GAMC.</p>}
       </div>
-      <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} relative w-full bg-slate-900`}>
+      {guided && userPoint && previewOpen && <section className="tarpuy-map-preview" aria-label="Confirma tu ubicación">
+        <div className="flex items-start justify-between gap-3">
+          <div><h2 className="font-extrabold text-lg">¿Tu parcela está aquí?</h2>
+            <p>{districtCode ? districts.find(d => d.code === districtCode)?.name : "Punto seleccionado"}</p>
+          </div>
+          <button type="button" onClick={onDismissPreview} aria-label="Cerrar vista previa" className="min-h-11 min-w-11 font-bold">×</button>
+        </div>
+        <p className="text-sm">{userPoint.source === "GPS" ? `Ubicación aproximada, ±${Math.round(userPoint.accuracy || 0)} m.` : userPoint.bounds ? "Centro aproximado del distrito." : "Punto elegido en el mapa."} Toca el mapa para ajustar.</p>
+        <button type="button" className="flow-primary w-full" onClick={onContinue}>Confirmar y ver {nextView === "siembra" ? "qué sembrar" : "clima"} →</button>
+      </section>}
+      {guided && <nav className="tarpuy-map-bottom-nav" aria-label="Navegación principal">
+        {[{ id: "clima", label: "Clima", icon: "sol" }, { id: "siembra", label: "Qué sembrar", icon: "mano_siembra" }, { id: "mapa", label: "Mapa", icon: "mapa_chacra" }].map(item =>
+          <button type="button" key={item.id} aria-current={item.id === "mapa" ? "page" : undefined} onClick={() => onNavigate?.(item.id)}>
+            <IlustracionTarpuy id={item.icon} size={28} />{item.label}
+          </button>)}
+      </nav>}
+      <div className={`${tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"} tarpuy-map-canvas relative w-full bg-slate-900`}>
         {canUseLeaflet ? (
           <>
             <div ref={containerRef} className="w-full h-full z-10" />
-            {gamcServices.length > 0 ? (
+            {!guided && gamcServices.length > 0 ? (
               <p className="absolute bottom-2 left-2 z-20 max-w-[60%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
                 Haz clic sobre el mapa para consultar atributos · GetFeatureInfo
               </p>
             ) : null}
-            {!guided && gamcServices.length > 0 ? (
-              <details className="absolute top-3 right-3 z-20 w-56 max-w-[calc(100%-1.5rem)] max-h-[80%] overflow-auto rounded-lg border border-slate-200 bg-white/95 shadow-md p-3 text-left">
-                <summary className="text-xs font-bold text-[var(--cielo-oscuro)] cursor-pointer">Capas del mapa</summary>
-                <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2">{gamcTheme}</p>
+            {gamcServices.length > 0 ? (
+              <details className="tarpuy-map-layers">
+                <summary><Layers size={20} aria-hidden="true" /> Capas del mapa</summary>
+
                 <div className="mt-2 space-y-2">
                   {gamcServices.map((svc) => {
                     const on = enabledIds.has(svc.service_id);
                     return (
-                      <label key={svc.service_id} className="flex items-start gap-2 cursor-pointer">
+                      <label key={svc.service_id} className="flex items-center gap-3 min-h-12 cursor-pointer">
                         <input
                           type="checkbox"
-                          className="mt-0.5 accent-[var(--cielo-oscuro)]"
+                          className="w-5 h-5 accent-[var(--hoja-oscura)]"
                           checked={on}
                           onChange={() => toggleService(svc.service_id)}
                         />

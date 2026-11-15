@@ -1,3 +1,4 @@
+import MamaTomasaBrand from "../MamaTomasaBrand.jsx";
 import React, { useState } from "react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { EtiquetaLogo, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
@@ -83,6 +84,26 @@ function irDirectoASeccion(onChangeView, id) {
   }
 }
 
+function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }) {
+  const qu = voiceLang === "qu";
+  return <div className="tarpuy-preferences">
+    <label>
+      <span>{qu ? "Simi · Idioma" : "Idioma"}</span>
+      <select value={voiceLang} onChange={(e) => onChangeVoiceLang?.(e.target.value)}>
+        <option value="es">Castellano</option>
+        <option value="qu">Runasimi (Quechua)</option>
+      </select>
+    </label>
+    <label>
+      <span>{qu ? "Qhaway · Vista" : "Vista"}</span>
+      <select value={appMode} onChange={(e) => onChangeAppMode?.(e.target.value)}>
+        <option value="facil">{qu ? "Llampu (Fácil)" : "Fácil"}</option>
+        <option value="avanzado">{qu ? "Sut'i (Avanzado)" : "Avanzada"}</option>
+      </select>
+    </label>
+  </div>;
+}
+
 export default function Navbar({
   activeView = "clima",
   onChangeView,
@@ -118,7 +139,7 @@ export default function Navbar({
        * ===================================================================== */}
       <aside
         aria-label="Navegación principal"
-        className="hidden lg:flex lg:flex-col lg:w-68 xl:w-72 lg:shrink-0 min-h-screen sticky top-0 max-h-screen justify-between p-5 select-none overflow-y-auto"
+        className="tarpuy-sidebar hidden lg:flex lg:flex-col lg:w-68 xl:w-72 lg:shrink-0 sticky top-0 justify-between p-5 select-none"
         style={{
           backgroundColor: "var(--tinta)",
           color: "var(--tarjeta)",
@@ -130,52 +151,8 @@ export default function Navbar({
             className="space-y-3.5 pb-4"
             style={{ borderBottom: "1px solid var(--tinta-suave)" }}
           >
-            <EtiquetaLogo className="w-full justify-center">
-              <img
-                src="/logos/nasa-space-apps.png"
-                alt="NASA International Space Apps Challenge"
-                className="h-10 w-auto object-contain"
-              />
-              <span
-                className="h-7 w-px"
-                style={{ backgroundColor: "var(--piedra)" }}
-                aria-hidden="true"
-              />
-              <img
-                src="/logos/alcaldia-cochabamba-escudo.jpg"
-                alt="Alcaldía de Cochabamba"
-                className="h-10 w-auto object-contain"
-              />
-            </EtiquetaLogo>
+            <MamaTomasaBrand />
 
-            {/* Título + solo una casita para volver al inicio */}
-            <div className="flex items-center justify-between gap-2 px-1 pt-1">
-              <div>
-                <h1
-                  className="font-bold tracking-tight leading-tight"
-                  style={{ color: "var(--tarjeta)", fontSize: "1.25rem" }}
-                >
-                  Tarpuy Cochabamba
-                </h1>
-                <p className="text-sm font-normal" style={{ color: "var(--arena)" }}>
-                  {tr(voiceLang, "subtitle")}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => irDirectoASeccion(onChangeView, "clima")}
-                aria-label={esQuechua ? "Qallariyman kutiy" : "Ir al inicio"}
-                title={esQuechua ? "Qallariyman kutiy" : "Ir al inicio"}
-                className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 cursor-pointer transition-transform active:translate-y-0.5"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "2px solid var(--piedra)",
-                }}
-              >
-                <IlustracionTarpuy id="casa" size={34} />
-              </button>
-            </div>
           </div>
 
           {/* Las pestañas grandes: Dibujo + UNA palabra completa, sin botones interiores ni cortes */}
@@ -225,9 +202,11 @@ export default function Navbar({
 
         {/* Botón grande de Altavoz al pie de la barra lateral */}
         <div
-          className="pt-4 mt-4 flex flex-col items-center"
+          className="tarpuy-sidebar-audio pt-4 mt-4 flex flex-col items-center"
           style={{ borderTop: "1px solid var(--tinta-suave)" }}
         >
+          <Preferencias voiceLang={voiceLang} onChangeVoiceLang={onChangeVoiceLang}
+            appMode={appMode} onChangeAppMode={onChangeAppMode} />
           <BotonAltavoz
             sonando={isSpeaking}
             mostrarTexto={true}
@@ -332,23 +311,7 @@ export function CabeceraNavegacion({
     >
       {/* FILA 1 EN MÓVIL: Los 2 logos juntos en su etiqueta crema + Comunidad actual + Estado sin internet */}
       <div className="lg:hidden flex flex-wrap items-center justify-between gap-2.5">
-        <EtiquetaLogo className="py-1.5 px-3">
-          <img
-            src="/logos/nasa-space-apps.png"
-            alt="NASA International Space Apps Challenge"
-            className="h-7 sm:h-8 w-auto object-contain"
-          />
-          <span
-            className="h-5 w-px"
-            style={{ backgroundColor: "var(--piedra)" }}
-            aria-hidden="true"
-          />
-          <img
-            src="/logos/alcaldia-cochabamba-escudo.jpg"
-            alt="Alcaldía de Cochabamba"
-            className="h-7 sm:h-8 w-auto object-contain"
-          />
-        </EtiquetaLogo>
+        <MamaTomasaBrand compact />
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Comunidad actual (toca para cambiar o usar GPS) */}
@@ -368,127 +331,13 @@ export function CabeceraNavegacion({
           </button>
 
           {/* Estado sin internet */}
-          <button
-            type="button"
-            onClick={() => setMostrarPanelOffline((v) => !v)}
-            className="min-h-[56px] px-3 py-1.5 rounded-2xl inline-flex items-center gap-1.5 cursor-pointer"
-            style={{
-              backgroundColor: "var(--cielo-suave)",
-              color: "var(--tinta)",
-              border: "1.5px solid var(--tinta)",
-            }}
-            title="Estado de conexión y copia local"
-          >
-            <IlustracionTarpuy id="antena_ondas" size={22} />
-            <span className="text-sm font-bold leading-tight">
-              {onlineActive
-                ? esQuechua
-                  ? "Waqaychasqa"
-                  : "Guardado"
-                : esQuechua
-                ? "Mana internet"
-                : "Sin internet"}
-            </span>
-          </button>
+          <span role="status" className="sync-indicator">{onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
         </div>
       </div>
 
-      {/* EN MÓVIL: 2 combos limpios (Idioma + Modo) para que no estén los 4 botones juntos */}
-      <div className="lg:hidden grid grid-cols-2 gap-2.5">
-        {/* Combo 1: Idioma (Castellano / Runasimi) */}
-        <label
-          className="relative min-h-[58px] px-3 py-1.5 rounded-2xl flex items-center gap-2 cursor-pointer"
-          style={{
-            backgroundColor: "var(--dorado-suave)",
-            color: "var(--tinta)",
-            border: "2px solid var(--tinta)",
-            boxShadow: "0 2px 0 var(--tinta)",
-          }}
-        >
-          <span className="shrink-0 pointer-events-none">
-            <IlustracionTarpuy id="altavoz" size={22} />
-          </span>
-          <select
-            aria-label={esQuechua ? "Rimay akllay" : "Seleccionar idioma"}
-            value={voiceLang}
-            onChange={(e) => onChangeVoiceLang?.(e.target.value)}
-            className="w-full bg-transparent font-bold pr-5 py-1 appearance-none cursor-pointer focus:outline-none"
-            style={{
-              color: "var(--tinta)",
-              fontSize: "clamp(0.95rem, 3.8vw, 1.05rem)",
-            }}
-          >
-            <option value="es">Castellano</option>
-            <option value="qu">Runasimi</option>
-          </select>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            className="absolute right-2.5 pointer-events-none shrink-0"
-          >
-            <path
-              d="M6 9L12 15L18 9"
-              stroke="var(--tinta)"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </label>
-
-        {/* Combo 2: Modo (Modo Fácil / Avanzado) */}
-        <label
-          className="relative min-h-[58px] px-3 py-1.5 rounded-2xl flex items-center gap-2 cursor-pointer"
-          style={{
-            backgroundColor: "var(--hoja-suave)",
-            color: "var(--tinta)",
-            border: "2px solid var(--tinta)",
-            boxShadow: "0 2px 0 var(--tinta)",
-          }}
-        >
-          <span className="shrink-0 pointer-events-none">
-            <IlustracionTarpuy
-              id={appMode === "avanzado" ? "lupa" : "mano_toca"}
-              size={22}
-            />
-          </span>
-          <select
-            aria-label={esQuechua ? "Qhaway akllay" : "Seleccionar modo de pantalla"}
-            value={appMode}
-            onChange={(e) => onChangeAppMode?.(e.target.value)}
-            className="w-full bg-transparent font-bold pr-5 py-1 appearance-none cursor-pointer focus:outline-none"
-            style={{
-              color: "var(--tinta)",
-              fontSize: "clamp(0.95rem, 3.8vw, 1.05rem)",
-            }}
-          >
-            <option value="facil">
-              {esQuechua ? "Llampu (Fácil)" : "Modo Fácil"}
-            </option>
-            <option value="avanzado">
-              {esQuechua ? "Sut'i (Avanzado)" : "Avanzado"}
-            </option>
-          </select>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            className="absolute right-2.5 pointer-events-none shrink-0"
-          >
-            <path
-              d="M6 9L12 15L18 9"
-              stroke="var(--tinta)"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </label>
+      <div className="lg:hidden">
+        <Preferencias voiceLang={voiceLang} onChangeVoiceLang={onChangeVoiceLang}
+          appMode={appMode} onChangeAppMode={onChangeAppMode} />
       </div>
 
       {/* EN ESCRITORIO: Cabecera con Comunidad, GPS, Copia guardada y los 4 botones */}
@@ -535,91 +384,9 @@ export function CabeceraNavegacion({
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMostrarPanelOffline((v) => !v)}
-            className="min-h-[64px] px-4 py-2 rounded-2xl inline-flex items-center gap-2 cursor-pointer transition-all"
-            style={{
-              backgroundColor: "var(--cielo-suave)",
-              color: "var(--tinta)",
-              border: "1.5px solid var(--tinta)",
-            }}
-            title="Estado de conexión y copia local"
-          >
-            <IlustracionTarpuy id="antena_ondas" size={26} />
-            <span className="text-base font-bold">
-              {onlineActive
-                ? esQuechua
-                  ? "Waqaychasqa"
-                  : "Copia guardada"
-                : esQuechua
-                ? "Mana internetwan llamk'achkan"
-                : "Sin internet · activo"}
-            </span>
-          </button>
+          <span role="status" className="sync-indicator">{onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
         </div>
 
-        {/* Fila de botones grandes (>= 64 px, separación 12 px) para Idioma (Castellano/Runasimi) y Modo (Fácil/Avanzado) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            {
-              id: "es",
-              tipo: "idioma",
-              nombre: "Castellano",
-              dibujoId: "altavoz",
-              activo: voiceLang === "es",
-              bgActivo: "var(--dorado-suave)",
-              onClick: () => onChangeVoiceLang?.("es"),
-            },
-            {
-              id: "qu",
-              tipo: "idioma",
-              nombre: "Runasimi",
-              dibujoId: "altavoz",
-              activo: voiceLang === "qu",
-              bgActivo: "var(--dorado-suave)",
-              onClick: () => onChangeVoiceLang?.("qu"),
-            },
-            {
-              id: "facil",
-              tipo: "modo",
-              nombre: esQuechua ? "Llampu (Fácil)" : "Modo Fácil",
-              dibujoId: "mano_toca",
-              activo: appMode === "facil",
-              bgActivo: "var(--hoja-suave)",
-              onClick: () => onChangeAppMode?.("facil"),
-            },
-            {
-              id: "avanzado",
-              tipo: "modo",
-              nombre: esQuechua ? "Sut'i (Avanzado)" : "Avanzado",
-              dibujoId: "lupa",
-              activo: appMode === "avanzado",
-              bgActivo: "var(--hoja-suave)",
-              onClick: () => onChangeAppMode?.("avanzado"),
-            },
-          ].map((btn) => (
-            <button
-              key={`${btn.tipo}_${btn.id}`}
-              type="button"
-              onClick={btn.onClick}
-              aria-pressed={btn.activo}
-              className="min-h-[64px] px-3 py-2 rounded-2xl inline-flex items-center justify-center gap-2 cursor-pointer transition-all text-center"
-              style={{
-                backgroundColor: btn.activo ? btn.bgActivo : "var(--arena)",
-                color: "var(--tinta)",
-                border: btn.activo ? "2px solid var(--tinta)" : "1.5px solid var(--piedra)",
-                boxShadow: btn.activo ? "0 3px 0 var(--tinta)" : "none",
-                fontWeight: 700,
-                fontSize: "clamp(0.95rem, 3.8vw, 1.08rem)",
-              }}
-            >
-              <IlustracionTarpuy id={btn.dibujoId} size={22} />
-              <span className="leading-tight break-words">{btn.nombre}</span>
-              {btn.activo && <CheckSimple size={18} />}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Panel desplegable para buscar otra comunidad o usar GPS cuando se toca el botón de comunidad */}
@@ -670,54 +437,7 @@ export function CabeceraNavegacion({
       )}
 
       {/* Panel desplegable de sincronización sin internet cuando se toca el indicador */}
-      {mostrarPanelOffline && (
-        <div
-          className="rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3"
-          style={{
-            backgroundColor: "var(--cielo-suave)",
-            border: "1.5px solid var(--tinta)",
-          }}
-        >
-          <div className="space-y-0.5">
-            <p className="font-bold text-lg" style={{ color: "var(--tinta)" }}>
-              {esQuechua
-                ? "Mana internet kaptinpas llamk'allanpuni"
-                : "Sin internet: todo sigue funcionando"}
-            </p>
-            <p className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
-              {dbStats?.updatedAt
-                ? `Autoguardado local (${dbStats.sizeKb} KB)`
-                : syncStatus || tr(voiceLang, "autoSaveDefault")}
-            </p>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={onToggleOffline}
-              className="tarpuy-btn-physical tarpuy-btn-physical--secondary flex-1 sm:flex-initial px-4 py-2 text-base font-bold cursor-pointer"
-              style={{ minHeight: "64px" }}
-            >
-              {onlineActive
-                ? esQuechua
-                  ? "Internetwan · Mana internetta qhaway"
-                  : "Probar modo sin internet"
-                : esQuechua
-                ? "Internetman kutiy"
-                : "Volver a conectar"}
-            </button>
-
-            <button
-              type="button"
-              onClick={onDownloadBundle}
-              className="tarpuy-btn-physical tarpuy-btn-physical--secondary flex-1 sm:flex-initial px-4 py-2 text-base font-bold cursor-pointer"
-              style={{ minHeight: "64px" }}
-            >
-              {tr(voiceLang, "refreshCopy")} {dbStats?.sizeKb ? `(${dbStats.sizeKb} KB)` : ""}
-            </button>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

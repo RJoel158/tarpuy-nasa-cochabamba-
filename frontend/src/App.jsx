@@ -1,19 +1,21 @@
+import MamaTomasaBrand from "./components/MamaTomasaBrand.jsx";
 import { locateDevice } from "./services/locationService.js";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LocateFixed } from "lucide-react";
 import Navbar, { CabeceraNavegacion } from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import FarmerWaterActionCard from "./components/alerts/FarmerWaterActionCard.jsx";
 import MunicipalAlertModal from "./components/alerts/MunicipalAlertModal.jsx";
 
-import FarmerOverview from "./features/producer/FarmerOverview.jsx";
+
 import ProducerMode from "./components/ProducerMode.jsx";
 import TechnicalMode from "./components/TechnicalMode.jsx";
 import CochabambaMap from "./components/maps/CochabambaMap.jsx";
+import { IlustracionTarpuy } from "./components/illustrations/TarpuyIllustrations.jsx";
 import InstitutionalBrandBar from "./components/InstitutionalBrandBar.jsx";
 import { BotonGrande } from "./components/ui/TarpuyBaseComponents.jsx";
-import { TarjetaSaberDelDia } from "./components/personality/ElementosContextualesFase1C.jsx";
-import PaginaTemporalFase1 from "./components/ui/PaginaTemporalFase1.jsx";
+
+
 import { FeedbackHost } from "./components/ui/FeedbackSystem.jsx";
 import { ZONE_GEO_CATALOG, findNearestZone, districtToCommunity } from "./utils/geoUtils.js";
 import { fetchDistrictAt, fetchGamcDistricts, fetchDrainageAt, fetchPeriurbanAt } from "./services/gamcClient.js";
@@ -39,6 +41,8 @@ import { tr } from "./utils/quechuaI18n.js";
 export default function App() {
   const initialSnapRef = useRef(loadDeviceSnapshotSync());
   const initialSnap = initialSnapRef.current;
+  const [mapPreviewOpen, setMapPreviewOpen] = useState(false);
+  const [mapNextView, setMapNextView] = useState("clima");
   const [activeView, setActiveView] = useState("clima");
   const [appMode, setAppMode] = useState("facil");
   const isAdvanced = appMode === "avanzado";
@@ -50,7 +54,9 @@ export default function App() {
   const [priorities, setPriorities] = useState(["water_conservation", "nitrogen_fixation", "erosion_control"]);
   const [irrigation, setIrrigation] = useState(initialSnap?.irrigation || "deficit_auxiliary");
   const [equipment, setEquipment] = useState("manual_yunta");
-  const [forceOffline, setForceOffline] = useState(false);
+  const forceOffline = false;
+  const [refreshTick, setRefreshTick] = useState(0);
+  const recommendationRequest = useRef(0);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
   const [alertBulletin, setAlertBulletin] = useState(null);
@@ -82,7 +88,7 @@ export default function App() {
         .catch(() => { if (!cancelled) setPeriurban(null); });
     }
     return () => { cancelled = true; };
-  }, [userPoint, forceOffline, isOnline]);
+  }, [userPoint, forceOffline, isOnline, refreshTick]);
 
   const municipalProfile = resolvePeriurbanProfile(districtMeta?.code);
   const municipalChip = chipLabel(municipalProfile, voiceLang) || userPoint?.district || null;
@@ -90,9 +96,6 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [activeProcess, setActiveProcess] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [showFase1Preview, setShowFase1Preview] = useState(
-    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("vista") === "fase1"
-  );
   const processTimersRef = useRef([]);
   const calcTimerRef = useRef(null);
   const alertBulletinRef = useRef(alertBulletin);
@@ -129,7 +132,7 @@ export default function App() {
   }, [simulateProcess, pushToast]);
 
   useEffect(() => {
-    const onOn = () => setIsOnline(true);
+    const onOn = () => { setIsOnline(true); setRefreshTick(t => t + 1); };
     const onOff = () => setIsOnline(false);
     window.addEventListener("online", onOn);
     window.addEventListener("offline", onOff);
@@ -137,19 +140,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    fetchZones(forceOffline).then((zs) => zs?.length && setZones(zs));
-    fetchCrops(forceOffline).then((cs) => cs?.length && setCrops(cs));
-  }, [forceOffline]);
+    const refresh = () => { if (navigator.onLine && document.visibilityState === "visible") setRefreshTick(t => t + 1); };
+    const timer = setInterval(refresh, 300000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
 
   useEffect(() => {
-    fetchAlerts(zoneId, forceOffline, {
+    fetchZones(!isOnline).then((zs) => zs?.length && setZones(zs));
+    fetchCrops(!isOnline).then((cs) => cs?.length && setCrops(cs));
+  }, [isOnline, refreshTick]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchAlerts(zoneId, !isOnline, {
       districtCode: districtMeta?.code,
       comuna: districtMeta?.comuna,
       drainage,
-    }).then((b) => b && setAlertBulletin(b));
-  }, [zoneId, forceOffline, districtMeta, drainage]);
+    }).then((b) => { if (!cancelled) setAlertBulletin(b); });
+    return () => { cancelled = true; };
+  }, [zoneId, isOnline, refreshTick, districtMeta, drainage]);
 
   const loadRecs = useCallback(async () => {
+    const request = ++recommendationRequest.current;
     setLoading(true);
     try {
       const municipal_context = districtMeta?.code
@@ -173,20 +186,22 @@ export default function App() {
           },
           ...(municipal_context ? { municipal_context } : {}),
         },
-        forceOffline
+        !isOnline
       );
+      if (request !== recommendationRequest.current) return;
       setRecData(data);
       if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
-    } catch {} finally { setLoading(false); }
-  }, [zoneId, cropId, priorities, irrigation, equipment, forceOffline, districtMeta, periurban, drainage]);
+    } catch {} finally { if (request === recommendationRequest.current) setLoading(false); }
+  }, [zoneId, cropId, priorities, irrigation, equipment, isOnline, refreshTick, districtMeta, periurban, drainage]);
 
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     if (!forceOffline && isOnline) {
-      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation })
+      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation }, { signal: controller.signal })
         .then((res) => {
           if (cancelled) return;
           setDbStats(getDeviceDbStats());
@@ -202,8 +217,8 @@ export default function App() {
       setDbStats(stats);
       setSyncStatus(stats.sizeKb > 0 ? `Leído de base local (${stats.sizeKb} KB)` : "Sin copia local aún");
     }
-    return () => { cancelled = true; };
-  }, [zoneId, communityName, cropId, irrigation, forceOffline, isOnline]);
+    return () => { cancelled = true; controller.abort(); };
+  }, [zoneId, communityName, cropId, irrigation, isOnline, refreshTick]);
 
   const currentZone = zones.find((z) => z.zone_id === zoneId) || zones[0];
   const cachedCount = listCachedZoneIds().length;
@@ -296,6 +311,8 @@ export default function App() {
   };
 
   const handleSelectCommunity = (comm) => {
+    setMapPreviewOpen(true);
+    setMapNextView("clima");
     gpsAttemptRef.current += 1;
     setGpsNotice(null);
     setCommunityName(comm.name);
@@ -321,6 +338,7 @@ export default function App() {
   };
 
   const handlePickMapPoint = async (lat, lon, source = "mapa", accuracy = null) => {
+    setMapPreviewOpen(true);
     const attempt = ++gpsAttemptRef.current;
     setGpsNotice(null);
     const district = await findDistrictAt(lat, lon);
@@ -337,7 +355,7 @@ export default function App() {
         source,
         accuracy,
         district: label,
-        bounds: source === "GPS" ? comm.bounds : undefined,
+        bounds: undefined,
       });
       applyZoneChange(profile?.zone_id || comm.zoneId);
       simulateProcess(`Ubicando parcela (${source})...`, 500, () => {
@@ -363,12 +381,21 @@ export default function App() {
   const handleDetectGps = async () => {
     const attempt = ++gpsAttemptRef.current;
     setActiveView("mapa");
+    setMapPreviewOpen(false);
+    setMapNextView("clima");
     setGpsNotice("Buscando tu ubicación. Permite el acceso si el navegador lo solicita.");
     try {
       if (!navigator.geolocation) throw new Error("GPS unavailable");
       const pos = await locateDevice(navigator.geolocation, {
         isCurrent: () => attempt === gpsAttemptRef.current,
-        onRetry: () => setGpsNotice("Mejorando la precisión de tu ubicación..."),
+        onRetry: () => {},
+        onPosition: (pos) => {
+          if (attempt !== gpsAttemptRef.current) return;
+          setMapPreviewOpen(true);
+          setDistrictMeta(null);
+          setUserPoint({ lat: pos.coords.latitude, lon: pos.coords.longitude, source: "GPS", accuracy: pos.coords.accuracy });
+          setGpsNotice(`Ubicación aproximada: ±${Math.round(pos.coords.accuracy)} m. Mejorando precisión…`);
+        },
       });
       if (!pos || attempt !== gpsAttemptRef.current) return;
       await handlePickMapPoint(pos.coords.latitude, pos.coords.longitude, "GPS", pos.coords.accuracy);
@@ -401,13 +428,7 @@ export default function App() {
     triggerAgronomicCalc("Ajustando herramientas...", "Preparación de suelo actualizada");
   };
 
-  const handleToggleOffline = () => {
-    const next = !forceOffline;
-    setForceOffline(next);
-    simulateProcess(next ? "Activando modo sin internet..." : "Reconectando...", 360, () => {
-      pushToast(next ? "Modo sin señal" : "Modo en línea", next ? "Usando datos guardados" : "Conectado al servicio", "info");
-    });
-  };
+  const handleToggleOffline = () => {};
 
   const handleChangeAppMode = (nextMode) => {
     if (nextMode === appMode) return;
@@ -435,12 +456,39 @@ export default function App() {
     );
   };
 
-  if (showFase1Preview) {
-    return <PaginaTemporalFase1 onClosePreview={() => setShowFase1Preview(false)} />;
+
+  if (activeView === "mapa") {
+    return <main className="tarpuy-map-screen" aria-label="Elige tu ubicación">
+      <CochabambaMap
+        guided previewOpen={mapPreviewOpen}
+        onDismissPreview={() => setMapPreviewOpen(false)}
+        onNavigate={(view) => {
+          setMapNextView(view);
+          if (view === "mapa") { setMapPreviewOpen(false); return; }
+          if (userPoint) setMapPreviewOpen(true);
+          else setGpsNotice("Usa Ubícame, elige tu distrito o toca tu parcela para continuar.");
+        }}
+        nextView={mapNextView}
+        activeZoneId={zoneId} onSelectZone={handleSelectZone}
+        selectedCommunityName={communityName} onSelectCommunity={handleSelectCommunity}
+        onChooseDistrict={(district) => handleSelectCommunity(districtToCommunity(district))}
+        userPoint={userPoint} onPickMapPoint={handlePickMapPoint}
+        onDetectGps={handleDetectGps} forceOffline={forceOffline} isOnline={isOnline}
+        onContinue={() => { setActiveProcess(null); setToasts([]); setMapPreviewOpen(false); setActiveView(mapNextView); }}
+        geoStatus={gpsNotice || ""}
+      />
+      <header className="tarpuy-map-brand">
+        <MamaTomasaBrand compact />
+        <div className="tarpuy-map-actions">
+          <button type="button" onClick={() => setActiveView("clima")} className="tarpuy-map-back">← Volver</button>
+          <button type="button" onClick={handleDetectGps} className="flow-primary"><LocateFixed aria-hidden="true" size={22} />Ubícame</button>
+        </div>
+      </header>
+    </main>;
   }
 
   return (
-    <div className="min-h-screen tarpuy-page-surface flex flex-col lg:flex-row">
+    <div className="tarpuy-app-layout min-h-screen tarpuy-page-surface flex flex-col lg:flex-row">
       <Navbar
         activeView={activeView}
         onChangeView={setActiveView}
@@ -465,7 +513,7 @@ export default function App() {
         syncStatus={syncStatus}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col justify-between pb-48 lg:pb-8">
+      <div className="tarpuy-main-content flex-1 min-w-0 flex flex-col justify-between pb-48 lg:pb-8">
           <div>
             <CabeceraNavegacion
               activeView={activeView}
@@ -522,31 +570,6 @@ export default function App() {
                     crop={crops.find((c) => c.crop_id === cropId) || null}
                     onOpenMunicipalAlert={() => setMunicipalModalOpen(true)}
                   />
-                  {/* 4. LA PARCELA + MI CHACRA (Fase 1C) */}
-                  <FarmerOverview
-                    community={communityName}
-                    zone={currentZone}
-                    crop={crops.find((crop) => crop.crop_id === cropId)}
-                    cropId={cropId}
-                    lang={voiceLang}
-                    offline={forceOffline || !isOnline}
-                    saved={dbStats}
-                    onPlant={() => setActiveView("siembra")}
-                    onMap={() => setActiveView("mapa")}
-                    speaking={isSpeaking}
-                    onSave={handleDownloadBundle}
-                    onListen={isSpeaking ? handleStopAudio : handleSpeakGuide}
-                  />
-
-                  <div className="flex justify-end">
-                    <BotonGrande
-                      variante="primario"
-                      ilustracionId="mano_siembra"
-                      texto={`${tr(voiceLang, "seeWhatToPlantIn")} ${communityName || currentZone?.name || ""}`}
-                      onClick={() => setActiveView("siembra")}
-                      className="w-full sm:w-auto"
-                    />
-                  </div>
                 </div>
               ) : activeView === "siembra" ? (
                 <ProducerMode key={zoneId}
@@ -627,15 +650,7 @@ export default function App() {
 
           <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
             <InstitutionalBrandBar variant="footer" />
-            <div className="no-print flex justify-start">
-              <button
-                type="button"
-                onClick={() => setShowFase1Preview(true)}
-                className="tarpuy-btn-physical tarpuy-btn-physical--secondary px-4 py-2 text-sm cursor-pointer"
-              >
-                Ver prueba Fase 1
-              </button>
-            </div>
+
           </footer>
         </div>
         <MunicipalAlertModal open={municipalModalOpen}
