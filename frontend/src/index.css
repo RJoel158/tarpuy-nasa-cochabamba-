@@ -128,7 +128,13 @@
 /* Full-screen district picker: map background, branding above, one bottom sheet. */
 .tarpuy-map-screen { position:fixed; inset:0; isolation:isolate; background:var(--arena); color:var(--tinta); }
 .tarpuy-map-screen .flow-location-map { position:absolute; inset:0; border:0; border-radius:0; }
-.tarpuy-map-screen .tarpuy-map-canvas { position:absolute; inset:0; height:100%; z-index:0; }
+.tarpuy-map-screen .tarpuy-map-canvas,
+.tarpuy-map-canvas--guided {
+  position: absolute !important;
+  inset: 0;
+  height: auto !important;
+  z-index: 0;
+}
 .tarpuy-map-brand { position:absolute; top:max(16px,env(safe-area-inset-top)); left:16px; width:350px; max-width:calc(100% - 32px); z-index:500; padding:16px; border-radius:24px; background:var(--tarjeta); box-shadow:0 4px 20px #231a1426; }
 .tarpuy-map-brand p { color:var(--tinta-suave); font-size:14px; }
 .tarpuy-map-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; }
@@ -208,10 +214,20 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
 }
 .tarpuy-map-layer-chips { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .tarpuy-map-layer-chips::-webkit-scrollbar { display: none; }
-.tarpuy-map-layers-btn {
+.tarpuy-map-fab-stack {
   position: absolute;
   right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 530;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.tarpuy-map-fab-stack--guided {
+  bottom: calc(152px + env(safe-area-inset-bottom));
+}
+.tarpuy-map-layers-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -232,6 +248,7 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
 .tarpuy-map-layers-panel {
   position: absolute;
   right: 12px;
+  bottom: calc(72px + env(safe-area-inset-bottom));
   z-index: 530;
   width: min(260px, calc(100% - 32px));
   max-height: 40dvh;
@@ -246,11 +263,10 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
   flex-direction: column;
   gap: 10px;
 }
+.tarpuy-map-layers-panel--guided {
+  bottom: calc(220px + env(safe-area-inset-bottom));
+}
 .tarpuy-map-locate-btn {
-  position: absolute;
-  right: 12px;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  z-index: 530;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -265,8 +281,12 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
   box-shadow: 0 3px 0 var(--tinta);
   cursor: pointer;
 }
-.flow-location-map .tarpuy-map-locate-btn {
+.tarpuy-map-next-btn {
+  position: absolute;
+  left: 12px;
+  right: 12px;
   bottom: calc(88px + env(safe-area-inset-bottom));
+  z-index: 525;
 }
 .flow-location-map .tarpuy-map-district {
   display: none;

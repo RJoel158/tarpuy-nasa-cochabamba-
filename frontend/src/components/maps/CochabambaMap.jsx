@@ -55,6 +55,10 @@ export default function CochabambaMap({
   isAdvanced = false,
   onChooseDistrict,
   guided = false,
+  previewOpen = false,
+  onDismissPreview,
+  onNavigate,
+  nextView = "clima",
   onContinue,
   onDistrictResolved,
   onBack,
@@ -79,7 +83,6 @@ export default function CochabambaMap({
   const [gamcServices, setGamcServices] = useState([]);
   const [enabledIds, setEnabledIds] = useState(() => new Set());
   const [layersOpen, setLayersOpen] = useState(false);
-  const [chromeBottom, setChromeBottom] = useState(120);
   const enabledRef = useRef(enabledIds);
   const servicesRef = useRef(gamcServices);
   const districtResolvedRef = useRef(onDistrictResolved);
@@ -147,16 +150,17 @@ export default function CochabambaMap({
 
   useEffect(() => {
     const dock = searchDockRef.current;
-    const canvas = dock?.parentElement?.querySelector?.(".tarpuy-map-canvas");
-    if (!dock || !canvas) return undefined;
+    const root = dock?.parentElement;
+    const canvas = root?.querySelector?.(".tarpuy-map-canvas");
+    if (!dock || !root) return undefined;
     const syncChrome = () => {
       const gap = 8;
+      const rootTop = root.getBoundingClientRect().top;
       const offset = Math.max(
         72,
-        Math.ceil(dock.getBoundingClientRect().bottom - canvas.getBoundingClientRect().top + gap)
+        Math.ceil(dock.getBoundingClientRect().bottom - rootTop + gap)
       );
-      setChromeBottom(offset);
-      canvas.style.setProperty("--tarpuy-map-chrome-bottom", `${offset}px`);
+      if (canvas) canvas.style.setProperty("--tarpuy-map-chrome-bottom", `${offset}px`);
     };
     syncChrome();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncChrome) : null;
@@ -165,7 +169,7 @@ export default function CochabambaMap({
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", syncChrome);
-      canvas.style.removeProperty("--tarpuy-map-chrome-bottom");
+      canvas?.style.removeProperty("--tarpuy-map-chrome-bottom");
     };
   }, [guided, layersOpen]);
 
@@ -247,6 +251,9 @@ export default function CochabambaMap({
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
       setMapEpoch((n) => n + 1);
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
     }
 
     const layer = layerRef.current;
@@ -268,7 +275,14 @@ export default function CochabambaMap({
         mapRef.current.setView([userPoint.lat, userPoint.lon], userPoint.accuracy > 1000 ? 13 : 16);
       }
     }
-  }, [canUseLeaflet, userPoint]);
+    const map = mapRef.current;
+    const canvas = containerRef.current?.parentElement;
+    const syncSize = () => map?.invalidateSize({ animate: false });
+    requestAnimationFrame(syncSize);
+    const ro = typeof ResizeObserver !== "undefined" && canvas ? new ResizeObserver(syncSize) : null;
+    ro?.observe(canvas);
+    return () => ro?.disconnect();
+  }, [canUseLeaflet, userPoint, guided]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -447,12 +461,85 @@ export default function CochabambaMap({
         </section>
       )}
 
+      <div
+        className={`${
+          guided ? "tarpuy-map-canvas--guided" : tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"
+        } tarpuy-map-canvas w-full bg-slate-900 ${guided ? "" : "relative"}`}
+      >
+        {canUseLeaflet ? (
+          <div ref={containerRef} className="w-full h-full z-10" />
+        ) : (
+          <div className="w-full h-full relative flex items-center justify-center p-4 select-none">
+            <span className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold">
+              Mapa municipal sin conexión a internet
+            </span>
+          </div>
+        )}
+        {!guided && canUseLeaflet && gamcServices.length > 0 ? (
+          <p className="absolute bottom-2 left-2 z-20 max-w-[55%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
+            Haz clic sobre el mapa para consultar atributos
+          </p>
+        ) : null}
+      </div>
+
+      {canUseLeaflet ? (
+        <div className={`tarpuy-map-fab-stack${guided ? " tarpuy-map-fab-stack--guided" : ""}`}>
+          {gamcServices.length > 0 ? (
+            <button
+              type="button"
+              className="tarpuy-map-layers-btn"
+              aria-expanded={layersOpen}
+              aria-controls="tarpuy-map-layer-panel"
+              onClick={() => setLayersOpen((open) => !open)}
+            >
+              <Layers size={22} aria-hidden="true" />
+              <span>Capas</span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onDetectGps}
+            className="tarpuy-map-locate-btn"
+            aria-label="Ubícame con GPS"
+          >
+            <LocateFixed size={22} aria-hidden="true" />
+            <span>Ubícame</span>
+          </button>
+        </div>
+      ) : null}
+
+      {canUseLeaflet && layersOpen && gamcServices.length > 0 ? (
+        <div
+          id="tarpuy-map-layer-panel"
+          className={`tarpuy-map-layers-panel${guided ? " tarpuy-map-layers-panel--guided" : ""}`}
+          role="region"
+          aria-label="Leyenda de capas"
+        >
+          {gamcServices
+            .filter((svc) => enabledIds.has(svc.service_id))
+            .map((svc) => (
+              <ul key={`legend-${svc.service_id}`} className="space-y-1">
+                <li className="text-xs font-extrabold mb-1">{LAYER_CHIP_LABEL[svc.id] || svc.short_title}</li>
+                {(svc.legend_classes || []).map((cls) => (
+                  <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-[var(--tinta-suave)]">
+                    <span
+                      className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
+                      style={{ background: cls.color }}
+                    />
+                    <span>{cls.label}</span>
+                  </li>
+                ))}
+              </ul>
+            ))}
+        </div>
+      ) : null}
+
       {guided && onContinue && !previewOpen ? (
         <button
           type="button"
           onClick={onContinue}
           disabled={!userPoint}
-          className="flow-primary absolute bottom-[calc(88px+env(safe-area-inset-bottom))] right-4 left-4 sm:left-auto z-[510] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="tarpuy-map-next-btn flow-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           Siguiente: ver clima →
         </button>
@@ -469,7 +556,10 @@ export default function CochabambaMap({
               type="button"
               key={item.id}
               aria-current={item.id === "mapa" ? "page" : undefined}
-              onClick={() => onNavigate?.(item.id)}
+              onClick={() => {
+                if (onNavigate) onNavigate(item.id);
+                else if (item.id !== "mapa") onContinue?.();
+              }}
             >
               <IlustracionTarpuy id={item.icon} size={28} />
               {item.label}
@@ -478,80 +568,6 @@ export default function CochabambaMap({
         </nav>
       ) : null}
 
-      <div
-        className={`${
-          guided ? "h-full" : tall ? "h-80 sm:h-[420px]" : "h-64 sm:h-72"
-        } tarpuy-map-canvas relative w-full bg-slate-900`}
-      >
-        {canUseLeaflet ? (
-          <>
-            <div ref={containerRef} className="w-full h-full z-10" />
-
-            {gamcServices.length > 0 ? (
-              <button
-                type="button"
-                className="tarpuy-map-layers-btn"
-                style={{ top: chromeBottom }}
-                aria-expanded={layersOpen}
-                aria-controls="tarpuy-map-layer-panel"
-                onClick={() => setLayersOpen((open) => !open)}
-              >
-                <Layers size={22} aria-hidden="true" />
-                <span>Capas de mapa</span>
-              </button>
-            ) : null}
-
-            {layersOpen && gamcServices.length > 0 ? (
-              <div
-                id="tarpuy-map-layer-panel"
-                className="tarpuy-map-layers-panel"
-                style={{ top: chromeBottom + 56 }}
-                role="region"
-                aria-label="Leyenda de capas"
-              >
-                {gamcServices
-                  .filter((svc) => enabledIds.has(svc.service_id))
-                  .map((svc) => (
-                    <ul key={`legend-${svc.service_id}`} className="space-y-1">
-                      <li className="text-xs font-extrabold mb-1">{LAYER_CHIP_LABEL[svc.id] || svc.short_title}</li>
-                      {(svc.legend_classes || []).map((cls) => (
-                        <li key={cls.id} className="flex items-center gap-1.5 text-[11px] text-[var(--tinta-suave)]">
-                          <span
-                            className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/10"
-                            style={{ background: cls.color }}
-                          />
-                          <span>{cls.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ))}
-              </div>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={onDetectGps}
-              className="tarpuy-map-locate-btn"
-              aria-label="Ubícame con GPS"
-            >
-              <LocateFixed size={22} aria-hidden="true" />
-              <span>Ubícame</span>
-            </button>
-
-            {!guided && gamcServices.length > 0 ? (
-              <p className="absolute bottom-2 left-2 z-20 max-w-[55%] rounded-md bg-white/90 px-2.5 py-1 text-[10px] text-slate-600 shadow">
-                Haz clic sobre el mapa para consultar atributos
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <div className="w-full h-full relative flex items-center justify-center p-4 select-none">
-            <span className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold">
-              Mapa municipal sin conexión a internet
-            </span>
-          </div>
-        )}
-      </div>
       {geoStatus ? <p className="sr-only">{geoStatus}</p> : null}
     </div>
   );

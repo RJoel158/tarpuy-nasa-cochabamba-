@@ -455,6 +455,7 @@ export default function App() {
         onDetectGps={handleDetectGps} forceOffline={forceOffline} isOnline={isOnline}
         geoStatus={gpsNotice || ""}
         onBack={() => setActiveView("clima")}
+        onNavigate={setActiveView}
       />
     </main>;
   }
