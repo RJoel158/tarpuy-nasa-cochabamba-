@@ -58,3 +58,4 @@ def get_category_botanical_families(
         fam = crops_map[category_or_crop_id].get("botanical_family")
         return {fam} if fam else set()
     return set()
+
