@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useId } from "react";
 import { Search, MapPin, ChevronDown, Check, X } from "lucide-react";
 import { searchDistricts } from "../../utils/geoUtils.js";
-
 import { useGamcDistricts } from "../../services/useGamcDistricts.js";
 
 const REGION_TOKEN_STYLE = {
@@ -35,7 +34,7 @@ export default function CommunitySearchCombobox({
 
   const districts = useGamcDistricts();
   const results = searchDistricts(districts, open ? query : "");
-  const isSidebar = variant === "sidebar";
+  const compact = variant === "light";
 
   useEffect(() => {
     const onOutside = (e) => {
@@ -70,20 +69,30 @@ export default function CommunitySearchCombobox({
     }
   };
 
+  const inputPlaceholder = selectedCommunityName
+    ? compact
+      ? "Cambiar distrito..."
+      : `Cambiar distrito (${selectedCommunityName})...`
+    : placeholder;
+
   return (
-    <div ref={rootRef} className="relative w-full min-w-0">
+    <div ref={rootRef} className={`relative w-full min-w-0 ${compact ? "tarpuy-district-search--compact" : ""}`}>
       <div
-        className="flex items-center gap-2.5 px-4 py-2.5 transition"
+        className={`flex items-center transition ${compact ? "gap-1.5 px-2.5 py-1.5" : "gap-2.5 px-4 py-2.5"}`}
         style={{
-          minHeight: "var(--size-btn-min-h)",
-          backgroundColor: isSidebar ? "var(--tarjeta)" : "var(--tarjeta)",
+          minHeight: compact ? "44px" : "var(--size-btn-min-h)",
+          backgroundColor: "var(--tarjeta)",
           color: "var(--tinta)",
-          border: "var(--border-width-thick) solid var(--tinta)",
+          border: compact ? "1.5px solid var(--tinta)" : "var(--border-width-thick) solid var(--tinta)",
           borderRadius: "var(--radius-btn)",
-          boxShadow: "0 3px 0 var(--tinta)",
+          boxShadow: compact ? "0 2px 0 var(--tinta)" : "0 3px 0 var(--tinta)",
         }}
       >
-        <Search className="w-6 h-6 shrink-0" style={{ color: "var(--tinta)" }} aria-hidden="true" />
+        <Search
+          className={`${compact ? "w-4 h-4" : "w-6 h-6"} shrink-0`}
+          style={{ color: "var(--tinta)" }}
+          aria-hidden="true"
+        />
         <input
           ref={inputRef}
           type="text"
@@ -93,7 +102,7 @@ export default function CommunitySearchCombobox({
           aria-autocomplete="list"
           aria-label="Buscar distrito"
           value={open ? query : selectedCommunityName}
-          placeholder={selectedCommunityName ? `Cambiar distrito (${selectedCommunityName})...` : placeholder}
+          placeholder={inputPlaceholder}
           onFocus={() => {
             setOpen(true);
             setQuery("");
@@ -105,10 +114,12 @@ export default function CommunitySearchCombobox({
             setHighlightIdx(0);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full min-w-0 bg-transparent font-extrabold outline-none"
+          className="w-full min-w-0 bg-transparent outline-none truncate"
           style={{
             color: "var(--tinta)",
-            fontSize: "var(--font-size-body-min)",
+            fontWeight: compact ? 700 : 800,
+            fontSize: compact ? "clamp(0.8125rem, 2.8vw, 1rem)" : "var(--font-size-body-min)",
+            lineHeight: 1.25,
           }}
         />
         {open && query ? (
@@ -119,31 +130,31 @@ export default function CommunitySearchCombobox({
               setQuery("");
               inputRef.current?.focus();
             }}
-            className="p-2 rounded-xl cursor-pointer shrink-0"
+            className={`${compact ? "p-1.5" : "p-2"} rounded-xl cursor-pointer shrink-0`}
             style={{
               backgroundColor: "var(--arena)",
               color: "var(--tinta)",
               border: "1.5px solid var(--tinta)",
             }}
           >
-            <X className="w-5 h-5" />
+            <X className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} />
           </button>
         ) : null}
         <button
           type="button"
-          aria-label="Mostrar lista de comunidades"
+          aria-label="Mostrar lista de distritos"
           onClick={() => {
             if (open) setOpen(false);
             else inputRef.current?.focus();
           }}
-          className="p-2 rounded-xl cursor-pointer shrink-0"
+          className={`${compact ? "p-1.5" : "p-2"} rounded-xl cursor-pointer shrink-0`}
           style={{
             backgroundColor: "var(--arena)",
             color: "var(--tinta)",
             border: "1.5px solid var(--tinta)",
           }}
         >
-          <ChevronDown className={`w-5 h-5 transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`${compact ? "w-3.5 h-3.5" : "w-5 h-5"} transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -151,19 +162,24 @@ export default function CommunitySearchCombobox({
         <ul
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full mt-2 max-h-72 overflow-y-auto z-[500] py-2"
+          className={`absolute left-0 right-0 top-full mt-2 overflow-y-auto z-[500] py-1.5 ${
+            compact ? "max-h-[min(50dvh,18rem)]" : "max-h-72 py-2"
+          }`}
           style={{
             backgroundColor: "var(--tarjeta)",
             color: "var(--tinta)",
-            border: "var(--border-width-thick) solid var(--tinta)",
+            border: compact ? "1.5px solid var(--tinta)" : "var(--border-width-thick) solid var(--tinta)",
             borderRadius: "var(--radius-card)",
-            boxShadow: "0 6px 0 var(--tinta)",
+            boxShadow: compact ? "0 4px 0 var(--tinta)" : "0 6px 0 var(--tinta)",
           }}
         >
           {results.length === 0 ? (
             <li
-              className="px-4 py-3 font-bold"
-              style={{ color: "var(--tinta-suave)", fontSize: "var(--font-size-body-min)" }}
+              className="px-3 py-2.5 font-bold"
+              style={{
+                color: "var(--tinta-suave)",
+                fontSize: compact ? "0.875rem" : "var(--font-size-body-min)",
+              }}
             >
               No encontramos «{query}»
             </li>
@@ -177,48 +193,72 @@ export default function CommunitySearchCombobox({
                 bg: "var(--arena)",
                 fg: "var(--tinta)",
               };
+              const title = item.code ? `Distrito ${String(item.code).replace(/^D/i, "")}` : item.name;
+              const subtitle = [item.region, item.alt || item.comuna].filter(Boolean).join(" · ");
               return (
                 <li key={item.id} role="option" aria-selected={selected}>
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => choose(item)}
-                    className="w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition cursor-pointer"
+                    className={`w-full text-left flex items-start gap-2 transition cursor-pointer ${
+                      compact ? "px-2.5 py-2" : "px-4 py-3 items-center justify-between gap-3"
+                    }`}
                     style={{
-                      minHeight: "56px",
+                      minHeight: compact ? "48px" : "56px",
                       backgroundColor: selected
                         ? "var(--dorado-suave)"
                         : highlighted
                         ? "var(--arena)"
                         : "transparent",
                       color: "var(--tinta)",
-                      fontWeight: selected ? 800 : 700,
-                      fontSize: "var(--font-size-body-min)",
                       borderBottom: "1px solid var(--arena)",
                     }}
                   >
-                    <span className="flex items-center gap-2.5 min-w-0">
-                      {selected ? (
-                        <Check className="w-5 h-5 shrink-0" style={{ color: "var(--hoja-oscura)" }} />
-                      ) : (
-                        <MapPin className="w-5 h-5 shrink-0" style={{ color: "var(--ladrillo)" }} />
-                      )}
-                      <span className="truncate">{item.name}</span>
-                    </span>
-                    <span className="flex items-center gap-2 shrink-0">
+                    {selected ? (
+                      <Check
+                        className={`${compact ? "w-4 h-4 mt-0.5" : "w-5 h-5"} shrink-0`}
+                        style={{ color: "var(--hoja-oscura)" }}
+                      />
+                    ) : (
+                      <MapPin
+                        className={`${compact ? "w-4 h-4 mt-0.5" : "w-5 h-5"} shrink-0`}
+                        style={{ color: "var(--ladrillo)" }}
+                      />
+                    )}
+                    <span className="min-w-0 flex-1 flex flex-col gap-0.5">
                       <span
-                        className="px-2.5 py-0.5 rounded-full text-xs font-extrabold"
+                        className="font-extrabold leading-snug break-words"
                         style={{
-                          backgroundColor: regColors.bg,
-                          color: regColors.fg,
-                          border: "1.5px solid var(--tinta)",
+                          fontSize: compact ? "clamp(0.8125rem, 2.7vw, 0.95rem)" : "var(--font-size-body-min)",
                         }}
                       >
-                        {item.region}
+                        {title}
+                        {item.periurbanProfile?.alias ? ` · ${item.periurbanProfile.alias}` : ""}
                       </span>
-                      <span className="text-xs font-bold" style={{ color: "var(--tinta-suave)" }}>
-                        {item.alt}
+                      <span className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-extrabold max-w-full truncate"
+                          style={{
+                            backgroundColor: regColors.bg,
+                            color: regColors.fg,
+                            border: "1px solid var(--tinta)",
+                          }}
+                        >
+                          {item.region}
+                        </span>
+                        {item.alt || item.comuna ? (
+                          <span
+                            className="text-[11px] sm:text-xs font-bold min-w-0 break-words"
+                            style={{ color: "var(--tinta-suave)" }}
+                          >
+                            {item.alt || item.comuna}
+                          </span>
+                        ) : null}
                       </span>
+                      {!compact && subtitle ? (
+                        <span className="sr-only">{subtitle}</span>
+                      ) : null}
                     </span>
                   </button>
                 </li>

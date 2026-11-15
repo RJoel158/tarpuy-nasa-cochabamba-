@@ -1,7 +1,6 @@
-import MamaTomasaBrand from "./components/MamaTomasaBrand.jsx";
 import { locateDevice } from "./services/locationService.js";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight, LocateFixed } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Navbar, { CabeceraNavegacion } from "./components/layout/Navbar.jsx";
 import EarlyWarningBanner from "./components/alerts/EarlyWarningBanner.jsx";
 import FarmerWaterActionCard from "./components/alerts/FarmerWaterActionCard.jsx";
@@ -476,17 +475,8 @@ export default function App() {
         onDetectGps={handleDetectGps} forceOffline={forceOffline} isOnline={isOnline}
         onContinue={() => { setActiveProcess(null); setToasts([]); setMapPreviewOpen(false); setActiveView(mapNextView); }}
         geoStatus={gpsNotice || ""}
+        onBack={() => setActiveView("clima")}
       />
-      <header className="tarpuy-map-brand">
-        <MamaTomasaBrand compact />
-        <div className="mt-2">
-          <InstitutionalBrandBar variant="inline" size="sm" />
-        </div>
-        <div className="tarpuy-map-actions">
-          <button type="button" onClick={() => setActiveView("clima")} className="tarpuy-map-back">← Volver</button>
-          <button type="button" onClick={handleDetectGps} className="flow-primary"><LocateFixed aria-hidden="true" size={22} />Ubícame</button>
-        </div>
-      </header>
     </main>;
   }
 
