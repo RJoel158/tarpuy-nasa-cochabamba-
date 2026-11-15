@@ -183,6 +183,10 @@ def create_app(
                     override = {**cached[1], "weather_refresh_error": True}
                 else:
                     override = {**alert_evaluator._load_telemetry(), "weather_refresh_error": True}
+                with weather_lock:
+                    if len(weather_cache) >= 64:
+                        weather_cache.pop(next(iter(weather_cache)))
+                    weather_cache[key] = (monotonic(), override)
         return alert_evaluator.evaluate_zone(
             valid_id,
             zone,

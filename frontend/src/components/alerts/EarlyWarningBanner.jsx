@@ -151,7 +151,7 @@ export default function EarlyWarningBanner({
   const soilCard = describeSoilCard(cur.soil_moisture_top_pct, voiceLang);
   const rainCard = describeRainCard(pred.total_precip_7d_mm, voiceLang);
   const sunCard = describeSunCard(pred.net_water_balance_7d_mm, voiceLang);
-  const hoyTresTarjetas = weatherTodayCards(days[0], alertPolicy.usable);
+  const hoyTresTarjetas = weatherTodayCards(days[0]);
   const cardTones = {
     unknown: { bg: "var(--arena)", label: "Datos por confirmar" },
     warning: { bg: "var(--alerta-cuidado-suave)", label: "Atención" },
@@ -396,6 +396,15 @@ export default function EarlyWarningBanner({
               >
                 {item.palabra}
               </h4>
+
+              {item.apoyoNumerico && (
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--tinta)" }}
+                >
+                  {item.apoyoNumerico}
+                </span>
+              )}
 
               <span className="text-xs font-extrabold rounded-full border border-current px-3 py-1">{cardTones[item.tone].label}</span>
               <p className="text-base leading-relaxed text-[var(--tinta-suave)]">{item.explicacion}</p>
