@@ -35,60 +35,9 @@ export default function DayForecastModal({
 
   /* Franja dibujada de Mañana, Tarde y Noche usando los mismos datos del día */
   const franjaMomentos = [
-    {
-      id: "manana",
-      momento: esQu ? "1. Tutamanta (Mañana)" : "1. Mañana",
-      dibujoId: tmin <= 2 ? "helada" : "nube_con_sol",
-      palabra:
-        tmin <= 2
-          ? esQu
-            ? "Qasa paqarin"
-            : "Amanece con helada"
-          : tmin <= 6
-          ? esQu
-            ? "Chiri paqarin"
-            : "Amanece frío"
-          : esQu
-          ? "Llanthu paqarin"
-          : "Mañana fresca",
-      apoyoNumerico: `${esQu ? "Mín" : "Mínima"}: ${day.temp_min_c}°C`,
-      bg: tmin <= 2 ? "var(--alerta-critico-suave)" : "var(--dorado-suave)",
-    },
-    {
-      id: "tarde",
-      momento: esQu ? "2. Chawpi p'unchaw (Tarde)" : "2. Tarde",
-      dibujoId: rain >= 3 ? "lluvia" : wind >= 18 ? "viento" : "sol",
-      palabra:
-        rain >= 3
-          ? esQu
-            ? "Para chawpi p'unchaw"
-            : "Lluvia en la tarde"
-          : wind >= 18
-          ? esQu
-            ? "Sinchi wayra"
-            : "Viento fuerte"
-          : tmax >= 23
-          ? esQu
-            ? "Rupha inti"
-            : "Sol y calor"
-          : esQu
-          ? "Q'uñi pacha"
-          : "Tarde templada",
-      apoyoNumerico: `${esQu ? "Máx" : "Máxima"}: ${day.temp_max_c}°C · ${
-        day.wind_kmh ?? "—"
-      } km/h · ET0: ${day.et0_mm ?? "—"} mm`,
-      bg: rain >= 3 ? "var(--cielo-suave)" : "var(--tierra-suave)",
-    },
-    {
-      id: "noche",
-      momento: esQu ? "3. Tuta (Noche)" : "3. Noche",
-      dibujoId: tmin <= 2 ? "helada" : "noche_luna",
-      palabra: dv.nightText,
-      apoyoNumerico: `${tr(lang, "rainLabel")}: ${day.precip_mm} mm (${
-        day.precip_prob_pct ?? 0
-      }%)`,
-      bg: tmin <= 2 ? "var(--alerta-critico-suave)" : "var(--cielo-suave)",
-    },
+    { id: "minima", momento: "Mínima diaria prevista", dibujoId: tmin <= 2 ? "helada" : "termometro_frio", palabra: `${day.temp_min_c ?? "—"} °C`, apoyoNumerico: "No indica la hora de la mínima", bg: "var(--cielo-suave)" },
+    { id: "lluvia", momento: "Lluvia acumulada del día", dibujoId: rain > 0 ? "lluvia" : "nube", palabra: `${day.precip_mm ?? "—"} mm`, apoyoNumerico: `Probabilidad: ${day.precip_prob_pct ?? "—"} %. Sin detalle por hora.`, bg: "var(--cielo-suave)" },
+    { id: "maxima", momento: "Máxima diaria prevista", dibujoId: "termometro_calor", palabra: `${day.temp_max_c ?? "—"} °C`, apoyoNumerico: `Viento máximo previsto: ${day.wind_kmh ?? "—"} km/h`, bg: "var(--tierra-suave)" },
   ];
 
   const alertaBg =
@@ -273,6 +222,7 @@ export default function DayForecastModal({
             </h4>
             <p className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
               {interp.dayText} {interp.nightText} {interp.rainText}
+              {day.forecast_provider && ` Fuente meteorológica: ${day.forecast_provider}. ET0: ${day.et0_provider || "Open-Meteo"}.`}
             </p>
             <p className="pt-1 font-bold text-lg" style={{ color: "var(--tinta)" }}>
               {tr(lang, "doToday")} {interp.adviceText}

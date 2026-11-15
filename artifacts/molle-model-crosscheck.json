@@ -1,0 +1,59 @@
+{
+  "scope": "district reference center, not user parcel; different models via same provider, not independent observations",
+  "requested_point": {
+    "lat": -17.39919,
+    "lon": -66.190703
+  },
+  "results": [
+    {
+      "model": "ecmwf_ifs025",
+      "http_status": 200,
+      "data": {
+        "latitude": -17.5,
+        "longitude": -66.25,
+        "generationtime_ms": 0.036597251892089844,
+        "utc_offset_seconds": -14400,
+        "timezone": "America/La_Paz",
+        "timezone_abbreviation": "GMT-4",
+        "elevation": 2545.0,
+        "daily_units": {
+          "time": "iso8601",
+          "precipitation_sum": "mm"
+        },
+        "daily": {
+          "time": [
+            "2026-11-15"
+          ],
+          "precipitation_sum": [
+            5.8
+          ]
+        }
+      }
+    },
+    {
+      "model": "gfs_seamless",
+      "http_status": 200,
+      "data": {
+        "latitude": -17.396675,
+        "longitude": -66.21094,
+        "generationtime_ms": 0.038743019104003906,
+        "utc_offset_seconds": -14400,
+        "timezone": "America/La_Paz",
+        "timezone_abbreviation": "GMT-4",
+        "elevation": 2545.0,
+        "daily_units": {
+          "time": "iso8601",
+          "precipitation_sum": "mm"
+        },
+        "daily": {
+          "time": [
+            "2026-11-15"
+          ],
+          "precipitation_sum": [
+            11.2
+          ]
+        }
+      }
+    }
+  ]
+}

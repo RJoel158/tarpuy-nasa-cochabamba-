@@ -1,5 +1,6 @@
 // Quechua draft: requires validation with a local speaker before field use.
 export function waterActionText(action, lang = "es") {
+  if (action.presentation) return action.presentation;
   const qu = lang === "qu";
   const messages = {
     frost: ["Noche muy fría: protege brotes; no riegues de madrugada.", "Chiri tuta hamun: mallkikunata p'istuy; ama paqarin yakuchaychu."],
@@ -46,7 +47,7 @@ const UI_STRINGS = {
     autoSaveDefault: "Base local automática",
     next7Days: "Próximos 7 días",
     weatherToday: "Clima hoy",
-    seeAlerts: "Ver avisos",
+    seeAlerts: "Ver riesgos",
     listenBtn: "Escuchar",
     listenQuechua: "Qhichwa",
     doToday: "Qué hacer hoy:",

@@ -50,6 +50,7 @@ class Settings:
             "GAMC_WMS_BASE_URL", "https://serviciosgamc.cochabamba.bo/api/gs/wms"
         )
     )
+    WEATHERAPI_KEY: str = field(default_factory=lambda: os.getenv("WEATHERAPI_KEY", ""))
     GAMC_API_KEY: str = field(default_factory=lambda: os.getenv("GAMC_API_KEY", ""))
 
     @property

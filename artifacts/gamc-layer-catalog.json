@@ -1,0 +1,77 @@
+[
+  {
+    "Name": "areas_de_equipamiento",
+    "Title": "Áreas de Equipamiento",
+    "Abstract": null
+  },
+  {
+    "Name": "areas_verdes",
+    "Title": "Áreas verdes",
+    "Abstract": null
+  },
+  {
+    "Name": "centros_de_salud",
+    "Title": "Centros de Salud",
+    "Abstract": null
+  },
+  {
+    "Name": "cota_2750",
+    "Title": "Cota 2750",
+    "Abstract": null
+  },
+  {
+    "Name": "cuencas_de_influencia",
+    "Title": "Cuencas de Influencia",
+    "Abstract": null
+  },
+  {
+    "Name": "cuencas_principales",
+    "Title": "Cuencas Principales",
+    "Abstract": null
+  },
+  {
+    "Name": "cuencas_uh_8",
+    "Title": "Cuencas UH 8",
+    "Abstract": null
+  },
+  {
+    "Name": "drenaje_e_influencia",
+    "Title": "Drenaje e Influencia",
+    "Abstract": null
+  },
+  {
+    "Name": "emergencias",
+    "Title": "Emergencias",
+    "Abstract": null
+  },
+  {
+    "Name": "limite_cercado",
+    "Title": "Limite Cercado",
+    "Abstract": null
+  },
+  {
+    "Name": "limite_distritos",
+    "Title": "Limite Distritos",
+    "Abstract": null
+  },
+  {
+    "Name": "limite_urbano",
+    "Title": "Limite Urbano",
+    "Abstract": null
+  },
+  {
+    "Name": "periurbanos",
+    "Title": "Periurbanos",
+    "Abstract": null
+  },
+  {
+    "Name": "poblacion_por_mazanas",
+    "Title": "Población por Mazanas",
+    "Abstract": null
+  },
+  {
+    "Name": "unidades_educativas",
+    "Title": "Unidades Educativas",
+    "Abstract": null
+  }
+]

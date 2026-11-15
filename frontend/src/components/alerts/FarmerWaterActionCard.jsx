@@ -21,6 +21,7 @@ export default function FarmerWaterActionCard({
   const text = waterActionText(action, lang);
   const Icon = { IRRIGATE: Droplets, WAIT: Hand, CAUTION: TriangleAlert }[action.code];
 
+  const narrationLang = text.language || lang;
   const audioKey = `water_${bulletin?.zone_id}_${lang}_${action.reason}`;
   const summary = bulletin?.predictions_summary || {};
   const summary14d = bulletin?.predictions_summary_14d || {};
@@ -43,13 +44,16 @@ export default function FarmerWaterActionCard({
       <h2 className="text-2xl font-extrabold">{text.title}</h2>
     </div>
     <p className="text-base sm:text-lg leading-relaxed font-medium">{text.message}</p>
+    {text.instruction && <p className="font-extrabold">{text.instruction}</p>}
     <p className="text-sm text-slate-600">{text.scope}</p>
+    {lang === "qu" && text.language === "es" && <p className="text-sm">Interpretación nueva en castellano; traducción quechua pendiente de validación.</p>}
+    {action.evidence?.length > 0 && <details className="text-sm"><summary className="cursor-pointer font-bold">Por qué esta recomendación</summary><ul className="list-disc pl-5 mt-2">{action.evidence.map(item => <li key={item}>{item}</li>)}</ul></details>}
     {dateLabel && <p className="water-advice-date">
       {lang === "qu" ? "Yachaypa p'unchawnin" : "Fecha del boletín"}: {dateLabel}
     </p>}
     <div className="water-advice-actions">
       <button type="button" aria-pressed={activeAudioKey === audioKey}
-        onClick={() => onSpeak(buildWaterActionNarration(action, lang), lang, audioKey)}
+        onClick={() => onSpeak(buildWaterActionNarration(action, narrationLang), narrationLang, audioKey)}
         className="weather-action weather-action--primary">
         <Volume2 aria-hidden="true" />{tr(lang, activeAudioKey === audioKey ? "stopAudio" : "listenBtn")}
       </button>

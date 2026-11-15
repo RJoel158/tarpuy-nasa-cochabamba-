@@ -1,3 +1,4 @@
+import { lightRainLabel } from "../../services/forecastLabels.js";
 import React from "react";
 import { translateAlertText } from "../../utils/quechuaI18n.js";
 import {
@@ -110,7 +111,7 @@ export function VisualMeter3({ level = 2, tone = "sky", labels = ["Bajo", "Medio
 }
 
 export function RainDropsVisual({ count = 0, text, lang = "es", compact = false }) {
-  const wordsEs = ["Sin lluvia", "Poca lluvia", "Lluvia", "Lluvia fuerte"];
+  const wordsEs = ["Lluvia prevista muy baja", "Poca lluvia", "Lluvia", "Lluvia fuerte"];
   const wordsQu = ["Mana para", "Pisi para", "Para", "Sinchi para"];
   const n = Math.max(0, Math.min(3, count));
   const label = text || (lang === "qu" ? wordsQu[n] : wordsEs[n]);
@@ -173,8 +174,8 @@ export function describeSoilCard(soilPct, lang = "es") {
 export function describeRainCard(rain7d, lang = "es") {
   const r = Number(rain7d ?? 0);
   const qu = lang === "qu";
-  if (r < 5) return { kind: "sun_dry", drops: 0, badge: qu ? "Ch'aki" : "Seco", tone: "amber", level: 1, title: qu ? "Mana anchata paranchu" : "Casi Sin Lluvia", advice: qu ? "Yaku parqoyta wakichiy" : "No confíes solo en lluvia", levels: qu ? ["Ch'aki", "Pisi", "Allin"] : ["Nada", "Regular", "Bastante"] };
-  if (r < 20) return { kind: "rain_good", drops: 2, badge: qu ? "Yanapa" : "Ayuda", tone: "sky", level: 2, title: qu ? "Pisi para jamunqa" : "Lluvia Moderada", advice: qu ? "Chakrata pisi uqhuchanqa" : "Mojará un poco la chacra", levels: qu ? ["Pisi", "Chawpi", "Sinchi"] : ["Poca", "Moderada", "Fuerte"] };
+  if (r < 5) return { kind: "sun_dry", drops: 0, badge: qu ? "Ch'aki" : "Seco", tone: "amber", level: 1, title: qu ? "Mana anchata paranchu" : "Acumulado semanal previsto bajo", advice: qu ? "Yaku parqoyta wakichiy" : "No confíes solo en lluvia", levels: qu ? ["Ch'aki", "Pisi", "Allin"] : ["Nada", "Regular", "Bastante"] };
+  if (r < 20) return { kind: "rain_good", drops: 2, badge: qu ? "Yanapa" : "Ayuda", tone: "sky", level: 2, title: qu ? "Pisi para jamunqa" : "Acumulado semanal previsto intermedio", advice: qu ? "Chakrata pisi uqhuchanqa" : "No indica cuánto lloverá hoy ni cuánto llegará a las raíces", levels: qu ? ["Pisi", "Chawpi", "Sinchi"] : ["Poca", "Moderada", "Fuerte"] };
   return { kind: "rain_good", drops: 3, badge: qu ? "Qhaway" : "Revisar", tone: "emerald", level: 3, title: qu ? "Allin para jamunqa" : "Mayor acumulado de lluvia", advice: qu ? "Allin pacha tarpunapaq" : "Revisa la humedad y el drenaje antes de sembrar", levels: qu ? ["Pisi", "Chawpi", "Allin"] : ["Poca", "Moderada", "Buena"] };
 }
 
@@ -191,9 +192,9 @@ export function describeDayVisual(day, lang = "es") {
   const pr = Number(day?.precip_mm ?? 0);
   const tmin = Number(day?.temp_min_c ?? 10);
   const drops = pr < 0.5 ? 0 : pr < 3 ? 1 : pr < 8 ? 2 : 3;
-  const rainText = qu
-    ? ["Mana para", "Ch'allallay", "Para", "Sinchi para"][drops]
-    : ["Sin lluvia", "Llovizna", "Lluvia", "Aguacero"][drops];
+  const rainText = drops === 0 ? lightRainLabel(day, lang) : qu
+    ? ["Para", "Ch'allallay", "Para", "Sinchi para"][drops]
+    : ["Lluvia poco significativa prevista", "Llovizna prevista", "Lluvia prevista", "Lluvia intensa prevista"][drops];
   const nightText = qu
     ? (tmin <= 2 ? "¡Qasa!" : tmin <= 6 ? "Tuta chiri" : "Q'uñi tuta")
     : (tmin <= 2 ? "¡Helada!" : tmin <= 6 ? "Noche fría" : "Noche templada");
@@ -230,7 +231,7 @@ export function cleanAlertForFarmer(alert, lang = "es") {
         severity: "critical",
         semaforo: "critico",
         badgeText: qu ? "MANCHAY" : "PELIGRO",
-        bannerPill: qu ? "CHAKRAPI MANCHAY" : "PELIGRO EN TU CHACRA",
+        bannerPill: qu ? "CHAKRAPI MANCHAY" : "RIESGO PREVISTO",
         badgeClass: "",
         borderClass: "",
         bgClass: "",
@@ -240,7 +241,7 @@ export function cleanAlertForFarmer(alert, lang = "es") {
         severity: "warning",
         semaforo: "cuidado",
         badgeText: qu ? "QHAWAY" : "CUIDADO",
-        bannerPill: qu ? "CHAKRAPI QHAWAY" : "CUIDADO EN TU CHACRA",
+        bannerPill: qu ? "CHAKRAPI QHAWAY" : "PRECAUCIÓN EN EL PRONÓSTICO",
         badgeClass: "",
         borderClass: "",
         bgClass: "",
@@ -249,10 +250,10 @@ export function cleanAlertForFarmer(alert, lang = "es") {
         severity: "info",
         semaforo: "tranquilo",
         badgeText: qu ? "ALLIN WILLAY" : "BUENA NOTICIA",
-        bannerPill: qu ? "ALLIN PACHA" : "BUEN TIEMPO",
+        bannerPill: qu ? "ALLIN PACHA" : "SIN RIESGO DESTACADO EN EL MODELO",
         badgeClass: "",
         borderClass: "",
         bgClass: "",
       };
-  return { ...style, kind: ALERT_KIND[alert.id] || "stable", cleanTitle: trAlert.title, category: trAlert.category, action: trAlert.action };
+  return { ...style, consequence: lang === "es" ? alert.message_es : null, kind: alert.presentation_kind || ALERT_KIND[alert.id] || "stable", cleanTitle: trAlert.title, category: trAlert.category, action: trAlert.action };
 }

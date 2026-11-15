@@ -1,3 +1,4 @@
+import WeatherSourcesFooter from "./components/WeatherSourcesFooter.jsx";
 import MamaTomasaBrand from "./components/MamaTomasaBrand.jsx";
 import { locateDevice } from "./services/locationService.js";
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -56,6 +57,7 @@ export default function App() {
   const [equipment, setEquipment] = useState("manual_yunta");
   const forceOffline = false;
   const [refreshTick, setRefreshTick] = useState(0);
+  const [weatherTick, setWeatherTick] = useState(0);
   const recommendationRequest = useRef(0);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [recData, setRecData] = useState(null);
@@ -71,10 +73,10 @@ export default function App() {
   const [gpsNotice, setGpsNotice] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeAudioKey, setActiveAudioKey] = useState(null);
-  const [userPoint, setUserPoint] = useState(null);
+  const [userPoint, setUserPoint] = useState(initialSnap?.userPoint || null);
   const [drainage, setDrainage] = useState(null);
   const [periurban, setPeriurban] = useState(null);
-  const [districtMeta, setDistrictMeta] = useState(null);
+  const [districtMeta, setDistrictMeta] = useState(initialSnap?.districtMeta || null);
   useEffect(() => {
     let cancelled = false;
     setDrainage(null);
@@ -147,6 +149,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      if (navigator.onLine && document.visibilityState === "visible") setWeatherTick(t => t + 1);
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     fetchZones(!isOnline).then((zs) => zs?.length && setZones(zs));
     fetchCrops(!isOnline).then((cs) => cs?.length && setCrops(cs));
   }, [isOnline, refreshTick]);
@@ -154,12 +163,13 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     fetchAlerts(zoneId, !isOnline, {
+      lat: userPoint?.lat, lon: userPoint?.lon,
       districtCode: districtMeta?.code,
       comuna: districtMeta?.comuna,
       drainage,
     }).then((b) => { if (!cancelled) setAlertBulletin(b); });
     return () => { cancelled = true; };
-  }, [zoneId, isOnline, refreshTick, districtMeta, drainage]);
+  }, [zoneId, isOnline, refreshTick, weatherTick, districtMeta, drainage, userPoint]);
 
   const loadRecs = useCallback(async () => {
     const request = ++recommendationRequest.current;
@@ -190,9 +200,9 @@ export default function App() {
       );
       if (request !== recommendationRequest.current) return;
       setRecData(data);
-      if (data?.realtime_bulletin) setAlertBulletin(data.realtime_bulletin);
+      // Weather is refreshed independently; zonal recommendations must not overwrite it.
     } catch {} finally { if (request === recommendationRequest.current) setLoading(false); }
-  }, [zoneId, cropId, priorities, irrigation, equipment, isOnline, refreshTick, districtMeta, periurban, drainage]);
+  }, [zoneId, cropId, priorities, irrigation, equipment, isOnline, refreshTick, districtMeta, periurban, drainage, userPoint]);
 
 
   useEffect(() => { loadRecs(); }, [loadRecs]);
@@ -201,7 +211,7 @@ export default function App() {
     let cancelled = false;
     const controller = new AbortController();
     if (!forceOffline && isOnline) {
-      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation }, { signal: controller.signal })
+      autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation, userPoint, districtMeta }, { signal: controller.signal })
         .then((res) => {
           if (cancelled) return;
           setDbStats(getDeviceDbStats());
@@ -218,7 +228,7 @@ export default function App() {
       setSyncStatus(stats.sizeKb > 0 ? `Leído de base local (${stats.sizeKb} KB)` : "Sin copia local aún");
     }
     return () => { cancelled = true; controller.abort(); };
-  }, [zoneId, communityName, cropId, irrigation, isOnline, refreshTick]);
+  }, [zoneId, communityName, cropId, irrigation, isOnline, refreshTick, userPoint, districtMeta]);
 
   const currentZone = zones.find((z) => z.zone_id === zoneId) || zones[0];
   const cachedCount = listCachedZoneIds().length;
@@ -227,7 +237,7 @@ export default function App() {
     setSyncStatus("Actualizando base local...");
     setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 45 });
     try {
-      const res = await autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation });
+      const res = await autoSyncZoneSnapshot(zoneId, { communityName, cropId, irrigation, userPoint, districtMeta });
       setActiveProcess({ label: "Guardando copia única en el dispositivo...", pct: 100 });
       setTimeout(() => setActiveProcess(null), 220);
       setDbStats(getDeviceDbStats());
@@ -649,6 +659,7 @@ export default function App() {
           </div>
 
           <footer className="max-w-5xl mx-auto w-full px-4 sm:px-8 pt-4 space-y-3">
+            <WeatherSourcesFooter bulletin={alertBulletin?.zone_id === zoneId ? alertBulletin : null} />
             <InstitutionalBrandBar variant="footer" />
 
           </footer>

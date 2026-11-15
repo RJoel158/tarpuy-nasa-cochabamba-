@@ -1,0 +1,33 @@
+{
+  "requested_reference": {
+    "lat": -17.39919,
+    "lon": -66.190703,
+    "scope": "district_center_not_user_parcel"
+  },
+  "http_status": 200,
+  "response": {
+    "latitude": -17.398947,
+    "longitude": -66.21988,
+    "generationtime_ms": 0.118255615234375,
+    "utc_offset_seconds": -14400,
+    "timezone": "America/La_Paz",
+    "timezone_abbreviation": "GMT-4",
+    "elevation": 2545.0,
+    "daily_units": {
+      "time": "iso8601",
+      "precipitation_sum": "mm",
+      "precipitation_probability_max": "%"
+    },
+    "daily": {
+      "time": [
+        "2026-11-14"
+      ],
+      "precipitation_sum": [
+        1.0
+      ],
+      "precipitation_probability_max": [
+        65
+      ]
+    }
+  }
+}
