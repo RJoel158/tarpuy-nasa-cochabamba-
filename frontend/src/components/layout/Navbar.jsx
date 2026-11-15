@@ -1,6 +1,6 @@
 import MamaTomasaBrand from "../MamaTomasaBrand.jsx";
 import InstallPwa from "../InstallPwa.jsx";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CommunitySearchCombobox from "../ui/CommunitySearchCombobox.jsx";
 import { BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
 import InstitutionalBrandBar from "../InstitutionalBrandBar.jsx";
@@ -107,6 +107,25 @@ function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }
   </div>;
 }
 
+export function useHasVisitedMap() {
+  const [visited, setVisited] = useState(() => {
+    try {
+      return localStorage.getItem("tarpuy_has_visited_map") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const markVisited = useCallback(() => {
+    try {
+      localStorage.setItem("tarpuy_has_visited_map", "true");
+    } catch {}
+    setVisited(true);
+  }, []);
+
+  return [visited, markVisited];
+}
+
 export function MobileBottomNav({
   activeView = "clima",
   onChangeView,
@@ -115,10 +134,21 @@ export function MobileBottomNav({
   className = "",
   style = {},
   zIndex = "z-40",
+  hasVisitedMap: propVisited,
+  onMarkVisitedMap: propMarkVisited,
 }) {
+  const [internalVisited, internalMarkVisited] = useHasVisitedMap();
+  const visited = propVisited !== undefined ? propVisited : internalVisited;
+  const markVisited = propMarkVisited || internalMarkVisited;
   const esQuechua = voiceLang === "qu";
   const visibleNavItems =
     appMode === "avanzado" ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "datos");
+
+  useEffect(() => {
+    if (activeView === "mapa") {
+      markVisited();
+    }
+  }, [activeView, markVisited]);
 
   return (
     <nav
@@ -135,27 +165,51 @@ export function MobileBottomNav({
       {visibleNavItems.map(({ id, ilustracionId, palabraEs, palabraQu }) => {
         const activa = activeView === id;
         const palabra = esQuechua ? palabraQu : palabraEs;
+        const destacarMapa = id === "mapa" && !visited && activeView !== "mapa";
 
         return (
           <button
             key={id}
             type="button"
-            onClick={() => irDirectoASeccion(onChangeView, id)}
+            onClick={() => {
+              if (id === "mapa") markVisited();
+              irDirectoASeccion(onChangeView, id);
+            }}
             aria-current={activa ? "page" : undefined}
-            className="flex flex-col items-center justify-center gap-1 px-1 py-1.5 cursor-pointer transition-all"
+            className={`flex flex-col items-center justify-center gap-1 px-1 py-1.5 cursor-pointer transition-all relative ${
+              destacarMapa ? "tarpuy-nav-map-highlight" : ""
+            }`}
             style={{
               minHeight: "64px",
-              backgroundColor: activa ? "var(--dorado)" : "transparent",
-              color: activa ? "var(--tinta)" : "var(--tarjeta)",
-              border: activa ? "2px solid var(--tarjeta)" : "2px solid transparent",
+              backgroundColor: activa
+                ? "var(--dorado)"
+                : destacarMapa
+                ? "color-mix(in srgb, var(--dorado) 22%, transparent)"
+                : "transparent",
+              color: activa
+                ? "var(--tinta)"
+                : destacarMapa
+                ? "var(--dorado)"
+                : "var(--tarjeta)",
+              border: activa
+                ? "2px solid var(--tarjeta)"
+                : destacarMapa
+                ? "2px solid var(--dorado)"
+                : "2px solid transparent",
               borderRadius: "var(--radius-btn)",
             }}
           >
+            {destacarMapa && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3" aria-hidden="true">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--dorado)] opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--dorado)] border border-[var(--tinta)]" />
+              </span>
+            )}
             <span className="flex items-center justify-center shrink-0">
               <IlustracionTarpuy id={ilustracionId} size={activa ? 32 : 28} />
             </span>
             <span
-              className={activa ? "font-bold leading-tight" : "font-medium leading-tight"}
+              className={activa || destacarMapa ? "font-bold leading-tight" : "font-medium leading-tight"}
               style={{
                 fontSize: "clamp(0.875rem, 3.6vw, 1.05rem)",
                 whiteSpace: "nowrap",
@@ -193,6 +247,13 @@ export default function Navbar({
   syncStatus = "",
 }) {
   const esQuechua = voiceLang === "qu";
+  const [visited, markVisited] = useHasVisitedMap();
+
+  useEffect(() => {
+    if (activeView === "mapa") {
+      markVisited();
+    }
+  }, [activeView, markVisited]);
 
   /* En Modo Fácil ocultamos la pestaña técnica "Datos"; solo se muestra en Modo Avanzado */
   const visibleNavItems =
@@ -226,25 +287,43 @@ export default function Navbar({
             {visibleNavItems.map(({ id, ilustracionId, palabraEs, palabraQu }) => {
               const activa = activeView === id;
               const palabra = esQuechua ? palabraQu : palabraEs;
+              const destacarMapa = id === "mapa" && !visited && activeView !== "mapa";
 
               return (
                 <button
                   key={id}
                   type="button"
-                  onClick={() => irDirectoASeccion(onChangeView, id)}
+                  onClick={() => {
+                    if (id === "mapa") markVisited();
+                    irDirectoASeccion(onChangeView, id);
+                  }}
                   aria-current={activa ? "page" : undefined}
-                  className="w-full flex items-center gap-4 px-4 py-3 cursor-pointer transition-all"
+                  className={`w-full flex items-center gap-4 px-4 py-3 cursor-pointer transition-all relative ${
+                    destacarMapa ? "tarpuy-nav-map-highlight" : ""
+                  }`}
                   style={{
                     minHeight: activa ? "76px" : "68px",
-                    backgroundColor: activa ? "var(--dorado)" : "var(--tinta-suave)",
-                    color: activa ? "var(--tinta)" : "var(--tarjeta)",
+                    backgroundColor: activa
+                      ? "var(--dorado)"
+                      : destacarMapa
+                      ? "color-mix(in srgb, var(--dorado) 26%, var(--tinta-suave))"
+                      : "var(--tinta-suave)",
+                    color: activa ? "var(--tinta)" : destacarMapa ? "var(--dorado)" : "var(--tarjeta)",
                     border: activa
                       ? "2px solid var(--tarjeta)"
+                      : destacarMapa
+                      ? "2px solid var(--dorado)"
                       : "1px solid transparent",
                     borderRadius: "var(--radius-btn)",
                     boxShadow: activa ? "0 3px 0 var(--tarjeta)" : "none",
                   }}
                 >
+                  {destacarMapa && (
+                    <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5" aria-hidden="true">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--dorado)] opacity-75" />
+                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--dorado)] border-2 border-[var(--tinta)]" />
+                    </span>
+                  )}
                   <span className="flex items-center justify-center shrink-0">
                     <IlustracionTarpuy
                       id={ilustracionId}
@@ -252,7 +331,7 @@ export default function Navbar({
                     />
                   </span>
                   <span
-                    className={activa ? "font-bold" : "font-medium"}
+                    className={activa || destacarMapa ? "font-bold" : "font-medium"}
                     style={{
                       fontSize: activa ? "1.4rem" : "1.25rem",
                       whiteSpace: "nowrap",
@@ -286,6 +365,8 @@ export default function Navbar({
         appMode={appMode}
         voiceLang={voiceLang}
         zIndex="z-40"
+        hasVisitedMap={visited}
+        onMarkVisitedMap={markVisited}
       />
     </>
   );
@@ -354,8 +435,12 @@ export function CabeceraNavegacion({
             </span>
           </button>
 
-          {/* Estado sin internet */}
-          <span role="status" className="sync-indicator">{usingSavedWeather ? "Copia guardada · actualización pendiente" : onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          {/* Estado sin internet (solo cuando aplica) */}
+          {usingSavedWeather ? (
+            <span role="status" className="sync-indicator">Copia guardada · actualización pendiente</span>
+          ) : !onlineActive ? (
+            <span role="status" className="sync-indicator">{`Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          ) : null}
         </div>
       </div>
 
@@ -408,7 +493,11 @@ export function CabeceraNavegacion({
             </button>
           </div>
 
-          <span role="status" className="sync-indicator">{usingSavedWeather ? "Copia guardada · actualización pendiente" : onlineActive ? "Actualización automática" : `Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          {usingSavedWeather ? (
+            <span role="status" className="sync-indicator">Copia guardada · actualización pendiente</span>
+          ) : !onlineActive ? (
+            <span role="status" className="sync-indicator">{`Sin conexión · ${dbStats?.updatedAt ? new Date(dbStats.updatedAt).toLocaleDateString("es-BO") : "sin copia guardada"}`}</span>
+          ) : null}
         </div>
 
       </div>
