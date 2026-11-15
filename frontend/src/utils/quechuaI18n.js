@@ -87,11 +87,11 @@ const UI_STRINGS = {
     calTitle: "Calendario de rotación (12 meses)",
     calTapMonth: "Toca un mes para ver el detalle",
     calProtected: "meses protegidos",
-    calBareWarn: "meses pelados",
+    calBareWarn: "meses en descanso",
     calLegendMain: "Cosecha",
     calLegendCover: "Abono / Forraje",
     calLegendMulch: "Chala / Rastrojo",
-    calLegendBare: "Tierra pelada",
+    calLegendBare: "Descanso de la tierra",
     calMonthRain: "Lluvia media",
   },
   qu: {

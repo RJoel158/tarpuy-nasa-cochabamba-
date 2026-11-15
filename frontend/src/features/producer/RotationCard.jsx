@@ -25,7 +25,7 @@ import { tr } from "../../utils/quechuaI18n.js";
 
 const PLAIN_TITLES = {
   punata_strat_baseline: {
-    es: "Seguir solo con maíz y dejar la tierra pelada",
+    es: "Seguir solo con maíz y dejar la tierra sin cobertura en descanso",
     qu: "Sarallawan tarpuy, allpata q'arata saqispa",
   },
   punata_strat_cover_avena_vicia: {
@@ -49,7 +49,7 @@ const PLAIN_TITLES = {
     qu: "Jawasa, Kinwa, uywa Avenawan muyuy",
   },
   mizque_strat_baseline: {
-    es: "Maíz y Cebolla dejando la tierra pelada al sol",
+    es: "Maíz y Cebolla dejando la tierra en descanso, sin cobertura",
     qu: "Sara, Cebolla ima allpata q'arata saqispa",
   },
   mizque_strat_drought_cover_mulch: {
@@ -223,7 +223,7 @@ export default function RotationCard({
     >
       {/* Cabecera de la estrategia (Corona/Estrella dorada en "La mejor para ti") */}
       <div
-        className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        className="px-5 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4"
         style={{
           backgroundColor: esMejor
             ? "var(--dorado-suave)"
@@ -232,7 +232,7 @@ export default function RotationCard({
             : "var(--hoja-suave)",
         }}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
           {esMejor ? (
             <EstrellaDorada size={50} />
           ) : (
@@ -248,7 +248,7 @@ export default function RotationCard({
             </div>
           )}
 
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <span
               className="inline-block px-3 py-0.5 rounded-full text-sm font-bold"
               style={{
@@ -278,13 +278,13 @@ export default function RotationCard({
         />
       </div>
 
-      <div className="p-6 sm:p-7 space-y-8">
+      <div className="p-5 sm:p-6 space-y-6">
         {/* 3 ÍCONOS SIMPLES: sin bordes gruesos ni cajas dentro de cajas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {tresIconosSimples.map((item) => (
             <div
               key={item.id}
-              className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
+              className="p-4 rounded-3xl flex flex-col items-center text-center gap-2"
               style={{ backgroundColor: "var(--arena)" }}
             >
               <div

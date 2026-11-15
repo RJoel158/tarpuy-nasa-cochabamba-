@@ -66,7 +66,7 @@ def _render_months(indicators: list[dict[str, Any]]) -> str:
             else '<span class="badge badge-green">&#9728; Seguro</span>'
         )
         soil_badge = (
-            '<span class="badge badge-red">&#9888; Suelo Desnudo</span>'
+            '<span class="badge badge-red">&#9888; Descanso de la tierra</span>'
             if m.get("bare_soil_flag")
             else '<span class="badge badge-green">&#127793; Cobertura</span>'
         )

@@ -26,7 +26,7 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
   const explained = new Set();
   const stages = groups.map((group) => {
     const range = group.start === group.end ? `En ${MONTH_FULL[group.start]}` : `De ${MONTH_FULL[group.start]} a ${MONTH_FULL[group.end]}`;
-    const name = group.category === "bare" ? "tierra pelada, sin cobertura"
+    const name = group.category === "bare" ? "descanso de la tierra, sin cobertura"
       : group.category === "idle" ? "descanso o transición"
       : group.cropName.replace(/\s*\/\s*/g, ", o ").replace(/\s*\([^)]*\)/g, "");
     const role = group.role.toLowerCase();

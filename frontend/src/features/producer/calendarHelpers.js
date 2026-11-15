@@ -10,7 +10,7 @@ const SHORT_NAMES = {
   papa_huaycha: { es: "Papa", qu: "Papa" },
   avena_vicia: { es: "Avena", qu: "Avenawan wikawan" },
   mulch_residue: { es: "Chala", qu: "Chhalla" },
-  bare_soil_fallow: { es: "Pelada", qu: "Q'ara" },
+  bare_soil_fallow: { es: "Descanso", qu: "Samay" },
   alfalfa: { es: "Alfalfa", qu: "Alfalfa" },
   haba: { es: "Haba", qu: "Hawas" },
   tarwi: { es: "Tarwi", qu: "Tarwi" },
@@ -71,6 +71,23 @@ export function formatStageRange(startM, endM, lang = "es") {
   return `${s} – ${e} · ${count} ${lang === "qu" ? "killa" : count === 1 ? "mes" : "meses"}`;
 }
 
+/* Cuidados del cultivo mes a mes (no solo regar):
+ * Sembrar → Aporque (solo cultivos principales) → Abonar (solo principales)
+ * → Regar → Cosechar. */
+function faseDelMes(m, matched, esPrincipal) {
+  const pasos = m >= matched.start_month ? m - matched.start_month : m + 12 - matched.start_month;
+  const largo = matched.end_month >= matched.start_month
+    ? matched.end_month - matched.start_month
+    : matched.end_month + 12 - matched.start_month;
+  if (m === matched.start_month) return "sembrar";
+  if (m === matched.end_month) return "cosechar";
+  if (esPrincipal && largo >= 4) {
+    if (pasos === 1) return "aporcar";
+    if (pasos === 2) return "abonar";
+  }
+  return "regar";
+}
+
 export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [], lang = "es") {
   const m = monthIndex + 1;
   const qu = lang === "qu";
@@ -115,16 +132,16 @@ export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [],
       accionVisual = "cubrir";
     } else if (/cobertura|legum|vicia|alfalfa|tarwi|arveja|haba|fijad/.test(txt)) {
       category = "cover";
-      accionVisual = m === matched.start_month ? "sembrar" : m === matched.end_month ? "cosechar" : "regar";
+      accionVisual = faseDelMes(m, matched, false);
     } else {
       category = "main";
-      accionVisual = m === matched.start_month ? "sembrar" : m === matched.end_month ? "cosechar" : "regar";
+      accionVisual = faseDelMes(m, matched, true);
     }
   } else if (ind.bare_soil_flag) {
     category = "bare";
     cropId = "bare_soil_fallow";
-    cropName = qu ? "Q'ara allpa (wayra manchay)" : "Tierra pelada (alerta viento)";
-    shortWord = qu ? "Q'ara" : "Pelada";
+    cropName = qu ? "Allpa samay (wayra manchay)" : "Descanso de la tierra (alerta viento)";
+    shortWord = qu ? "Samay" : "Descanso";
     accionVisual = "suelo_pelado";
   }
 

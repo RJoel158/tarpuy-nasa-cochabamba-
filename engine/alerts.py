@@ -197,7 +197,7 @@ class AgroclimaticAlertEvaluator:
                     "title_es": f"¡Alerta de Helada! ({min_t}°C el {coldest['day_label']})",
                     "title_qu": f"¡Qasa Chayamunqa! ({min_t}°C)",
                     "message_es": f"La madrugada del {coldest['day_label']} bajará a {min_t}°C. Puede quemar brotes de papa o maíz tierno.",
-                    "action_es": "Tapa plantas chicas con paja o rastrojo seco y evita deshierbar dejando tierra pelada.",
+                    "action_es": "Tapa plantas chicas con paja o rastrojo seco y evita deshierbar dejando la tierra en descanso sin cobertura.",
                 })
             elif min_t <= 5.0:
                 alerts.append({
@@ -257,7 +257,7 @@ class AgroclimaticAlertEvaluator:
                 "title_es": f"Aviso de Viento Fuerte ({max_w:.0f} km/h el {windy['day_label']})",
                 "title_qu": "Sinchi Wayra Hamushan",
                 "message_es": f"Las ráfagas del {windy['day_label']} secarán rápido la tierra descubierta y pueden volcar plantas.",
-                "action_es": "No quemes ni dejes el suelo pelado; aplica abonos foliares o riegos por aspersión cuando calme el viento.",
+                "action_es": "No quemes ni dejes la tierra en descanso sin cobertura; aplica abonos foliares o riegos por aspersión cuando calme el viento.",
             })
 
         alerts.sort(key=lambda a: SEV_ORDER.get(a["severity"], 9))
