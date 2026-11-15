@@ -495,17 +495,14 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
         </div>
       </div>
 
-      {/* Inspector del mes seleccionado con letras grandes y dibujos */}
+      {/* Inspector del mes seleccionado con letras grandes y dibujos (sin bordes anidados) */}
       <div
         className="rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4"
-        style={{
-          backgroundColor: "var(--arena)",
-          border: "var(--tarpuy-border-medium) solid var(--tinta)",
-        }}
+        style={{ backgroundColor: "var(--arena)" }}
       >
         <div className="flex items-center gap-3">
           <span
-            className="font-extrabold"
+            className="font-bold"
             style={{
               fontFamily: "var(--tarpuy-font-display)",
               fontSize: "var(--tarpuy-text-subtitle)",
@@ -515,7 +512,7 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
             {active.month_name || MONTH_FULL_NAMES[selectedIdx]}
           </span>
           <span
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-extrabold"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full font-bold"
             style={{
               backgroundColor: active.bare_soil_flag
                 ? "var(--alerta-cuidado-suave)"
@@ -523,8 +520,7 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
               color: active.bare_soil_flag
                 ? "var(--alerta-cuidado-oscuro)"
                 : "var(--hoja-oscura)",
-              border: "var(--tarpuy-border-thin) solid var(--tinta)",
-              fontSize: "1rem",
+              fontSize: "0.95rem",
             }}
           >
             {active.bare_soil_flag ? "⚠️ Suelo Desnudo" : "🌱 Cobertura Activa"}
@@ -537,17 +533,14 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
         >
           <div
             className="px-3.5 py-2.5 rounded-xl flex items-center gap-2.5"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            style={{ backgroundColor: "var(--tarjeta)" }}
           >
             <IlustracionTarpuy id="gota_agua" size={28} />
             <div>
-              <span className="block text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+              <span className="block text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                 Lluvia
               </span>
-              <strong className="font-extrabold" style={{ color: "var(--cielo-oscuro)" }}>
+              <strong className="font-bold" style={{ color: "var(--cielo-oscuro)" }}>
                 {active.precip_mm} mm
               </strong>
             </div>
@@ -555,21 +548,18 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
 
           <div
             className="px-3.5 py-2.5 rounded-xl flex items-center gap-2.5"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            style={{ backgroundColor: "var(--tarjeta)" }}
           >
             <IlustracionTarpuy
               id={active.temp_min_c <= 2 ? "termometro_frio" : "termometro_calor"}
               size={28}
             />
             <div>
-              <span className="block text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+              <span className="block text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                 T. Mínima
               </span>
               <strong
-                className="font-extrabold"
+                className="font-bold"
                 style={{
                   color:
                     active.temp_min_c <= 0
@@ -584,17 +574,14 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
 
           <div
             className="px-3.5 py-2.5 rounded-xl flex items-center gap-2.5"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            style={{ backgroundColor: "var(--tarjeta)" }}
           >
             <IlustracionTarpuy id="tierra_humeda" size={28} />
             <div>
-              <span className="block text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+              <span className="block text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                 SMAP Humedad
               </span>
-              <strong className="font-extrabold" style={{ color: "var(--cielo-oscuro)" }}>
+              <strong className="font-bold" style={{ color: "var(--cielo-oscuro)" }}>
                 {activeSoilPct}%
               </strong>
             </div>
@@ -602,17 +589,14 @@ export default function ClimateChartsPanel({ indicators = [], zoneName = "", lan
 
           <div
             className="px-3.5 py-2.5 rounded-xl flex items-center gap-2.5"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            style={{ backgroundColor: "var(--tarjeta)" }}
           >
             <IlustracionTarpuy id="planta_crecida" size={28} />
             <div>
-              <span className="block text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+              <span className="block text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
                 NDVI Verdor
               </span>
-              <strong className="font-extrabold" style={{ color: "var(--hoja-oscura)" }}>
+              <strong className="font-bold" style={{ color: "var(--hoja-oscura)" }}>
                 {active.ndvi_mean}
               </strong>
             </div>

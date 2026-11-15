@@ -623,11 +623,10 @@ export function PersonajeGuia({
 
       {mostrarEtiquetaNombre && (
         <span
-          className="px-3 py-0.5 text-sm font-extrabold"
+          className="px-2.5 py-0.5 text-sm font-bold"
           style={{
-            backgroundColor: "var(--tarjeta)",
-            color: "var(--tinta)",
-            border: "var(--border-width-medium) solid var(--tinta)",
+            backgroundColor: "var(--arena)",
+            color: "var(--tinta-suave)",
             borderRadius: "var(--radius-pill)",
           }}
         >
@@ -639,9 +638,10 @@ export function PersonajeGuia({
 }
 
 /**
- * 2. GLOBO DE HABLA (Borde grueso, esquinas redondeadas, cola hacia el personaje)
+ * 2. GLOBO DE HABLA (Suave, sin borde grueso ni sombra dura para no competir con botones)
  */
 export function GloboHabla({
+  titulo = null,
   texto,
   children,
   direccionCola = "izquierda", // 'izquierda' | 'derecha' | 'arriba' | 'abajo'
@@ -651,7 +651,7 @@ export function GloboHabla({
 }) {
   const mapaTonos = {
     normal: {
-      bg: "var(--tarjeta)",
+      bg: "var(--arena)",
       fg: "var(--tinta)",
     },
     tranquilo: {
@@ -683,20 +683,16 @@ export function GloboHabla({
       {/* Cola hacia la izquierda (cuando el personaje está a la izquierda) */}
       {direccionCola === "izquierda" && (
         <svg
-          width="20"
-          height="28"
-          viewBox="0 0 20 28"
+          width="16"
+          height="24"
+          viewBox="0 0 16 24"
           className="shrink-0 -mr-1 z-10"
           aria-hidden="true"
         >
           <path
-            d="M20 4L3 14L20 24Z"
+            d="M16 3L2 12L16 21Z"
             fill={estiloTono.bg}
-            stroke="var(--tinta)"
-            strokeWidth="3"
-            strokeLinejoin="round"
           />
-          <path d="M19 6V22" stroke={estiloTono.bg} strokeWidth="4" />
         </svg>
       )}
 
@@ -705,39 +701,33 @@ export function GloboHabla({
         style={{
           backgroundColor: estiloTono.bg,
           color: estiloTono.fg,
-          border: "var(--border-width-thick) solid var(--tinta)",
           borderRadius: "var(--radius-card)",
-          boxShadow: "0 4px 0 var(--tinta)",
         }}
       >
-        {etiquetaSuperior && (
+        {(titulo || etiquetaSuperior) && (
           <span
-            className="block text-sm font-extrabold uppercase tracking-wide mb-1"
-            style={{ color: "var(--tinta-suave)" }}
+            className="block text-base font-bold mb-1"
+            style={{ color: "var(--tinta)" }}
           >
-            {etiquetaSuperior}
+            {titulo || etiquetaSuperior}
           </span>
         )}
-        <p className="tarpuy-body font-bold">{texto || children}</p>
+        <p className="tarpuy-body font-normal">{texto || children}</p>
       </div>
 
       {/* Cola hacia la derecha (cuando el personaje está a la derecha) */}
       {direccionCola === "derecha" && (
         <svg
-          width="20"
-          height="28"
-          viewBox="0 0 20 28"
+          width="16"
+          height="24"
+          viewBox="0 0 16 24"
           className="shrink-0 -ml-1 z-10"
           aria-hidden="true"
         >
           <path
-            d="M0 4L17 14L0 24Z"
+            d="M0 3L14 12L0 21Z"
             fill={estiloTono.bg}
-            stroke="var(--tinta)"
-            strokeWidth="3"
-            strokeLinejoin="round"
           />
-          <path d="M1 6V22" stroke={estiloTono.bg} strokeWidth="4" />
         </svg>
       )}
     </div>
@@ -750,17 +740,20 @@ export function GloboHabla({
 export function GuiaConGlobo({
   pose = "saludo",
   nombre = PROPUESTAS_NOMBRE_PERSONAJE[0].nombre,
+  titulo = null,
   texto,
   tono = "normal",
+  size = 96,
   className = "",
 }) {
   return (
     <div className={`flex flex-col sm:flex-row items-center gap-3 sm:gap-4 ${className}`}>
-      <PersonajeGuia pose={pose} nombre={nombre} mostrarEtiquetaNombre={true} size={104} />
+      <PersonajeGuia pose={pose} nombre={nombre} mostrarEtiquetaNombre={false} size={size} />
       <GloboHabla
+        titulo={titulo}
         texto={texto}
         tono={tono}
-        etiquetaSuperior={`${nombre} te dice:`}
+        etiquetaSuperior={titulo ? null : `${nombre}:`}
         direccionCola="izquierda"
         className="w-full"
       />

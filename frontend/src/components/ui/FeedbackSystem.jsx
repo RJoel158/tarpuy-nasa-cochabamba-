@@ -1,12 +1,31 @@
 import React from "react";
-import { Loader2, CheckCircle2, AlertTriangle, Info, X, Volume2 } from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle, Info, X } from "lucide-react";
 import { WeatherIllustration, cleanAlertForFarmer } from "../alerts/WeatherPictograms.jsx";
+import { BotonGrande, BotonAltavoz } from "./TarpuyBaseComponents.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
-const TOAST_STYLE = {
-  success: { border: "border-l-emerald-600", Icon: CheckCircle2, color: "text-emerald-700" },
-  warning: { border: "border-l-amber-500", Icon: AlertTriangle, color: "text-amber-600" },
-  info: { border: "border-l-[var(--cielo-oscuro)]", Icon: Info, color: "text-[var(--cielo-oscuro)]" },
+/**
+ * TARPUY NASA COCHABAMBA — SISTEMA DE AVISOS Y MODAL DE ALERTAS (FASE 3)
+ * ======================================================================
+ * Cero códigos hexadecimales sueltos: usa únicamente tokens de tokens.css.
+ */
+
+const TOAST_TOKEN_STYLE = {
+  success: {
+    bg: "var(--hoja-suave)",
+    accent: "var(--hoja-oscura)",
+    Icon: CheckCircle2,
+  },
+  warning: {
+    bg: "var(--alerta-cuidado-suave)",
+    accent: "var(--alerta-cuidado-oscuro)",
+    Icon: AlertTriangle,
+  },
+  info: {
+    bg: "var(--cielo-suave)",
+    accent: "var(--cielo-oscuro)",
+    Icon: Info,
+  },
 };
 
 export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast }) {
@@ -15,50 +34,79 @@ export function FeedbackHost({ activeProcess = null, toasts = [], onDismissToast
   return (
     <div
       aria-live="polite"
-      className="fixed bottom-20 lg:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-50 flex flex-col gap-2.5 pointer-events-none"
+      className="fixed top-4 right-4 left-4 sm:left-auto sm:w-80 z-50 flex flex-col gap-2 pointer-events-none"
     >
       {activeProcess ? (
         <div
           role="status"
-          className="pointer-events-auto bg-[var(--tinta)] text-white rounded-xl px-4 py-3 shadow-lg border border-sky-400/30 space-y-2"
+          className="pointer-events-auto px-3.5 py-2.5 space-y-2 rounded-2xl"
+          style={{
+            backgroundColor: "var(--tinta)",
+            color: "var(--tarjeta)",
+            border: "1.5px solid var(--tarjeta)",
+            boxShadow: "0 3px 0 var(--tinta)",
+          }}
         >
-          <div className="flex items-center justify-between gap-2 text-xs font-bold">
+          <div className="flex items-center justify-between gap-2 text-sm font-bold">
             <span className="inline-flex items-center gap-2 min-w-0 truncate">
-              <Loader2 className="w-4 h-4 text-[var(--hoja-oscura)] animate-spin shrink-0" />
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" style={{ color: "var(--dorado)" }} />
               <span className="truncate">{activeProcess.label}</span>
             </span>
-            <span className="text-sky-300 shrink-0 tabular-nums">{activeProcess.pct}%</span>
+            <span className="shrink-0 tabular-nums" style={{ color: "var(--dorado)" }}>
+              {activeProcess.pct}%
+            </span>
           </div>
-          <div className="h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
+          <div
+            className="h-2 w-full rounded-full overflow-hidden"
+            style={{ backgroundColor: "var(--tinta-suave)" }}
+          >
             <div
-              className="h-full bg-[var(--hoja-oscura)] rounded-full transition-all duration-150"
-              style={{ width: `${activeProcess.pct}%` }}
+              className="h-full rounded-full transition-all duration-150"
+              style={{
+                width: `${activeProcess.pct}%`,
+                backgroundColor: "var(--dorado)",
+              }}
             />
           </div>
         </div>
       ) : null}
 
       {toasts.map((t) => {
-        const cfg = TOAST_STYLE[t.type] || TOAST_STYLE.info;
+        const cfg = TOAST_TOKEN_STYLE[t.type] || TOAST_TOKEN_STYLE.info;
         const Icon = cfg.Icon;
         return (
           <div
             key={t.id}
             role="status"
-            className={`pointer-events-auto bg-white border border-slate-200 border-l-4 ${cfg.border} text-slate-900 rounded-xl px-3.5 py-2.5 shadow-lg flex items-start justify-between gap-2.5`}
+            className="pointer-events-auto px-3.5 py-2.5 rounded-2xl flex items-center justify-between gap-2.5"
+            style={{
+              backgroundColor: cfg.bg,
+              color: "var(--tinta)",
+              border: "1.5px solid var(--tinta)",
+              boxShadow: "0 3px 0 var(--tinta)",
+            }}
           >
-            <div className="flex items-start gap-2.5 min-w-0">
-              <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
-              <div className="min-w-0 text-xs">
-                <p className="font-bold text-[var(--tinta)] leading-snug">{t.title}</p>
-                {t.detail ? <p className="text-slate-600 mt-0.5 leading-snug">{t.detail}</p> : null}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Icon className="w-5 h-5 shrink-0" style={{ color: cfg.accent }} />
+              <div className="min-w-0 leading-tight">
+                <p className="font-bold text-sm leading-snug">{t.title}</p>
+                {t.detail ? (
+                  <p className="text-xs font-normal mt-0.5 leading-snug" style={{ color: "var(--tinta-suave)" }}>
+                    {t.detail}
+                  </p>
+                ) : null}
               </div>
             </div>
             <button
               type="button"
               onClick={() => onDismissToast?.(t.id)}
               aria-label="Cerrar notificación"
-              className="text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer shrink-0"
+              className="p-1 rounded-lg cursor-pointer shrink-0"
+              style={{
+                backgroundColor: "var(--tarjeta)",
+                color: "var(--tinta)",
+                border: "1px solid var(--tinta)",
+              }}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -77,50 +125,97 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
       role="dialog"
       aria-modal="true"
       aria-label={tr(lang, "alertsModalTitle")}
-      className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(35, 26, 20, 0.72)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full max-h-[85vh] flex flex-col shadow-xl overflow-hidden"
+        className="tarpuy-card-physical max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: "var(--tarjeta)",
+          boxShadow: "0 8px 0 var(--tinta)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
+        <div
+          className="px-6 py-4 flex flex-wrap items-center justify-between gap-4"
+          style={{
+            backgroundColor: "var(--arena)",
+            borderBottom: "var(--border-width-thick) solid var(--tinta)",
+          }}
+        >
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--cielo-oscuro)]">{tr(lang, "alertsModalSub")}</p>
-            <h3 className="text-base font-bold text-[var(--tinta)]">{tr(lang, "seeAlerts")} · {zoneName}</h3>
+            <p className="text-sm font-extrabold uppercase tracking-wider" style={{ color: "var(--tinta-suave)" }}>
+              {tr(lang, "alertsModalSub")}
+            </p>
+            <h3 className="tarpuy-subtitle">
+              {tr(lang, "seeAlerts")} · {zoneName}
+            </h3>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={tr(lang, "closeBtn")}
-            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+
+          <BotonAltavoz
+            sonando={false}
+            mostrarTexto={true}
+            etiqueta={tr(lang, "listenBtn")}
+            onClick={onListen}
+          />
         </div>
 
-        <div className="p-5 space-y-3 overflow-y-auto">
+        <div className="p-6 space-y-4 overflow-y-auto">
           {alerts.map((al) => {
             const vis = cleanAlertForFarmer(al, lang);
             if (!vis) return null;
+            const bgAlerta =
+              al.severity === "critical"
+                ? "var(--alerta-critico-suave)"
+                : al.severity === "warning"
+                ? "var(--alerta-cuidado-suave)"
+                : "var(--hoja-suave)";
+
             return (
               <div
                 key={al.id}
-                className={`p-3.5 rounded-2xl border border-l-4 ${vis.borderClass} ${vis.bgClass} flex items-start gap-3`}
+                className="p-5 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-4"
+                style={{
+                  backgroundColor: bgAlerta,
+                  border: "var(--border-width-thick) solid var(--tinta)",
+                }}
               >
-                <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                  <WeatherIllustration kind={vis.kind} animated={true} className="w-11 h-11" />
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    border: "var(--border-width-medium) solid var(--tinta)",
+                  }}
+                >
+                  <WeatherIllustration kind={vis.kind} animated={true} className="w-14 h-14" />
                 </div>
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${vis.badgeClass}`}>
+
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className="text-sm font-extrabold uppercase tracking-wider px-3 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: "var(--tarjeta)",
+                        color: "var(--tinta)",
+                        border: "1.5px solid var(--tinta)",
+                      }}
+                    >
                       {vis.badgeText}
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-500">{vis.category}</span>
+                    <span className="text-sm font-extrabold" style={{ color: "var(--tinta-suave)" }}>
+                      {vis.category}
+                    </span>
                   </div>
-                  <p className="text-sm font-bold text-[var(--tinta)] leading-snug">{vis.cleanTitle}</p>
-                  <div className="bg-white/90 border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-700 leading-relaxed">
-                    <strong className="text-[var(--tinta)]">{tr(lang, "doToday")}</strong> {vis.action}
+                  <p className="tarpuy-subtitle">{vis.cleanTitle}</p>
+                  <div
+                    className="p-3.5 rounded-2xl text-base font-bold"
+                    style={{
+                      backgroundColor: "var(--tarjeta)",
+                      border: "var(--border-width-medium) solid var(--tinta)",
+                    }}
+                  >
+                    <strong>{tr(lang, "doToday")}</strong> {vis.action}
                   </div>
                 </div>
               </div>
@@ -128,22 +223,19 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
           })}
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={onListen}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[var(--cielo-oscuro)] hover:bg-[var(--cielo-presionado)] text-white text-xs font-bold cursor-pointer"
-          >
-            <Volume2 className="w-3.5 h-3.5" />
-            <span>{tr(lang, "listenBtn")}</span>
-          </button>
-          <button
-            type="button"
+        <div
+          className="px-6 py-4"
+          style={{
+            backgroundColor: "var(--arena)",
+            borderTop: "var(--border-width-thick) solid var(--tinta)",
+          }}
+        >
+          <BotonGrande
+            variante="primario"
+            texto={tr(lang, "closeBtn")}
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold cursor-pointer"
-          >
-            {tr(lang, "closeBtn")}
-          </button>
+            className="w-full text-xl justify-center"
+          />
         </div>
       </div>
     </div>

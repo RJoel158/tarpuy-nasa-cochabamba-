@@ -1,14 +1,14 @@
 import HorizontalCarousel from "../ui/HorizontalCarousel.jsx";
-import WeatherDetailCards from "./WeatherDetailCards.jsx";
 import React, { useState, useEffect } from "react";
 import { buildWeatherNarration } from "../../services/narration.js";
 import { AlertsModal } from "../ui/FeedbackSystem.jsx";
 import DayForecastModal from "./DayForecastModal.jsx";
 import { BotonGrande, BotonAltavoz } from "../ui/TarpuyBaseComponents.jsx";
 import { IlustracionTarpuy } from "../illustrations/TarpuyIllustrations.jsx";
-import { PersonajeGuia, GloboHabla } from "../personality/PersonajeGuia.jsx";
 import { PatronPantalla } from "../personality/PatronesYSellos.jsx";
 import { PaisajePorHora } from "../personality/ElementosContextualesFase1C.jsx";
+import MamaTomasaAyuda from "../personality/MamaTomasaAyuda.jsx";
+import { SABERES_DEL_DIA_EJEMPLO } from "../../data/saberesDelDia.js";
 import { tr } from "../../utils/quechuaI18n.js";
 import {
   WeatherIllustration,
@@ -236,20 +236,76 @@ export default function EarlyWarningBanner({
   ];
 
   // TODO-FUNCIONALIDAD: el equipo decide cómo se calcula el momento del día (amanecer, mediodia, atardecer, noche) según la hora local o el pronóstico nocturno.
-  const momentoDecorativo = minTemp <= 2 ? "noche" : "amanecer";
+  const momentoEjemplo = minTemp <= 2 ? "noche" : "amanecer";
+
+  // Semáforo de Mamá Tomasa en Clima (sin repetir el aviso principal, solo puntos clave cortos con su expresión de Fase 1)
+  const saberHoy = SABERES_DEL_DIA_EJEMPLO[0];
+  const semaforoPrincipalClima =
+    primaryAlert.severity === "critical"
+      ? "rojo"
+      : primaryAlert.severity === "warning"
+      ? "amarillo"
+      : "verde";
+
+  const posePrincipalClima =
+    primaryAlert.severity === "critical" || primaryAlert.severity === "warning"
+      ? "alerta"
+      : lluvia7d < 5
+      ? "riego"
+      : "saludo";
+
+  const tarjetasMamaTomasa = [
+    ...alerts.slice(1).map((al, idx) => {
+      const cleaned = cleanAlertForFarmer(al, voiceLang);
+      const esCritico = cleaned?.severity === "critical";
+      const esCuidado = cleaned?.severity === "warning";
+      return {
+        id: `alerta_extra_${idx}`,
+        weatherKind: cleaned?.kind || "stable",
+        pose: esCritico || esCuidado ? "alerta" : "saludo",
+        semaforo: esCritico ? "rojo" : esCuidado ? "amarillo" : "verde",
+        titulo: cleaned?.cleanTitle || al.title,
+        frase: cleaned?.action || al.recommended_action || "",
+      };
+    }),
+    {
+      id: "semaforo_temperatura",
+      dibujoId: hoyTresTarjetas[0].dibujoId,
+      pose: minTemp <= 6 ? "alerta" : "saludo",
+      semaforo: minTemp <= 2 ? "rojo" : minTemp <= 6 ? "amarillo" : "verde",
+      titulo: `${hoyTresTarjetas[0].etiqueta}: ${hoyTresTarjetas[0].palabra}`,
+      frase: hoyTresTarjetas[0].explicacion,
+    },
+    {
+      id: "semaforo_lluvia",
+      dibujoId: hoyTresTarjetas[1].dibujoId,
+      pose: "riego",
+      semaforo: lluvia7d < 5 ? "amarillo" : "verde",
+      titulo: `${hoyTresTarjetas[1].etiqueta}: ${hoyTresTarjetas[1].palabra}`,
+      frase: hoyTresTarjetas[1].explicacion,
+    },
+    {
+      id: "semaforo_saber",
+      dibujoId: saberHoy.dibujoId,
+      pose: "pensando",
+      semaforo: "verde",
+      titulo: `${isQu ? "Yachay" : "Saber del día"}: ${saberHoy.tituloEs}`,
+      frase: isQu && saberHoy.textoQu ? saberHoy.textoQu : saberHoy.textoEs,
+    },
+  ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* ===================================================================
-       * 1. EL MENSAJE DEL DÍA (Tarjeta gigante con UN dibujo grande, UNA frase
-       *    simple, el personaje guía señalando y botón de altavoz grande)
+       * 1. EL MENSAJE DEL DÍA (Protagonista único: titular corto + dibujo + Escuchar)
+       *    El texto largo de "Qué hacer hoy" y los avisos viven en Mamá Tomasa.
        * =================================================================== */}
       <section
         aria-label={isQu ? "Kunan p'unchaw willay" : "El mensaje del día"}
         className="tarpuy-card-physical overflow-hidden"
         style={{
           backgroundColor: estiloMensajeDia.bg,
-          boxShadow: "0 6px 0 var(--tinta)",
+          border: "2px solid var(--tinta)",
         }}
       >
         {/* Franja superior de estado del clima */}
@@ -257,20 +313,16 @@ export default function EarlyWarningBanner({
           className="px-6 py-3 flex flex-wrap items-center justify-between gap-3"
           style={{
             backgroundColor: estiloMensajeDia.franja,
-            borderBottom: "var(--border-width-thick) solid var(--tinta)",
             color:
               primaryAlert.severity === "warning"
                 ? "var(--tinta)"
                 : "var(--texto-sobre-fuerte)",
           }}
         >
-          <span className="inline-flex items-center gap-2.5 font-extrabold text-lg uppercase tracking-wider">
+          <span className="inline-flex items-center gap-2.5 font-bold text-lg">
             <span
-              className="w-4 h-4 rounded-full inline-block"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "2px solid var(--tinta)",
-              }}
+              className="w-3.5 h-3.5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--tarjeta)" }}
               aria-hidden="true"
             />
             <span>
@@ -278,71 +330,61 @@ export default function EarlyWarningBanner({
             </span>
           </span>
 
-          <span className="text-sm font-extrabold">
+          <span className="text-sm font-medium">
             {isQu ? "¿Imata kunan ruwana?" : "¿Qué debo hacer hoy?"}
           </span>
         </div>
 
-        {/* Cuerpo gigante del Mensaje del Día */}
+        {/* Cuerpo limpio del Mensaje del Día: dibujo grande + titular corto + Escuchar */}
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* UN dibujo grande del estado principal (y luna si es helada nocturna) */}
+            {/* UN dibujo grande del estado principal */}
             <div className="relative shrink-0">
               <div
-                className="w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
-                }}
+                className="w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "var(--tarjeta)" }}
               >
                 <WeatherIllustration
                   kind={primaryAlert.kind}
                   animated={true}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
+                  className="w-22 h-22 sm:w-24 sm:h-24"
                 />
               </div>
 
               {primaryAlert.kind === "frost" && (
                 <span
-                  className="w-12 h-12 rounded-full flex items-center justify-center absolute -top-2 -right-2"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-11 h-11 rounded-full flex items-center justify-center absolute -top-1 -right-1"
+                  style={{ backgroundColor: "var(--tarjeta)" }}
                 >
-                  <IlustracionTarpuy id="noche_luna" size={34} />
+                  <IlustracionTarpuy id="noche_luna" size={30} />
                 </span>
               )}
             </div>
 
-            {/* UNA frase simple y grande + acción inmediata */}
-            <div className="flex-1 text-center md:text-left space-y-2.5">
+            {/* Titular corto del aviso (el detalle largo de "Qué hacer hoy" está en Mamá Tomasa) */}
+            <div className="flex-1 text-center md:text-left">
               <h2 className="tarpuy-title">{primaryAlert.cleanTitle}</h2>
-              <p
-                className="font-extrabold leading-snug"
-                style={{
-                  fontSize: "var(--font-size-subtitle)",
-                  color: "var(--tinta)",
-                }}
-              >
-                {primaryAlert.action}
-              </p>
             </div>
 
-            {/* Botón de altavoz grande dentro de la misma tarjeta */}
-            <div className="shrink-0 flex flex-col items-center gap-2">
+            {/* Botón de altavoz grande en la zona inferior/pulgar de la tarjeta */}
+            <div className="shrink-0 w-full md:w-auto flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center gap-3">
               <BotonAltavoz
                 sonando={estaHablandoAlerta}
                 mostrarTexto={true}
                 etiqueta={tr(voiceLang, "listenBtn")}
                 onClick={handleListen}
+                className="w-full sm:w-auto justify-center"
               />
               {alerts.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="font-extrabold text-base underline cursor-pointer py-1"
-                  style={{ color: "var(--tinta)" }}
+                  className="min-h-[56px] px-4 py-2 rounded-2xl font-bold text-base underline cursor-pointer text-center"
+                  style={{
+                    backgroundColor: "var(--tarjeta)",
+                    color: "var(--tinta)",
+                    border: "1.5px solid var(--tinta)",
+                  }}
                 >
                   {tr(voiceLang, "seeAlerts")} ({alerts.length})
                 </button>
@@ -351,71 +393,76 @@ export default function EarlyWarningBanner({
           </div>
 
           {/* 5. PAISAJE POR HORA (Fase 1C, debajo del mensaje del día con TODO-FUNCIONALIDAD) */}
-
+          <PaisajePorHora momento={momentoEjemplo} zona={zId} />
         </div>
       </section>
 
-      {/* Separador fijo de Clima: Ondas de agua y viento */}
+      {/* Único separador suave de la pantalla de Clima */}
       <PatronPantalla tipo="ondas" />
 
       {/* ===================================================================
-       * 2. HOY (El clima de hoy en 3 dibujos grandes con una palabra cada uno)
+       * 2. HOY (En 3 dibujos en fila en móvil y escritorio, con 1 palabra cada uno)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "weatherToday")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="tarpuy-subtitle">
-            {isQu ? "Kunan p'unchaw (Hoy)" : "El clima de tu zona"}
+            {isQu ? "Kunan p'unchaw (Hoy)" : "Hoy"}
           </h3>
-          <span className="text-base font-bold" style={{ color: "var(--tinta-suave)" }}>
+          <span className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
             {shortZone}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
           {hoyTresTarjetas.map((item) => (
             <article
               key={item.id}
-              className="tarpuy-card-physical p-6 flex flex-col items-center text-center justify-between gap-4"
-              style={{ backgroundColor: item.bg }}
+              className="tarpuy-card-physical p-2.5 sm:p-6 flex flex-col items-center text-center justify-between gap-2 sm:gap-4"
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <span
-                className="px-3.5 py-1 rounded-full text-sm font-extrabold uppercase tracking-wider"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  color: "var(--tinta)",
-                  border: "1.5px solid var(--tinta)",
-                }}
+                className="text-sm font-medium leading-tight"
+                style={{ color: "var(--tinta-suave)" }}
               >
                 {item.etiqueta}
               </span>
 
-              {/* Dibujo grande arriba */}
+              {/* Dibujo grande arriba en fondo suave */}
               <div
-                className="w-28 h-28 rounded-full flex items-center justify-center shrink-0"
+                className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: item.bg }}
+              >
+                <IlustracionTarpuy id={item.dibujoId} size={52} />
+              </div>
+
+              {/* UNA palabra grande en negrita */}
+              <h4
+                className="font-bold leading-tight break-words"
                 style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "var(--border-width-thick) solid var(--tinta)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(1.05rem, 4.2vw, 1.65rem)",
+                  color: "var(--tinta)",
                 }}
               >
-                <IlustracionTarpuy id={item.dibujoId} size={76} />
-              </div>
+                {item.palabra}
+              </h4>
 
-              {/* UNA palabra grande y clara */}
-              <div className="space-y-1.5">
-                <h4 className="tarpuy-title">{item.palabra}</h4>
-                <p className="tarpuy-body font-bold">{item.explicacion}</p>
-              </div>
-
-              {/* Los números pequeños abajo como apoyo */}
+              {/* Números de apoyo (>= 14 px) */}
               <span
-                className="px-3 py-1 rounded-xl text-xs font-extrabold"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  color: "var(--tinta-suave)",
-                  border: "1.5px solid var(--tinta)",
-                }}
+                className="hidden md:block text-sm font-normal pt-1"
+                style={{ color: "var(--tinta-suave)" }}
               >
                 {item.apoyoNumerico}
+              </span>
+              <span
+                className="md:hidden text-sm font-medium"
+                style={{ color: "var(--tinta-suave)" }}
+              >
+                {item.id === "temperatura"
+                  ? `${cur.temp_c}°C`
+                  : item.id === "lluvia"
+                  ? `${pred.total_precip_7d_mm} mm`
+                  : `${days[0]?.wind_kmh ?? 12} km/h`}
               </span>
             </article>
           ))}
@@ -423,7 +470,7 @@ export default function EarlyWarningBanner({
       </section>
 
       {/* ===================================================================
-       * 3. LA SEMANA (Tira de 7 casillas grandes: día + UN dibujo del clima)
+       * 3. LA SEMANA (Tira de 7 casillas grandes tocables, sin requerir scroll horizontal)
        * =================================================================== */}
       <section aria-label={tr(voiceLang, "dayByDay")} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -433,12 +480,8 @@ export default function EarlyWarningBanner({
               : "La semana (toca un día para ver mañana, tarde y noche)"}
           </h3>
           <span
-            className="px-3 py-1 rounded-full text-sm font-extrabold"
-            style={{
-              backgroundColor: "var(--dorado-suave)",
-              color: "var(--dorado-oscuro)",
-              border: "1.5px solid var(--tinta)",
-            }}
+            className="text-sm font-medium"
+            style={{ color: "var(--tinta-suave)" }}
           >
             {tr(voiceLang, "tapForDetail")}
           </span>
@@ -461,43 +504,33 @@ export default function EarlyWarningBanner({
                 key={d.date}
                 type="button"
                 onClick={() => setSelectedDay(d)}
-                className="tarpuy-btn-physical p-4 flex flex-col items-center justify-between gap-3 text-center cursor-pointer"
+                className="tarpuy-btn-physical last:col-span-2 sm:last:col-span-1 p-3.5 sm:p-4 flex flex-col items-center justify-between gap-2.5 text-center cursor-pointer"
                 style={{
-                  minHeight: "196px",
+                  minHeight: "172px",
                   backgroundColor: bgCasilla,
                   color: "var(--tinta)",
                 }}
               >
                 {/* Día arriba */}
-                <span className="font-extrabold text-xl leading-tight">
+                <span className="font-bold text-lg leading-tight">
                   {d.day_label}
                 </span>
 
-                {/* UN dibujo grande del clima */}
+                {/* UN dibujo grande del clima sin borde interior */}
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center shrink-0"
-                  style={{
-                    backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
-                  }}
+                  className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: "var(--tarjeta)" }}
                 >
-                  <WeatherIllustration kind={dv.kind} className="w-14 h-14" />
+                  <WeatherIllustration kind={dv.kind} className="w-13 h-13" />
                 </div>
 
-                {/* Palabra de estado + números pequeños como apoyo */}
-                <div className="space-y-1 w-full">
-                  <span
-                    className="inline-block px-3 py-0.5 rounded-full text-sm font-extrabold"
-                    style={{
-                      backgroundColor: "var(--tarjeta)",
-                      color: "var(--tinta)",
-                      border: "1.5px solid var(--tinta)",
-                    }}
-                  >
+                {/* Palabra de estado + números de apoyo (>= 14 px) */}
+                <div className="space-y-0.5 w-full">
+                  <span className="block text-base font-bold leading-snug">
                     {dv.word}
                   </span>
                   <span
-                    className="block text-xs font-bold"
+                    className="block text-sm font-normal"
                     style={{ color: "var(--tinta-suave)" }}
                   >
                     {d.temp_min_c}° / {d.temp_max_c}°C
@@ -569,18 +602,86 @@ export default function EarlyWarningBanner({
               </span>
             </div>
 
-            <WeatherDetailCards current={cur} summary={pred} lang={voiceLang} />
+            <HorizontalCarousel label="Detalle técnico y estado del suelo" kind="detail">
+              {weatherCards.map((c) => {
+                const tone = TONE_CLASSES[c.tone] || TONE_CLASSES.sky;
+                return (
+                  <div
+                    key={c.key}
+                    className="tarpuy-card-physical p-4 flex flex-col justify-between gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <WeatherIllustration kind={c.kind} className="w-12 h-12 shrink-0" />
+                        <span
+                          className="text-xs font-extrabold uppercase tracking-wider leading-tight"
+                          style={{ color: "var(--tinta-suave)" }}
+                        >
+                          {c.category}
+                        </span>
+                      </div>
+                      <span
+                        className="text-xs font-extrabold px-2.5 py-0.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: tone.bgVar,
+                          color: "var(--tinta)",
+                          border: "1.5px solid var(--tinta)",
+                        }}
+                      >
+                        {c.badge}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="font-extrabold text-lg leading-tight">{c.title}</p>
+                      <p className="text-sm font-bold mt-1" style={{ color: "var(--tinta-suave)" }}>
+                        {c.advice}
+                      </p>
+                      <p
+                        className="mt-2 text-xs font-mono font-bold px-2.5 py-1.5 rounded-xl"
+                        style={{
+                          backgroundColor: "var(--arena)",
+                          color: "var(--tinta)",
+                          border: "1.5px solid var(--tinta)",
+                        }}
+                      >
+                        {c.techText}
+                      </p>
+                    </div>
+
+                    {c.isRain ? (
+                      <div className="space-y-2">
+                        <RainDropsVisual count={c.drops} lang={voiceLang} />
+                        <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+                      </div>
+                    ) : (
+                      <VisualMeter3 level={c.level} tone={c.tone} labels={c.levels} />
+                    )}
+                  </div>
+                );
+              })}
+            </HorizontalCarousel>
           </div>
         )}
       </section>
 
-      <AlertsModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        alerts={alerts}
-        zoneName={shortZone}
-        lang={voiceLang}
+      <MamaTomasaAyuda
+        titulo={
+          isQu
+            ? `Pacha willay · ${shortZone}`
+            : `Clima de hoy en ${shortZone}`
+        }
+        pose={posePrincipalClima}
+        semaforoPrincipal={semaforoPrincipalClima}
+        mensaje={primaryAlert.action}
+        tarjetas={tarjetasMamaTomasa}
         onListen={handleListen}
+        isSpeaking={estaHablandoAlerta}
+        badgeCount={tarjetasMamaTomasa.length}
+        tonoAvisoPrincipal={estiloMensajeDia.tonoGlobo}
+        lang={voiceLang}
+        abiertoControlado={modalOpen}
+        onCambiarAbierto={setModalOpen}
       />
 
       <DayForecastModal

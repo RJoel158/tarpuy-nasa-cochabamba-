@@ -5,8 +5,9 @@ import DataVeracityCard from "./alerts/DataVeracityCard.jsx";
 import InstitutionalBrandBar from "./InstitutionalBrandBar.jsx";
 import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
-import { GuiaConGlobo } from "./personality/PersonajeGuia.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
+import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
+import { speakSpanish, speakQuechua } from "../services/speechService.js";
 
 const DEFAULT_MONTHS = [
   { month: 1, month_name: "Enero", precip_mm: 98, temp_min_c: 11.2, temp_max_c: 23.5, soil_moisture_index: 0.58, ndvi_mean: 0.54, frost_risk_days: 0, bare_soil_flag: false },
@@ -59,65 +60,30 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
 
   return (
     <div className="space-y-6">
-      {/* Guía campesina presentando los recuerdos del clima de 30 años */}
-      <div
-        className="tarpuy-card-physical p-5 sm:p-6"
-        style={{
-          backgroundColor: "var(--tarjeta)",
-          borderColor: "var(--tinta)",
-        }}
-      >
-        <GuiaConGlobo
-          pose="pensando"
-          size={92}
-          titulo={
-            isQu
-              ? `${zoneName || "Chakrayki"}: 30 wata pacha yuyariy`
-              : `Así se porta el tiempo en ${zoneName || "tu comunidad"} durante el año`
-          }
-          texto={
-            isQu
-              ? "NASA satélitekuna 30 wata qhawarqanku mayk'aqchus paran, qasan, ruphan ima."
-              : "Los satélites miraron el cielo durante 30 años para recordar en qué meses llueve más, cuándo cae helada y cuándo hace más calor."
-          }
-        />
-      </div>
-
-      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (sin ejes ni números pequeños) */}
+      {/* 3 tarjetas grandes con barras dibujadas, gotas y termómetros (las explicaciones viven en Mamá Tomasa) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TARJETA 1: LOS MESES DE MÁS LLUVIA */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--cielo-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--cielo-suave)" }}
               >
-                <IlustracionTarpuy id="lluvia" size={50} />
+                <IlustracionTarpuy id="lluvia" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--cielo-suave)",
-                    color: "var(--cielo-oscuro)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--cielo-oscuro)" }}
                 >
                   {isQu ? "Para pacha" : "Agua del cielo"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -129,20 +95,8 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
               </div>
             </div>
 
-            <p
-              className="font-bold"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi para allpata uqhuchin tarpunapaq:"
-                : "En estos meses cae más agua para sembrar y llenar la tierra:"}
-            </p>
-
-            {/* Barras dibujadas con gotas */}
-            <div className="space-y-3.5">
+            {/* Barras dibujadas con gotas (sin bordes de caja anidados) */}
+            <div className="space-y-3">
               {rainyMonths.map((m) => {
                 const pct = Math.max(28, Math.min(100, Math.round((Number(m.precip_mm || 0) / maxRain) * 100)));
                 const dropCount = pct >= 80 ? 3 : pct >= 50 ? 2 : 1;
@@ -151,14 +105,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`rain-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -168,33 +119,28 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                       <span className="inline-flex items-center gap-1">
                         {Array.from({ length: dropCount }).map((_, idx) => (
-                          <IlustracionTarpuy key={idx} id="gota_agua" size={24} />
+                          <IlustracionTarpuy key={idx} id="gota_agua" size={22} />
                         ))}
                         <span
-                          className="font-extrabold ml-1"
+                          className="font-medium ml-1"
                           style={{
                             color: "var(--cielo-oscuro)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
                         </span>
                       </span>
                     </div>
-                    {/* Barra dibujada a mano */}
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${pct}%`,
                           backgroundColor: "var(--cielo)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>
@@ -208,36 +154,25 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
         {/* TARJETA 2: LOS MESES CON HELADA */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--alerta-cuidado-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--alerta-cuidado-suave)" }}
               >
-                <IlustracionTarpuy id="termometro_frio" size={50} />
+                <IlustracionTarpuy id="termometro_frio" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--alerta-cuidado-suave)",
-                    color: "var(--alerta-cuidado-oscuro)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--alerta-cuidado-oscuro)" }}
                 >
                   {isQu ? "Qasa pacha" : "Frío de noche"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -249,20 +184,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
               </div>
             </div>
 
-            <p
-              className="font-bold"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi tutamanta sinchita chirin, yurakunata qhatana:"
-                : "En estos meses la madrugada enfría fuerte y conviene cuidar los brotes:"}
-            </p>
-
-            {/* Barras dibujadas con termómetro de frío / helada */}
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {frostMonths.map((m) => {
                 const tMin = Number(m.temp_min_c ?? 2);
                 const frostScore = Math.max(30, Math.min(100, Math.round(((10 - tMin) / 14) * 100)));
@@ -272,14 +194,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`frost-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -290,15 +209,15 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       <span className="inline-flex items-center gap-1.5">
                         <IlustracionTarpuy
                           id={isHardFrost ? "helada" : "termometro_frio"}
-                          size={26}
+                          size={24}
                         />
                         <span
-                          className="font-extrabold"
+                          className="font-medium"
                           style={{
                             color: isHardFrost
                               ? "var(--alerta-critico-oscuro)"
                               : "var(--cielo-oscuro)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
@@ -306,11 +225,8 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                     </div>
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
@@ -319,7 +235,6 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                           backgroundColor: isHardFrost
                             ? "var(--alerta-critico)"
                             : "var(--cielo)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>
@@ -333,36 +248,25 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
         {/* TARJETA 3: LOS MESES MÁS CALIENTES */}
         <article
           className="tarpuy-card-physical p-5 sm:p-6 space-y-5 flex flex-col justify-between"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            borderColor: "var(--tinta)",
-          }}
+          style={{ backgroundColor: "var(--tarjeta)" }}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--tierra-suave)",
-                  border: "var(--tarpuy-border-medium) solid var(--tinta)",
-                }}
+                style={{ backgroundColor: "var(--tierra-suave)" }}
               >
-                <IlustracionTarpuy id="termometro_calor" size={50} />
+                <IlustracionTarpuy id="termometro_calor" size={48} />
               </div>
               <div>
                 <span
-                  className="inline-block px-3 py-0.5 rounded-full font-extrabold mb-1"
-                  style={{
-                    backgroundColor: "var(--tierra-suave)",
-                    color: "var(--tierra-oscura)",
-                    border: "1.5px solid var(--tinta)",
-                    fontSize: "0.9rem",
-                  }}
+                  className="block text-sm font-medium mb-0.5"
+                  style={{ color: "var(--tierra-oscura)" }}
                 >
                   {isQu ? "Ruphay pacha" : "Sol fuerte"}
                 </span>
                 <h3
-                  className="font-extrabold leading-tight"
+                  className="font-bold leading-tight"
                   style={{
                     fontFamily: "var(--tarpuy-font-display)",
                     fontSize: "var(--tarpuy-text-subtitle)",
@@ -374,20 +278,7 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
               </div>
             </div>
 
-            <p
-              className="font-bold"
-              style={{
-                color: "var(--tinta-suave)",
-                fontSize: "var(--tarpuy-text-body-min)",
-              }}
-            >
-              {isQu
-                ? "Kay killakunapi inti allpata utqhaylla ch'akichin, rastrojowan qhatana:"
-                : "En estos meses el sol seca rápido la tierra; conviene cubrirla con rastrojo:"}
-            </p>
-
-            {/* Barras dibujadas con termómetro de calor y sol */}
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {hotMonths.map((m) => {
                 const isVeryHot = m.heatScore >= 85;
                 const levelWord = isVeryHot ? "Sol muy fuerte" : "Calor alto";
@@ -395,14 +286,11 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                   <div
                     key={`hot-${m.month}`}
                     className="p-3.5 rounded-2xl space-y-2"
-                    style={{
-                      backgroundColor: "var(--arena)",
-                      border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                    }}
+                    style={{ backgroundColor: "var(--arena)" }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className="font-extrabold"
+                        className="font-bold"
                         style={{
                           fontSize: "var(--tarpuy-text-body)",
                           color: "var(--tinta)",
@@ -411,12 +299,12 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                         {m.month_name}
                       </span>
                       <span className="inline-flex items-center gap-1.5">
-                        <IlustracionTarpuy id="sol" size={26} />
+                        <IlustracionTarpuy id="sol" size={24} />
                         <span
-                          className="font-extrabold"
+                          className="font-medium"
                           style={{
                             color: "var(--tierra-oscura)",
-                            fontSize: "1rem",
+                            fontSize: "0.95rem",
                           }}
                         >
                           {levelWord}
@@ -424,18 +312,14 @@ function ResumenClimaticoModoFacil({ indicators = [], zoneName = "", lang = "es"
                       </span>
                     </div>
                     <div
-                      className="w-full h-6 rounded-full overflow-hidden p-0.5"
-                      style={{
-                        backgroundColor: "var(--tarjeta)",
-                        border: "2px solid var(--tinta)",
-                      }}
+                      className="w-full h-4 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--tarjeta)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${m.heatScore}%`,
                           backgroundColor: "var(--tierra)",
-                          borderRight: "2px solid var(--tinta)",
                         }}
                       />
                     </div>
@@ -842,68 +726,137 @@ export default function TechnicalMode({
               </div>
             ) : null}
 
-            {/* Tabla mensual de 12 meses (visible al activar showTable o siempre al imprimir) */}
+            {/* Tabla mensual de 12 meses: en móvil como lista de tarjetas simples (1 por mes), en escritorio como tabla */}
             {showTable ? (
               <div
-                className="overflow-x-auto pt-4"
-                style={{ borderTop: "var(--tarpuy-border-thin) solid var(--tinta)" }}
+                className="pt-4 space-y-4"
+                style={{ borderTop: "1.5px solid var(--tinta)" }}
               >
-                <table
-                  className="w-full text-left border-collapse"
-                  style={{
-                    color: "var(--tinta)",
-                    fontSize: "1rem",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        backgroundColor: "var(--arena)",
-                        borderBottom: "var(--tarpuy-border-medium) solid var(--tinta)",
-                      }}
-                    >
-                      <th className="py-3 px-3 font-extrabold">Mes</th>
-                      <th className="py-3 px-3 font-extrabold">Lluvia (mm)</th>
-                      <th className="py-3 px-3 font-extrabold">T. Mínima (°C)</th>
-                      <th className="py-3 px-3 font-extrabold">Humedad SMAP</th>
-                      <th className="py-3 px-3 font-extrabold">Verdor NDVI</th>
-                      <th className="py-3 px-3 font-extrabold">Días Helada</th>
-                      <th className="py-3 px-3 font-extrabold">Estado del suelo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {indicators.map((m) => (
-                      <tr
-                        key={m.month}
+                {/* Vista móvil (< md): Lista de tarjetas simples por mes sin scroll horizontal */}
+                <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {indicators.map((m) => {
+                    const smapPct = Math.round(
+                      m.soil_moisture_index > 1
+                        ? m.soil_moisture_index
+                        : (m.soil_moisture_index || 0) * 100
+                    );
+                    return (
+                      <div
+                        key={`card-${m.month}`}
+                        className="p-4 rounded-2xl space-y-2.5"
                         style={{
                           backgroundColor: m.bare_soil_flag
                             ? "var(--tierra-suave)"
-                            : "var(--tarjeta)",
-                          borderBottom: "1.5px solid var(--piedra)",
+                            : "var(--arena)",
                         }}
                       >
-                        <td className="py-2.5 px-3 font-extrabold">
-                          {m.month_name || `Mes ${m.month}`}
-                        </td>
-                        <td className="py-2.5 px-3 font-bold">{m.precip_mm} mm</td>
-                        <td className="py-2.5 px-3 font-mono font-bold">{m.temp_min_c}°C</td>
-                        <td className="py-2.5 px-3 font-mono font-bold">
-                          {Math.round(
-                            m.soil_moisture_index > 1
-                              ? m.soil_moisture_index
-                              : (m.soil_moisture_index || 0) * 100
-                          )}
-                          %
-                        </td>
-                        <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
-                        <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
-                        <td className="py-2.5 px-3 font-extrabold">
-                          {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
-                        </td>
+                        <div className="flex items-center justify-between gap-2">
+                          <strong className="font-bold text-lg" style={{ color: "var(--tinta)" }}>
+                            {m.month_name || `Mes ${m.month}`}
+                          </strong>
+                          <span
+                            className="px-2.5 py-0.5 rounded-full text-sm font-bold"
+                            style={{
+                              backgroundColor: "var(--tarjeta)",
+                              color: "var(--tinta)",
+                            }}
+                          >
+                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Lluvia:
+                            </span>
+                            <strong className="font-bold text-base">{m.precip_mm} mm</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              T. Mínima:
+                            </span>
+                            <strong className="font-bold text-base">{m.temp_min_c}°C</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Humedad SMAP:
+                            </span>
+                            <strong className="font-bold text-base">{smapPct}%</strong>
+                          </div>
+                          <div>
+                            <span className="block font-normal" style={{ color: "var(--tinta-suave)" }}>
+                              Verdor NDVI / Helada:
+                            </span>
+                            <strong className="font-bold text-base">
+                              {m.ndvi_mean} · {m.frost_risk_days ?? 0} d
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Vista escritorio (>= md): Tabla completa */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table
+                    className="w-full text-left border-collapse"
+                    style={{
+                      color: "var(--tinta)",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: "var(--arena)",
+                          borderBottom: "var(--tarpuy-border-medium) solid var(--tinta)",
+                        }}
+                      >
+                        <th className="py-3 px-3 font-extrabold">Mes</th>
+                        <th className="py-3 px-3 font-extrabold">Lluvia (mm)</th>
+                        <th className="py-3 px-3 font-extrabold">T. Mínima (°C)</th>
+                        <th className="py-3 px-3 font-extrabold">Humedad SMAP</th>
+                        <th className="py-3 px-3 font-extrabold">Verdor NDVI</th>
+                        <th className="py-3 px-3 font-extrabold">Días Helada</th>
+                        <th className="py-3 px-3 font-extrabold">Estado del suelo</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {indicators.map((m) => (
+                        <tr
+                          key={m.month}
+                          style={{
+                            backgroundColor: m.bare_soil_flag
+                              ? "var(--tierra-suave)"
+                              : "var(--tarjeta)",
+                            borderBottom: "1.5px solid var(--piedra)",
+                          }}
+                        >
+                          <td className="py-2.5 px-3 font-extrabold">
+                            {m.month_name || `Mes ${m.month}`}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold">{m.precip_mm} mm</td>
+                          <td className="py-2.5 px-3 font-mono font-bold">{m.temp_min_c}°C</td>
+                          <td className="py-2.5 px-3 font-mono font-bold">
+                            {Math.round(
+                              m.soil_moisture_index > 1
+                                ? m.soil_moisture_index
+                                : (m.soil_moisture_index || 0) * 100
+                            )}
+                            %
+                          </td>
+                          <td className="py-2.5 px-3 font-mono font-bold">{m.ndvi_mean}</td>
+                          <td className="py-2.5 px-3 font-bold">{m.frost_risk_days ?? 0} días</td>
+                          <td className="py-2.5 px-3 font-extrabold">
+                            {m.bare_soil_flag ? "⚠️ Suelo desnudo" : "🌱 Cubierto"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : null}
           </section>
@@ -972,6 +925,63 @@ export default function TechnicalMode({
           </p>
         ) : null}
       </section>
+
+      {/* Ventana emergente de Mamá Tomasa en la pantalla de Datos NASA */}
+      <MamaTomasaAyuda
+        titulo={
+          isQu
+            ? `NASA Willay · ${zone?.name || "Cochabamba"}`
+            : `Datos del año en ${zone?.name || "tu comunidad"}`
+        }
+        pose="pensando"
+        semaforoPrincipal="verde"
+        mensaje={
+          isQu
+            ? "30 wata satélite qhawarisqan: mayk'aqchus paran, qasan, ruphan."
+            : "Semáforo del año según 30 años de satélites NASA:"
+        }
+        tarjetas={[
+          {
+            id: "explicacion_lluvia",
+            dibujoId: "lluvia",
+            pose: "riego",
+            semaforo: "verde",
+            titulo: isQu ? "Aswan paray killakuna" : "Meses de más lluvia",
+            frase: isQu
+              ? "Para allpata uqhuchin tarpunapaq."
+              : "Momento seguro para sembrar con agua del cielo.",
+          },
+          {
+            id: "explicacion_calor",
+            dibujoId: "termometro_calor",
+            pose: "siembra",
+            semaforo: "amarillo",
+            titulo: isQu ? "Aswan q'uñi killakuna" : "Meses más calientes",
+            frase: isQu
+              ? "Inti allpata ch'akichin; rastrojowan qhatana."
+              : "El sol seca rápido la tierra; cúbrela con rastrojo.",
+          },
+          {
+            id: "explicacion_helada",
+            dibujoId: "termometro_frio",
+            pose: "alerta",
+            semaforo: "rojo",
+            titulo: isQu ? "Qasay killakuna" : "Meses con helada",
+            frase: isQu
+              ? "Tutamanta sinchita chirin; yurakunata qhatana."
+              : "Madrugadas muy frías: abriga tus brotes.",
+          },
+        ]}
+        onListen={() => {
+          const texto = isQu
+            ? "NASA satélitekuna 30 wata qhawarqanku mayk'aqchus paran, qasan, ruphan ima."
+            : `Así se porta el tiempo en ${zone?.name || "tu comunidad"} durante el año. Los satélites de la NASA miraron el cielo durante 30 años para recordar en qué meses llueve más, cuándo cae helada y cuándo hace más calor.`;
+          if (isQu) speakQuechua(texto);
+          else speakSpanish(texto);
+        }}
+        badgeCount={3}
+        lang={lang}
+      />
     </div>
   );
 }

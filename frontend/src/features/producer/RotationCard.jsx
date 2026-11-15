@@ -86,7 +86,6 @@ export default function RotationCard({
   activeAudioKey,
   isAdvanced = false,
   lang = "es",
-  compact = false,
 }) {
   const [verNumeros, setVerNumeros] = useState(isAdvanced);
 
@@ -125,9 +124,69 @@ export default function RotationCard({
 
   /* 3. Los 3 íconos simples: más fuerza para la tierra, cuánta agua necesita, cuánto puede ganar */
   const tresIconosSimples = [
-    {id:'tierra', dibujoId:'tierra_humeda', titulo: isQu ? 'Allpa' : 'Suelo', estado: tr(lang, tl.soil === 'green' ? 'wellWord' : tl.soil === 'red' ? 'riskWord' : 'careWord'), bg:'var(--tierra-suave)'},
-    {id:'agua', dibujoId:'gota_agua', titulo: isQu ? 'Yaku' : 'Agua', estado: tr(lang, tl.water === 'green' ? 'wellWord' : tl.water === 'red' ? 'riskWord' : 'careWord'), bg:'var(--cielo-suave)'},
-    {id:'helada', dibujoId:'helada', titulo: isQu ? 'Qasa' : 'Helada', estado: tr(lang, tl.frost === 'green' ? 'wellWord' : tl.frost === 'red' ? 'riskWord' : 'careWord'), bg:'var(--dorado-suave)'},
+    {
+      id: "tierra",
+      dibujoId: "tierra_humeda",
+      titulo: isQu ? "Allpa kallpa" : "Más fuerza para la tierra",
+      estado:
+        tl.soil === "green"
+          ? isQu
+            ? "Allpata kallpachan"
+            : "Abona y cuida tu suelo"
+          : tl.soil === "red"
+          ? isQu
+            ? "Allpa sayk'un"
+            : "Cansa y pela la tierra"
+          : isQu
+          ? "Allpata qhaway"
+          : "Mantiene el suelo regular",
+      bg:
+        tl.soil === "green"
+          ? "var(--hoja-suave)"
+          : tl.soil === "red"
+          ? "var(--alerta-critico-suave)"
+          : "var(--tierra-suave)",
+    },
+    {
+      id: "agua",
+      dibujoId: "gota_agua",
+      titulo: isQu ? "Yaku munay" : "Cuánta agua necesita",
+      estado:
+        tl.water === "green"
+          ? isQu
+            ? "Yakuta waqaychan"
+            : "Aprovecha y guarda la humedad"
+          : tl.water === "red"
+          ? isQu
+            ? "Achka yakuta munan"
+            : "Pierde humedad rápido"
+          : isQu
+          ? "Chawpi yaku"
+          : "Necesita riego moderado",
+      bg:
+        tl.water === "green"
+          ? "var(--cielo-suave)"
+          : tl.water === "red"
+          ? "var(--alerta-cuidado-suave)"
+          : "var(--cielo-suave)",
+    },
+    {
+      id: "ganancia",
+      dibujoId: "cosecha",
+      titulo: isQu ? "Puquy wan qullqi" : "Cuánto puede ganar",
+      estado: isBase
+        ? isQu
+          ? "Pisi puquy qhipaman"
+          : "Menor cosecha con los años"
+        : esMejor
+        ? isQu
+          ? "Allin mikhuna, allin qhatu"
+          : "Buena cosecha y alimento seguro"
+        : isQu
+        ? "Allin yanapa"
+        : "Cosecha estable y forraje",
+      bg: isBase ? "var(--alerta-cuidado-suave)" : "var(--dorado-suave)",
+    },
   ];
 
   const LIGHT_STYLE = {
@@ -143,7 +202,7 @@ export default function RotationCard({
     { key: "erosion", name: tr(lang, "windRainCheck"), val: tl.erosion || "yellow" },
   ];
 
-  const primaryText = buildStrategyNarration(strategy, lang, indicators);
+  const primaryText = buildStrategyNarration(strategy, lang);
 
   /* 5. Consejos de suelo extraídos de los pasos de la estrategia */
   const consejosSuelo = (strategy.crop_sequence || []).slice(0, 3).map((paso, idx) => ({
@@ -158,7 +217,7 @@ export default function RotationCard({
       className="tarpuy-card-physical overflow-hidden space-y-0"
       style={{
         backgroundColor: "var(--tarjeta)",
-        boxShadow: "0 6px 0 var(--tinta)",
+        border: esMejor ? "2px solid var(--tinta)" : undefined,
       }}
     >
       {/* Cabecera de la estrategia (Corona/Estrella dorada en "La mejor para ti") */}
@@ -170,19 +229,15 @@ export default function RotationCard({
             : isBase
             ? "var(--alerta-cuidado-suave)"
             : "var(--hoja-suave)",
-          borderBottom: "var(--border-width-thick) solid var(--tinta)",
         }}
       >
         <div className="flex items-center gap-4">
           {esMejor ? (
-            <EstrellaDorada size={54} />
+            <EstrellaDorada size={50} />
           ) : (
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "var(--border-width-medium) solid var(--tinta)",
-              }}
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <CropIllustration
                 cropId={primerCultivo.crop_id}
@@ -194,11 +249,10 @@ export default function RotationCard({
 
           <div className="space-y-1">
             <span
-              className="inline-block px-3.5 py-1 rounded-full text-sm font-extrabold uppercase tracking-wider"
+              className="inline-block px-3 py-0.5 rounded-full text-sm font-bold"
               style={{
                 backgroundColor: "var(--tarjeta)",
                 color: "var(--tinta)",
-                border: "1.5px solid var(--tinta)",
               }}
             >
               {etiquetaEstrategia}
@@ -214,7 +268,7 @@ export default function RotationCard({
           etiqueta={tr(lang, "listenBtn")}
           onClick={() =>
             onSpeak(
-              buildStrategyNarration(strategy, isQu ? "qu" : "es", indicators),
+              buildStrategyNarration(strategy, isQu ? "qu" : "es"),
               isQu ? "qu" : "es",
               isQu ? qKey : esKey,
               `strat_${strategy.strategy_id}`
@@ -223,129 +277,38 @@ export default function RotationCard({
         />
       </div>
 
-      <div className="p-6 sm:p-7 space-y-7">
-        {/* Una frase clara de por qué conviene */}
-        <div
-          className="p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-4"
-          style={{
-            backgroundColor: "var(--arena)",
-            border: "var(--border-width-medium) solid var(--tinta)",
-          }}
-        >
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: "var(--tarjeta)",
-              border: "var(--border-width-medium) solid var(--tinta)",
-            }}
-          >
-            <CropIllustration
-              cropId={primerCultivo.crop_id}
-              name={primerCultivo.crop_name}
-              className="w-16 h-16"
-            />
-          </div>
-          <div><p className="tarpuy-body font-bold">{primaryText}</p>{isQu && <p className="text-sm mt-3">Guion quechua pendiente de revisión local.</p>}</div>
-        </div>
-
-        {/* 3 ÍCONOS SIMPLES: Más fuerza para la tierra, Cuánta agua necesita, Cuánto puede ganar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-6 sm:p-7 space-y-8">
+        {/* 3 ÍCONOS SIMPLES: sin bordes gruesos ni cajas dentro de cajas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {tresIconosSimples.map((item) => (
             <div
               key={item.id}
-              className="p-5 rounded-3xl flex flex-col items-center text-center gap-3"
-              style={{
-                backgroundColor: item.bg,
-                border: "var(--border-width-thick) solid var(--tinta)",
-              }}
+              className="p-5 rounded-3xl flex flex-col items-center text-center gap-2.5"
+              style={{ backgroundColor: "var(--arena)" }}
             >
               <div
-                className="w-20 h-20 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: "var(--tarjeta)",
-                  border: "var(--border-width-medium) solid var(--tinta)",
-                }}
+                className="w-18 h-18 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: item.bg }}
               >
-                <IlustracionTarpuy id={item.dibujoId} size={56} />
+                <IlustracionTarpuy id={item.dibujoId} size={50} />
               </div>
               <span
-                className="text-sm font-extrabold uppercase tracking-wide"
+                className="text-sm font-medium"
                 style={{ color: "var(--tinta-suave)" }}
               >
                 {item.titulo}
               </span>
-              <p className="font-extrabold text-xl leading-snug">{item.estado}</p>
+              <p className="font-bold text-xl leading-snug">{item.estado}</p>
             </div>
           ))}
         </div>
 
-        {/* 4. CALENDARIO DE 12 MESES DIBUJADO (Semilla = Sembrar, Gota = Regar, Cosecha = Cosechar, Ladrillo = Estamos aquí) */}
-        <details open={!compact || undefined} className="flow-calendar-detail"><summary className="font-extrabold text-lg cursor-pointer">Ver los 12 meses</summary>
+        {/* 4. CALENDARIO DE 12 MESES DIBUJADO (los consejos de suelo viven en Mamá Tomasa) */}
         <CropCalendarBar
           cropSequence={strategy.crop_sequence}
           indicators={indicators}
           lang={lang}
         />
-        </details>
-
-        {/* 5. CONSEJOS DE SUELO EXISTENTES (2 o 3 tarjetas ilustradas con frase corta y altavoz) */}
-        {!compact && !isQu && consejosSuelo.length > 0 && (
-          <div className="space-y-4">
-            <h4 className="tarpuy-subtitle">
-              {isQu ? "Allpa waqaychay yuyaychaykuna" : "Consejos para cuidar tu suelo en este plan"}
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {consejosSuelo.map((c, cIdx) => {
-                const audioConsejoKey = `${strategy.strategy_id}_consejo_${cIdx}_${lang}`;
-                return (
-                  <div
-                    key={c.id}
-                    className="p-5 rounded-3xl flex flex-col justify-between gap-4"
-                    style={{
-                      backgroundColor: "var(--tierra-suave)",
-                      border: "var(--border-width-medium) solid var(--tinta)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: "var(--tarjeta)",
-                          border: "var(--border-width-medium) solid var(--tinta)",
-                        }}
-                      >
-                        <CropIllustration
-                          cropId={c.dibujoCropId}
-                          name={c.nombre}
-                          className="w-14 h-14"
-                        />
-                      </div>
-                      <h5 className="font-extrabold text-lg leading-tight">{c.nombre}</h5>
-                    </div>
-
-                    <p className="tarpuy-body font-bold">{c.frase}</p>
-
-                    <div className="pt-1 flex justify-end">
-                      <BotonAltavoz
-                        sonando={activeAudioKey === audioConsejoKey}
-                        mostrarTexto={true}
-                        etiqueta={tr(lang, "listenBtn")}
-                        onClick={() =>
-                          onSpeak(
-                            `${c.nombre}. ${c.frase}`,
-                            lang,
-                            audioConsejoKey
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Botones de voz bilingüe originales (Castellano y Runasimi) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -356,7 +319,7 @@ export default function RotationCard({
             texto={tr(lang, "listenQuBtn")}
             onClick={() =>
               onSpeak(
-                buildStrategyNarration(strategy, "qu", indicators),
+                buildStrategyNarration(strategy, "qu"),
                 "qu",
                 qKey,
                 `strat_${strategy.strategy_id}`
@@ -370,7 +333,7 @@ export default function RotationCard({
             texto={tr(lang, "listenEsBtn")}
             onClick={() =>
               onSpeak(
-                buildStrategyNarration(strategy, "es", indicators),
+                buildStrategyNarration(strategy, "es"),
                 "es",
                 esKey,
                 `strat_${strategy.strategy_id}`

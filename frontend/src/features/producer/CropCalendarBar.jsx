@@ -37,7 +37,7 @@ export default function CropCalendarBar({
   const activeCell = cells[selectedIdx] || cells[0];
 
   const obtenerEstiloAccion = (cell) => {
-    switch (cell.category) {
+    switch (cell.accionVisual) {
       case "sembrar":
         return {
           dibujoId: "semilla",
@@ -52,14 +52,14 @@ export default function CropCalendarBar({
           bg: "var(--dorado-suave)",
           muestra: "var(--dorado)",
         };
-      case "mulch":
+      case "cubrir":
         return {
           dibujoId: "tierra_humeda",
           palabra: qu ? "Chhalla" : "Tapar suelo",
           bg: "var(--tierra-suave)",
           muestra: "var(--tierra)",
         };
-      case "bare":
+      case "suelo_pelado":
         return {
           dibujoId: "tierra_seca",
           palabra: qu ? "Q'ara" : "Tierra pelada",
@@ -69,8 +69,8 @@ export default function CropCalendarBar({
       case "regar":
       default:
         return {
-          dibujoId: "brote",
-          palabra: cell.category === "idle" ? (qu ? "Samay" : "Descanso") : (qu ? "Tarpuy" : "Cultivo"),
+          dibujoId: "gota_agua",
+          palabra: qu ? "Parqoy" : "Regar",
           bg: "var(--cielo-suave)",
           muestra: "var(--cielo)",
         };
@@ -165,9 +165,52 @@ export default function CropCalendarBar({
           </span>
         </div>
 
-        <p className="text-base" style={{color:'var(--tinta-suave)'}}>Los meses describen cultivos y cobertura. El riego se decide revisando la humedad de tu parcela.</p>
-        {/* Las 12 casillas grandes de los meses */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+        {/* Leyenda visual clara (Dibujo + Color + Palabra) */}
+        <div
+          className="p-3.5 rounded-2xl flex flex-wrap items-center justify-center gap-4 text-base font-extrabold"
+          style={{
+            backgroundColor: "var(--arena)",
+            border: "var(--border-width-medium) solid var(--tinta)",
+          }}
+        >
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--hoja)", border: "2px solid var(--tinta)" }}
+            />
+            <IlustracionTarpuy id="semilla" size={28} />
+            <span>{qu ? "Tarpuy (Sembrar)" : "Semilla = Sembrar"}</span>
+          </span>
+
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--cielo)", border: "2px solid var(--tinta)" }}
+            />
+            <IlustracionTarpuy id="gota_agua" size={28} />
+            <span>{qu ? "Parqoy (Regar)" : "Gota = Regar"}</span>
+          </span>
+
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--dorado)", border: "2px solid var(--tinta)" }}
+            />
+            <IlustracionTarpuy id="cosecha" size={28} />
+            <span>{qu ? "Puquy (Cosechar)" : "Cosecha = Cosechar"}</span>
+          </span>
+
+          <span className="inline-flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full inline-block"
+              style={{ backgroundColor: "var(--ladrillo)", border: "2px solid var(--tinta)" }}
+            />
+            <span>{qu ? "Kaypi kachkanchik" : "Estamos aquí (mes actual)"}</span>
+          </span>
+        </div>
+
+        {/* Las 12 casillas grandes de los meses (2 filas de 6 desde sm, 3 filas de 4 en móvil sin cortar texto) */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3.5">
           {cells.map((c, idx) => {
             const estilo = obtenerEstiloAccion(c);
             const isSel = selectedIdx === idx;
@@ -180,11 +223,11 @@ export default function CropCalendarBar({
                 onClick={() => setSelectedIdx(idx)}
                 aria-pressed={isSel}
                 title={`${c.monthName}: ${c.cropName}`}
-                className={`tarpuy-btn-physical p-3.5 flex flex-col items-center justify-between gap-2 text-center cursor-pointer relative ${
+                className={`tarpuy-btn-physical p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center cursor-pointer relative ${
                   isSel ? "tarpuy-btn-physical--pressed" : ""
                 }`}
                 style={{
-                  minHeight: "156px",
+                  minHeight: "148px",
                   backgroundColor: estilo.bg,
                   color: "var(--tinta)",
                   outline: esMesActual
@@ -197,36 +240,35 @@ export default function CropCalendarBar({
                 {/* Marca "Estamos aquí" en --ladrillo para el mes actual */}
                 {esMesActual && (
                   <span
-                    className="w-full px-2 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wide"
+                    className="w-full px-1.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide"
                     style={{
                       backgroundColor: "var(--ladrillo)",
                       color: "var(--tarjeta)",
                       border: "1.5px solid var(--tinta)",
                     }}
                   >
-                    {qu ? "Kaypi" : "Estamos aquí"}
+                    {qu ? "Kaypi" : "Aquí"}
                   </span>
                 )}
 
-                <span className="font-extrabold text-xl">{c.monthShort}</span>
+                <span className="font-bold text-lg sm:text-xl">{c.monthShort}</span>
 
                 {/* Dibujo de la acción del mes (Semilla, Gota o Cosecha) */}
                 <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                  className="w-13 h-13 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shrink-0"
                   style={{
                     backgroundColor: "var(--tarjeta)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
                   }}
                 >
-                  <IlustracionTarpuy id={estilo.dibujoId} size={46} />
+                  <IlustracionTarpuy id={estilo.dibujoId} size={42} />
                 </div>
 
-                <div className="space-y-0.5">
-                  <span className="block font-extrabold text-base leading-tight">
+                <div className="space-y-0.5 w-full">
+                  <span className="block font-bold text-sm sm:text-base leading-tight break-words">
                     {estilo.palabra}
                   </span>
                   <span
-                    className="block text-sm font-bold truncate"
+                    className="block text-sm font-normal leading-tight break-words"
                     style={{ color: "var(--tinta-suave)" }}
                   >
                     {c.shortWord}

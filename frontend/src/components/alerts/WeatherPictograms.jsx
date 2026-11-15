@@ -12,15 +12,43 @@ import {
 
 /**
  * WeatherPictograms — Mantiene todos los nombres y firmas existentes,
- * reemplazando sus dibujos con el nuevo set de ilustraciones hechas a mano
+ * reemplazando sus dibujos y estilos con el sistema visual de Fase 1 + 1B
  * y 100% variables CSS (cero hex sueltos).
  */
 
 export const TONE_CLASSES = {
-  rose: { bgVar: "var(--alerta-critico-suave)", bar: "bg-rose-600", badge: "bg-rose-100 text-rose-800", text: "text-rose-700" },
-  amber: { bgVar: "var(--alerta-cuidado-suave)", bar: "bg-amber-500", badge: "bg-amber-100 text-amber-900", text: "text-amber-800" },
-  sky: { bgVar: "var(--cielo-suave)", bar: "bg-sky-700", badge: "bg-sky-100 text-sky-900", text: "text-sky-800" },
-  emerald: { bgVar: "var(--hoja-suave)", bar: "bg-emerald-600", badge: "bg-emerald-100 text-emerald-800", text: "text-emerald-800" },
+  rose: {
+    bar: "tarpuy-bar-critico",
+    badge: "tarpuy-badge-critico",
+    text: "tarpuy-text-critico",
+    bgVar: "var(--alerta-critico-suave)",
+    barVar: "var(--alerta-critico)",
+    inkVar: "var(--alerta-critico-oscuro)",
+  },
+  amber: {
+    bar: "tarpuy-bar-cuidado",
+    badge: "tarpuy-badge-cuidado",
+    text: "tarpuy-text-cuidado",
+    bgVar: "var(--alerta-cuidado-suave)",
+    barVar: "var(--alerta-cuidado)",
+    inkVar: "var(--alerta-cuidado-oscuro)",
+  },
+  sky: {
+    bar: "tarpuy-bar-cielo",
+    badge: "tarpuy-badge-cielo",
+    text: "tarpuy-text-cielo",
+    bgVar: "var(--cielo-suave)",
+    barVar: "var(--cielo)",
+    inkVar: "var(--cielo-oscuro)",
+  },
+  emerald: {
+    bar: "tarpuy-bar-hoja",
+    badge: "tarpuy-badge-hoja",
+    text: "tarpuy-text-hoja",
+    bgVar: "var(--hoja-suave)",
+    barVar: "var(--hoja)",
+    inkVar: "var(--hoja-oscura)",
+  },
 };
 
 export function WeatherIllustration({ kind = "stable", animated = false, className = "w-12 h-12" }) {
@@ -50,18 +78,28 @@ export function VisualMeter3({ level = 2, tone = "sky", labels = ["Bajo", "Medio
   const cfg = TONE_CLASSES[tone] || TONE_CLASSES.sky;
   return (
     <div className="space-y-1.5 min-w-0">
-      <div className="grid grid-cols-3 gap-1.5" aria-hidden="true">
+      <div className="grid grid-cols-3 gap-2" aria-hidden="true">
         {[1, 2, 3].map((step) => (
-          <div key={step} className={`h-2.5 rounded-full ${step <= level ? cfg.bar : "bg-stone-200"}`} />
+          <div
+            key={step}
+            className="h-3.5 rounded-full"
+            style={{
+              backgroundColor: step <= level ? cfg.barVar : "var(--arena)",
+              border: "1.5px solid var(--tinta)",
+            }}
+          />
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-1 text-[10px] sm:text-[11px] leading-tight">
+      <div className="grid grid-cols-3 gap-1 text-xs leading-tight">
         {labels.slice(0, 3).map((lbl, idx) => (
           <span
             key={lbl}
             className={`truncate ${idx === 1 ? "text-center" : idx === 2 ? "text-right" : "text-left"} ${
-              idx + 1 === level ? `font-bold ${cfg.text}` : "text-stone-500"
+              idx + 1 === level ? "font-extrabold" : "font-bold"
             }`}
+            style={{
+              color: idx + 1 === level ? "var(--tinta)" : "var(--tinta-suave)",
+            }}
           >
             {lbl}
           </span>
@@ -77,22 +115,22 @@ export function RainDropsVisual({ count = 0, text, lang = "es", compact = false 
   const n = Math.max(0, Math.min(3, count));
   const label = text || (lang === "qu" ? wordsQu[n] : wordsEs[n]);
   return (
-    <div className="flex items-center gap-1 min-w-0">
-      <div className="flex items-center gap-0.5 shrink-0" aria-hidden="true">
+    <div className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-center gap-1 shrink-0" aria-hidden="true">
         {[1, 2, 3].map((i) => (
-          <svg key={i} viewBox="0 0 16 20" className={compact ? "w-2.5 h-3.5" : "w-3.5 h-4"}>
+          <svg key={i} viewBox="0 0 16 20" className={compact ? "w-3.5 h-4" : "w-4 h-5"}>
             <path
               d="M8 1C11 6 14 9.5 14 13a6 6 0 1 1-12 0c0-3.5 3-7 6-12z"
-              fill={i <= n ? "var(--color-illus-water)" : "var(--color-border-subtle)"}
-              stroke="var(--color-ink-stroke)"
-              strokeWidth="1.2"
+              fill={i <= n ? "var(--cielo)" : "var(--arena)"}
+              stroke="var(--tinta)"
+              strokeWidth="1.5"
             />
           </svg>
         ))}
       </div>
       <span
-        className={`${compact ? "text-[11px]" : "text-xs"} font-semibold leading-tight whitespace-nowrap`}
-        style={{ color: n > 0 ? "var(--color-text-primary)" : "var(--color-text-muted)" }}
+        className={`${compact ? "text-xs" : "text-sm"} font-extrabold leading-tight whitespace-nowrap`}
+        style={{ color: n > 0 ? "var(--tinta)" : "var(--tinta-suave)" }}
       >
         {label}
       </span>
@@ -188,9 +226,33 @@ export function cleanAlertForFarmer(alert, lang = "es") {
   const trAlert = translateAlertText(alert, lang);
   const sev = alert.severity || "info";
   const style = sev === "critical"
-    ? { badgeText: qu ? "MANCHAY" : "PELIGRO", bannerPill: qu ? "CHAKRAPI MANCHAY" : "PELIGRO EN TU CHACRA", badgeClass: "bg-rose-100 text-rose-800", borderClass: "border-rose-300 border-l-rose-600", bgClass: "bg-rose-50/70" }
+    ? {
+        severity: "critical",
+        semaforo: "critico",
+        badgeText: qu ? "MANCHAY" : "PELIGRO",
+        bannerPill: qu ? "CHAKRAPI MANCHAY" : "PELIGRO EN TU CHACRA",
+        badgeClass: "",
+        borderClass: "",
+        bgClass: "",
+      }
     : sev === "warning"
-    ? { badgeText: qu ? "QHAWAY" : "CUIDADO", bannerPill: qu ? "CHAKRAPI QHAWAY" : "CUIDADO EN TU CHACRA", badgeClass: "bg-amber-100 text-amber-900", borderClass: "border-amber-300 border-l-amber-500", bgClass: "bg-amber-50/70" }
-    : { badgeText: qu ? "ALLIN WILLAY" : "BUENA NOTICIA", bannerPill: qu ? "ALLIN PACHA" : "BUEN TIEMPO", badgeClass: "bg-emerald-100 text-emerald-800", borderClass: "border-emerald-300 border-l-emerald-600", bgClass: "bg-emerald-50/60" };
-  return { ...style, severity: sev, kind: ALERT_KIND[alert.id] || "stable", cleanTitle: trAlert.title, category: trAlert.category, action: trAlert.action };
+    ? {
+        severity: "warning",
+        semaforo: "cuidado",
+        badgeText: qu ? "QHAWAY" : "CUIDADO",
+        bannerPill: qu ? "CHAKRAPI QHAWAY" : "CUIDADO EN TU CHACRA",
+        badgeClass: "",
+        borderClass: "",
+        bgClass: "",
+      }
+    : {
+        severity: "info",
+        semaforo: "tranquilo",
+        badgeText: qu ? "ALLIN WILLAY" : "BUENA NOTICIA",
+        bannerPill: qu ? "ALLIN PACHA" : "BUEN TIEMPO",
+        badgeClass: "",
+        borderClass: "",
+        bgClass: "",
+      };
+  return { ...style, kind: ALERT_KIND[alert.id] || "stable", cleanTitle: trAlert.title, category: trAlert.category, action: trAlert.action };
 }

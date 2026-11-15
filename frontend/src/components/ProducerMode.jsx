@@ -6,6 +6,8 @@ import { CropIllustration } from "../features/producer/FarmPictograms.jsx";
 import { BotonGrande } from "./ui/TarpuyBaseComponents.jsx";
 import { PatronPantalla, SelloCartilla } from "./personality/PatronesYSellos.jsx";
 import { IlustracionTarpuy } from "./illustrations/TarpuyIllustrations.jsx";
+import MamaTomasaAyuda from "./personality/MamaTomasaAyuda.jsx";
+import { buildStrategyNarration } from "../services/narration.js";
 import { tr } from "../utils/quechuaI18n.js";
 
 /**
@@ -60,6 +62,118 @@ export default function ProducerMode({
   }, [cropId, irrigation, priorities]);
 
   const shownStrategy = ordered[selectedIdx] || ordered[0];
+  const stratKey = shownStrategy
+    ? `${shownStrategy.strategy_id}_${qu ? "qu" : "es"}`
+    : `siembra_guia_${qu ? "qu" : "es"}`;
+
+  const handleListenMamaTomasa = () => {
+    if (shownStrategy) {
+      onSpeak?.(
+        buildStrategyNarration(shownStrategy, qu ? "qu" : "es"),
+        qu ? "qu" : "es",
+        stratKey,
+        `strat_${shownStrategy.strategy_id}`
+      );
+    } else {
+      const msg = qu
+        ? "Kay 4 tapuykunata kutichiy, chakraykipaq allin tarpuyta rikuchisqayki."
+        : "Responde estas 4 preguntas con calma tocando los dibujos. Abajo verás el mejor plan para tu tierra.";
+      onSpeak?.(msg, qu ? "qu" : "es", stratKey);
+    }
+  };
+
+  /* Semáforo y expresión de Fase 1 de Mamá Tomasa para la estrategia seleccionada */
+  const tl = shownStrategy?.traffic_light || {};
+  const esLineaBase = shownStrategy?.strategy_type === "current_baseline";
+  const semaforoPrincipalSiembra = esLineaBase
+    ? tl.soil === "red" || tl.water === "red"
+      ? "rojo"
+      : "amarillo"
+    : selectedIdx === 0
+    ? "verde"
+    : "verde";
+
+  const posePrincipalSiembra = esLineaBase
+    ? "alerta"
+    : selectedIdx === 0
+    ? "cosecha"
+    : "siembra";
+
+  const mensajeCortoSiembra = !shownStrategy
+    ? qu
+      ? "4 tapuykunata ñit'iy allin tarpuyta rikunapaq."
+      : "Toca los dibujos de las 4 preguntas para ver tu plan."
+    : esLineaBase
+    ? qu
+      ? "Kikinllata tarpuyqa allpata sayk'uchin."
+      : "Repetir el mismo cultivo cansa la tierra. Mira el semáforo:"
+    : selectedIdx === 0
+    ? qu
+      ? "Kay tarpuyqa allpaykita wanuchan, yakutapas waqaychan."
+      : "Este es el mejor plan: abona tu tierra y cuida el agua."
+    : qu
+    ? "Allin tarpuy allpayki samananpaq."
+    : "Buena opción para rotar tus cultivos y cuidar el suelo.";
+
+  const mapTrafficColor = (val) =>
+    val === "green" ? "verde" : val === "red" ? "rojo" : "amarillo";
+
+  const tarjetasMamaTomasa = shownStrategy
+    ? [
+        {
+          id: "semaforo_suelo",
+          dibujoId: "planta_crecida",
+          pose: tl.soil === "red" ? "alerta" : "siembra",
+          semaforo: mapTrafficColor(tl.soil || (esLineaBase ? "yellow" : "green")),
+          titulo: qu ? "Allpa wan wanu (Tu tierra)" : "Tu tierra y abono",
+          frase:
+            tl.soil === "green"
+              ? qu
+                ? "Allpata samachin, wanutapas saqin."
+                : "Deja abono natural y descansa la tierra."
+              : tl.soil === "red"
+              ? qu
+                ? "Allpata utqhaylla sayk'uchin."
+                : "Agota los nutrientes del suelo."
+              : qu
+              ? "Allpata chawpillanpi waqaychan."
+              : "Mantiene el suelo regular.",
+        },
+        {
+          id: "semaforo_agua",
+          dibujoId: "gota_agua",
+          pose: tl.water === "red" ? "alerta" : "riego",
+          semaforo: mapTrafficColor(tl.water || "green"),
+          titulo: qu ? "Yaku munay (El agua)" : "Cuidado del agua",
+          frase:
+            tl.water === "green"
+              ? qu
+                ? "Allpapi yakuta allinta waqaychan."
+                : "Guarda bien la humedad en los surcos."
+              : tl.water === "red"
+              ? qu
+                ? "Achka yakuta munan."
+                : "Pierde humedad rápido; pide más riego."
+              : qu
+              ? "Chawpi qarpayta munan."
+              : "Necesita riego moderado.",
+        },
+        {
+          id: "semaforo_cosecha",
+          dibujoId: "cosecha",
+          pose: esLineaBase ? "alerta" : "cosecha",
+          semaforo: esLineaBase ? "amarillo" : "verde",
+          titulo: qu ? "Puquy (La cosecha)" : "Tu cosecha",
+          frase: esLineaBase
+            ? qu
+              ? "Watamanta wataman pisi puquy."
+              : "Da menos cosecha con el paso de los años."
+            : qu
+            ? "Allin puquy, allin mikhuna."
+            : "Buena cosecha y alimento seguro.",
+        },
+      ]
+    : [];
 
   const handleVerMiPlan = () => {
     setShowComparison(true);
@@ -133,20 +247,14 @@ export default function ProducerMode({
           >
             <span
               className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "var(--border-width-medium) solid var(--tinta)",
-              }}
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
               <IlustracionTarpuy id="cartilla_grafico" size={34} />
             </span>
-            <span className="font-extrabold">{tr(lang, "posterBtn")}</span>
+            <span className="font-bold">{tr(lang, "posterBtn")}</span>
           </a>
         </div>
       </div>
-
-      {/* Patrón fijo de Siembra: Terrazas agrícolas */}
-      <PatronPantalla tipo="terrazas" />
 
       {/* 1. LAS 4 PREGUNTAS CONVERSACIONALES + 2. BOTÓN GRANDE "VER MI PLAN" */}
       <PrioritySelectorGrid
@@ -164,7 +272,7 @@ export default function ProducerMode({
         lang={lang}
       />
 
-      {/* Patrón fijo de Siembra antes de los resultados */}
+      {/* Único patrón suave de Siembra antes de los resultados */}
       <PatronPantalla tipo="terrazas" />
 
       {/* 3. LOS RESULTADOS (Las 3 estrategias ordenadas) */}
@@ -176,15 +284,15 @@ export default function ProducerMode({
           </div>
         ) : ordered.length > 0 && shownStrategy ? (
           <div className="space-y-6">
-            {/* Encabezado de resultados + Sello de Cartilla de Fase 1C */}
+            {/* Encabezado de resultados + Sello de Cartilla */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="tarpuy-title">
                   {qu ? "Chakraykipaq 3 tarpuy ñankuna" : "Tus 3 opciones de siembra"}
                 </h3>
-                <p className="tarpuy-body font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <p className="tarpuy-body font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {qu
-                    ? " hukta ñit'iy 12 killa tarpuyta rikunapaq"
+                    ? "Hukta ñit'iy 12 killa tarpuyta rikunapaq"
                     : "Toca cualquiera de las 3 tarjetas para ver su calendario de 12 meses"}
                 </p>
               </div>
@@ -196,7 +304,7 @@ export default function ProducerMode({
               />
             </div>
 
-            {/* Selector visual de las 3 estrategias (La mejor para ti, Otra buena opción, Como siempre se hizo) */}
+            {/* Selector visual de las 3 estrategias */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {ordered.map((s, idx) => {
                 const info = tabInfo(s, idx);
@@ -213,19 +321,17 @@ export default function ProducerMode({
                       activa ? "tarpuy-btn-physical--pressed" : ""
                     } p-4 flex flex-col justify-between gap-3 text-left cursor-pointer`}
                     style={{
-                      minHeight: "148px",
+                      minHeight: "140px",
                       backgroundColor: activa ? info.bg : "var(--tarjeta)",
                       color: "var(--tinta)",
-                      outline: activa ? "3px solid var(--tinta)" : "none",
                     }}
                   >
                     <div className="flex items-center justify-between gap-2 w-full">
                       <span
-                        className="px-3 py-1 rounded-full text-sm font-extrabold uppercase tracking-wide"
+                        className="px-3 py-0.5 rounded-full text-sm font-bold"
                         style={{
-                          backgroundColor: info.bg,
+                          backgroundColor: activa ? "var(--tarjeta)" : info.bg,
                           color: "var(--tinta)",
-                          border: "1.5px solid var(--tinta)",
                         }}
                       >
                         {info.etiqueta}
@@ -233,10 +339,10 @@ export default function ProducerMode({
 
                       {info.estrella && (
                         <span
-                          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold"
                           style={{
                             backgroundColor: "var(--dorado)",
-                            border: "2px solid var(--tinta)",
+                            color: "var(--tinta)",
                           }}
                           aria-hidden="true"
                         >
@@ -247,16 +353,13 @@ export default function ProducerMode({
 
                     <div className="flex items-center gap-3">
                       <span
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: "var(--arena)",
-                          border: "var(--border-width-medium) solid var(--tinta)",
-                        }}
+                        className="w-13 h-13 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: "var(--arena)" }}
                       >
                         <CropIllustration
                           cropId={primerCultivo.crop_id}
                           name={primerCultivo.crop_name}
-                          className="w-12 h-12"
+                          className="w-11 h-11"
                         />
                       </span>
                       <div className="min-w-0">
@@ -302,6 +405,23 @@ export default function ProducerMode({
           </div>
         )}
       </div>
+
+      {/* Ventana emergente de Mamá Tomasa en la pantalla de Siembra */}
+      <MamaTomasaAyuda
+        titulo={
+          shownStrategy
+            ? shownStrategy.title_es
+            : tr(lang, "rotationTitle")
+        }
+        pose={posePrincipalSiembra}
+        semaforoPrincipal={semaforoPrincipalSiembra}
+        mensaje={mensajeCortoSiembra}
+        tarjetas={tarjetasMamaTomasa}
+        onListen={handleListenMamaTomasa}
+        isSpeaking={activeAudioKey === stratKey}
+        badgeCount={tarjetasMamaTomasa.length}
+        lang={lang}
+      />
     </div>
   );
 }

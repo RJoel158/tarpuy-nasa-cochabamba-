@@ -2,7 +2,6 @@ import React from "react";
 import { CropIllustration, WaterIllustration, ToolIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
 import { BotonGrande } from "../../components/ui/TarpuyBaseComponents.jsx";
-import { PersonajeGuia, GloboHabla } from "../../components/personality/PersonajeGuia.jsx";
 
 /**
  * TARPUY NASA COCHABAMBA — LAS 4 PREGUNTAS GUIADAS DE SIEMBRA (FASE 4)
@@ -139,7 +138,7 @@ function CheckDibujado({ size = 28 }) {
   );
 }
 
-/* Barra de avance dibujada: Semilla → Brote → Planta → Cosecha */
+/* Barra de avance dibujada: Semilla → Brote → Planta → Cosecha (sin bordes ni sub-cajas) */
 function BarraAvanceDibujada({ qu = false }) {
   const pasos = [
     { num: 1, dibujo: "semilla", texto: qu ? "1. Ñawpa tarpuy" : "1. Cultivo anterior" },
@@ -151,23 +150,16 @@ function BarraAvanceDibujada({ qu = false }) {
   return (
     <div
       aria-label="Pasos de tu conversación de siembra"
-      className="p-4 rounded-3xl grid grid-cols-2 sm:grid-cols-4 gap-3"
-      style={{
-        backgroundColor: "var(--arena)",
-        border: "var(--border-width-medium) solid var(--tinta)",
-      }}
+      className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-3"
     >
       {pasos.map((p) => (
         <div
           key={p.num}
-          className="px-3 py-2.5 rounded-2xl flex items-center gap-3"
-          style={{
-            backgroundColor: "var(--tarjeta)",
-            border: "var(--border-width-medium) solid var(--tinta)",
-          }}
+          className="px-3.5 py-2.5 rounded-2xl flex items-center gap-3"
+          style={{ backgroundColor: "var(--arena)" }}
         >
-          <IlustracionTarpuy id={p.dibujo} size={38} />
-          <span className="font-extrabold text-base leading-tight">{p.texto}</span>
+          <IlustracionTarpuy id={p.dibujo} size={36} />
+          <span className="font-medium text-base leading-tight">{p.texto}</span>
         </div>
       ))}
     </div>
@@ -198,22 +190,8 @@ export default function PrioritySelectorGrid({
 
   return (
     <div className="space-y-6">
-      {/* Encabezado conversacional con el Personaje Guía y Barra de avance dibujada */}
-      <div className="tarpuy-card-physical p-5 sm:p-6 space-y-5">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <PersonajeGuia pose="siembra" mostrarEtiquetaNombre={true} size={96} />
-          <GloboHabla
-            direccionCola="izquierda"
-            tono="recomendado"
-            texto={
-              qu
-                ? " kay 4 tapuykunata kutichiy, chakraykipaq allin tarpuyta rikuchisqayki."
-                : "Responde estas 4 preguntas con calma tocando los dibujos. Abajo verás el mejor plan para tu tierra."
-            }
-            className="w-full"
-          />
-        </div>
-
+      {/* Barra de avance dibujada (la explicación larga vive en la ventana de Mamá Tomasa) */}
+      <div className="tarpuy-card-physical p-5 sm:p-6">
         <BarraAvanceDibujada qu={qu} />
       </div>
 
@@ -242,7 +220,7 @@ export default function PrioritySelectorGrid({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {cropItems.map((c) => {
             const active = cropId === c.crop_id;
             const meta = CROP_LABELS[c.crop_id] || {
@@ -260,36 +238,35 @@ export default function PrioritySelectorGrid({
                 aria-pressed={active}
                 className={`tarpuy-btn-physical ${
                   active ? "tarpuy-btn-physical--pressed" : ""
-                } relative p-4 flex flex-col items-center justify-between gap-2.5 text-center cursor-pointer`}
+                } relative p-3 sm:p-4 flex flex-col items-center justify-between gap-2 text-center cursor-pointer`}
                 style={{
-                  minHeight: "148px",
+                  minHeight: "144px",
                   backgroundColor: active ? "var(--hoja-suave)" : "var(--tarjeta)",
                   color: "var(--tinta)",
                 }}
               >
                 {active && (
-                  <span className="absolute right-2.5 top-2.5">
-                    <CheckDibujado size={26} />
+                  <span className="absolute right-2 top-2">
+                    <CheckDibujado size={24} />
                   </span>
                 )}
 
                 <span
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shrink-0"
                   style={{
                     backgroundColor: "var(--arena)",
-                    border: "var(--border-width-medium) solid var(--tinta)",
                   }}
                 >
-                  <CropIllustration cropId={c.crop_id} className="w-16 h-16" />
+                  <CropIllustration cropId={c.crop_id} className="w-14 h-14 sm:w-16 sm:h-16" />
                 </span>
 
-                <span className="min-w-0">
-                  <span className="block font-extrabold text-xl leading-snug break-words">
+                <span className="min-w-0 w-full">
+                  <span className="block font-bold text-lg sm:text-xl leading-snug break-words">
                     {mainName}
                   </span>
                   {subName ? (
                     <span
-                      className="block text-sm font-bold mt-0.5 break-words"
+                      className="block text-sm font-normal mt-0.5 break-words"
                       style={{ color: "var(--tinta-suave)" }}
                     >
                       {subName}
@@ -510,14 +487,14 @@ export default function PrioritySelectorGrid({
           })}
         </div>
 
-        {/* 2. UN BOTÓN GRANDE "VER MI PLAN" AL FINAL DEL FORMULARIO */}
-        <div className="pt-4">
+        {/* 2. BOTÓN GRANDE "VER MI PLAN" FIJO EN ZONA DEL PULGAR EN MÓVIL (sin tapar a Mamá Tomasa) */}
+        <div className="sticky bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] z-20 lg:static pt-3 pr-20 lg:pr-0">
           <BotonGrande
             variante="primario"
             ilustracionId="brote"
-            texto={qu ? "Tarpuyniyta qhaway (Ver mi plan)" : "Ver mi plan"}
+            texto={qu ? "Tarpuyniyta qhaway" : "Ver mi plan"}
             onClick={onVerPlan}
-            className="w-full text-2xl py-4 justify-center"
+            className="w-full text-xl sm:text-2xl py-3.5 sm:py-4 justify-center"
           />
         </div>
 

@@ -180,13 +180,13 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
         <button
           type="button"
           onClick={() => setShowGlossary((p) => !p)}
-          className="no-print min-h-[56px] inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-extrabold cursor-pointer transition-all"
+          className="no-print min-h-[64px] w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-2xl font-bold cursor-pointer transition-all"
           style={{
             backgroundColor: showGlossary ? "var(--dorado-suave)" : "var(--arena)",
             color: "var(--tinta)",
-            border: "var(--tarpuy-border-thin) solid var(--tinta)",
+            border: "2px solid var(--tinta)",
             boxShadow: "0 3px 0 0 var(--tinta)",
-            fontSize: "1rem",
+            fontSize: "1.05rem",
           }}
         >
           <IlustracionTarpuy id="cartilla_grafico" size={28} />
@@ -195,40 +195,33 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
         </button>
       </div>
 
-      {/* Los 3 Sellos Dibujados del Origen del Dato */}
+      {/* Los 3 Sellos Dibujados del Origen del Dato (sin bordes gruesos en elementos informativos) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {THREE_ORIGIN_SEALS.map((seal) => (
           <div
             key={seal.id}
             className="rounded-2xl p-4 flex items-start gap-3.5"
-            style={{
-              backgroundColor: seal.bg,
-              border: "var(--tarpuy-border-medium) solid var(--tinta)",
-            }}
+            style={{ backgroundColor: seal.bg }}
           >
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: "var(--tarjeta)",
-                border: "var(--tarpuy-border-thin) solid var(--tinta)",
-              }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "var(--tarjeta)" }}
             >
-              <IlustracionTarpuy id={seal.illus} size={50} />
+              <IlustracionTarpuy id={seal.illus} size={46} />
             </div>
             <div className="space-y-1">
               <span
-                className="inline-block px-2.5 py-0.5 rounded-full font-extrabold"
+                className="inline-block px-2.5 py-0.5 rounded-full font-bold"
                 style={{
                   backgroundColor: "var(--tarjeta)",
                   color: seal.accent,
-                  border: "1.5px solid var(--tinta)",
                   fontSize: "0.9rem",
                 }}
               >
                 {isQu ? seal.badgeQu : seal.badge}
               </span>
               <p
-                className="font-bold leading-snug"
+                className="font-normal leading-snug"
                 style={{
                   color: "var(--tinta)",
                   fontSize: "var(--tarpuy-text-body-min)",
@@ -241,7 +234,7 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
         ))}
       </div>
 
-      {/* Tarjetas de cada fuente de datos con su sello dibujado y frase simple */}
+      {/* Tarjetas de cada fuente de datos con su sello dibujado y frase simple (sin cajas dentro de cajas) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {items.map((item) => {
           const seal = resolveOriginSeal(item);
@@ -249,40 +242,32 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
             <div
               key={item.layer || item.title_es}
               className="rounded-2xl p-4 sm:p-5 space-y-3"
-              style={{
-                backgroundColor: "var(--arena)",
-                border: "var(--tarpuy-border-thin) solid var(--tinta)",
-              }}
+              style={{ backgroundColor: "var(--arena)" }}
             >
               <div className="flex items-start gap-3.5">
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                  style={{
-                    backgroundColor: seal.bg,
-                    border: "var(--tarpuy-border-thin) solid var(--tinta)",
-                  }}
+                  style={{ backgroundColor: seal.bg }}
                 >
-                  <IlustracionTarpuy id={seal.illus} size={42} />
+                  <IlustracionTarpuy id={seal.illus} size={40} />
                 </div>
                 <div className="space-y-1 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className="inline-block px-2.5 py-0.5 rounded-full font-extrabold"
+                      className="inline-block px-2.5 py-0.5 rounded-full font-bold"
                       style={{
                         backgroundColor: seal.bg,
                         color: seal.accent,
-                        border: "1.5px solid var(--tinta)",
                         fontSize: "0.85rem",
                       }}
                     >
                       {seal.badge}
                     </span>
                     <span
-                      className="inline-block px-2.5 py-0.5 rounded-full font-extrabold"
+                      className="inline-block px-2.5 py-0.5 rounded-full font-medium"
                       style={{
                         backgroundColor: "var(--tarjeta)",
-                        color: "var(--tinta)",
-                        border: "1.5px solid var(--tinta)",
+                        color: "var(--tinta-suave)",
                         fontSize: "0.8rem",
                       }}
                     >
@@ -290,7 +275,7 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
                     </span>
                   </div>
                   <h4
-                    className="font-extrabold leading-snug"
+                    className="font-bold leading-snug"
                     style={{
                       fontFamily: "var(--tarpuy-font-display)",
                       fontSize: "1.2rem",
@@ -304,11 +289,10 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
 
               {/* Frase simple siempre visible */}
               <p
-                className="font-extrabold px-3.5 py-2.5 rounded-xl"
+                className="font-medium px-3.5 py-2.5 rounded-xl"
                 style={{
                   backgroundColor: "var(--tarjeta)",
                   color: "var(--tinta)",
-                  border: "1.5px solid var(--tinta)",
                   fontSize: "var(--tarpuy-text-body-min)",
                 }}
               >
@@ -348,11 +332,12 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
           <button
             type="button"
             onClick={() => setShowTechDetailsInEasy((prev) => !prev)}
-            className="w-full min-h-[56px] px-4 py-3 rounded-2xl font-extrabold flex items-center justify-between gap-3 cursor-pointer"
+            className="w-full min-h-[64px] px-4 py-3 rounded-2xl font-bold flex items-center justify-between gap-3 cursor-pointer"
             style={{
               backgroundColor: "var(--arena)",
               color: "var(--tinta)",
-              border: "var(--tarpuy-border-thin) solid var(--tinta)",
+              border: "2px solid var(--tinta)",
+              boxShadow: "0 3px 0 0 var(--tinta)",
               fontSize: "var(--tarpuy-text-body-min)",
             }}
           >
@@ -361,7 +346,7 @@ export default function DataVeracityCard({ manifest = [], isAdvanced = true, lan
                 ? "Ocultar fuentes técnicas detalladas"
                 : "Ver fuentes técnicas completas (NASA POWER, SMAP, SoilGrids)"}
             </span>
-            {showTechDetailsInEasy ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+            {showTechDetailsInEasy ? <ChevronUp className="w-6 h-6 shrink-0" /> : <ChevronDown className="w-6 h-6 shrink-0" />}
           </button>
         </div>
       ) : null}

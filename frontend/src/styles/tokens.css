@@ -159,29 +159,43 @@
    * =================================================================== */
   --font-family-base: "Atkinson Hyperlegible", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-family-display: "Nunito", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --tarpuy-font-base: var(--font-family-base);
+  --tarpuy-font-display: var(--font-family-display);
 
   --font-size-body-min: 1.125rem;      /* 18 px */
   --font-size-body: 1.25rem;           /* 20 px */
   --font-size-subtitle: 1.5rem;        /* 24 px */
   --font-size-title: clamp(1.875rem, 3.5vw, 2.25rem); /* 30 px - 36 px */
+  --tarpuy-text-body-min: var(--font-size-body-min);
+  --tarpuy-text-body: var(--font-size-body);
+  --tarpuy-text-subtitle: var(--font-size-subtitle);
+  --tarpuy-text-title: var(--font-size-title);
 
   --line-height-body: 1.55;
   --line-height-title: 1.2;
+  --tarpuy-line-body: var(--line-height-body);
+  --tarpuy-line-title: var(--line-height-title);
 
-  --border-width-thick: 3px;
-  --border-width-medium: 2px;
+  /* Bordes más tranquilos: 2px solo en botones interactivos, 1px suave en delimitadores */
+  --border-width-thick: 2px;
+  --border-width-medium: 1px;
+  --border-width-thin: 1px;
+  --tarpuy-border-thick: 2px;
+  --tarpuy-border-medium: 1px;
+  --tarpuy-border-thin: 1px;
 
-  --radius-btn: 22px;
-  --radius-card: 28px;
+  --radius-btn: 20px;
+  --radius-card: 24px;
   --radius-pill: 9999px;
 
-  --size-btn-min-h: 68px;
-  --size-speaker-btn: 72px;
+  --size-btn-min-h: 64px;
+  --size-speaker-btn: 68px;
   --space-btn-gap: 16px;
 
-  --btn-bevel-height: 5px;
-  --btn-bevel-pressed: 1px;
-  --btn-translate-pressed: 4px;
+  /* Relieve sutil solo para botones interactivos */
+  --btn-bevel-height: 2.5px;
+  --btn-bevel-pressed: 0px;
+  --btn-translate-pressed: 2px;
 }
 
 /* =====================================================================
@@ -210,51 +224,66 @@
 }
 
 /* =====================================================================
- * SUPERFICIES, TEXTURAS SUTILES Y MODO AVANZADO SOBRIO
+ * SUPERFICIES LIMPIAS Y TRANQUILAS + REGLAS MÓVILES (320px–430px)
  * ===================================================================== */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+
 .tarpuy-page-surface {
   background-color: var(--papel);
-  /* Textura de trama de papel / tela muy sutil a baja opacidad (sin degradados llamativos) */
-  background-image: radial-gradient(var(--piedra) 0.55px, transparent 0.55px);
-  background-size: 18px 18px;
+  background-image: none;
   color: var(--tinta);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-min);
   line-height: var(--line-height-body);
+  overflow-x: hidden;
 }
 
-/* Modo Avanzado: misma paleta pero más sobria (sin textura decorativa) */
-[data-modo="avanzado"] .tarpuy-page-surface,
-.tarpuy-page-surface[data-modo="avanzado"],
-[data-producer-mode="false"] {
-  background-image: none;
+/* Nada de texto más pequeño de 14 px (0.875rem), ni siquiera en detalles */
+.tarpuy-page-surface .text-xs {
+  font-size: 0.875rem !important;
+  line-height: 1.35 !important;
 }
 
 .tarpuy-title {
   font-family: var(--font-family-display);
-  font-size: var(--font-size-title);
+  font-size: clamp(1.75rem, 5.2vw, var(--font-size-title));
   line-height: var(--line-height-title);
   color: var(--tinta);
-  font-weight: 800;
+  font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .tarpuy-subtitle {
   font-family: var(--font-family-display);
-  font-size: var(--font-size-subtitle);
+  font-size: clamp(1.375rem, 4.2vw, var(--font-size-subtitle));
   line-height: 1.3;
   color: var(--tinta);
-  font-weight: 800;
+  font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .tarpuy-body {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body);
+  font-size: clamp(1.125rem, 3.8vw, var(--font-size-body));
   line-height: var(--line-height-body);
   color: var(--tinta);
+  font-weight: 400;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+  .tarpuy-body {
+    max-width: 40ch;
+  }
 }
 
 /* =====================================================================
- * BOTONES FÍSICOS (Relleno de color, borde grueso de tinta y sombra dura)
+ * BOTONES FÍSICOS (Únicos elementos con borde de tinta y relieve sutil)
  * ===================================================================== */
 .tarpuy-btn-physical {
   min-height: var(--size-btn-min-h);
@@ -262,7 +291,7 @@
   border-radius: var(--radius-btn);
   font-family: var(--font-family-display);
   font-size: var(--font-size-body);
-  font-weight: 800;
+  font-weight: 700;
   box-shadow: 0 var(--btn-bevel-height) 0 var(--tinta);
   transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
   user-select: none;
@@ -330,7 +359,7 @@
 .tarpuy-btn-physical--disabled {
   background-color: var(--arena);
   color: var(--tinta-apagada);
-  border-color: var(--tinta-suave);
+  border-color: var(--piedra);
   border-style: dashed;
   box-shadow: none;
   transform: translateY(var(--btn-translate-pressed));
@@ -338,26 +367,27 @@
 }
 
 /* =====================================================================
- * TARJETAS, FRANJA DE ZONA Y ETIQUETA DE LOGOS
+ * TARJETAS INFORMATIVAS (Sin borde grueso ni sombra; separadas por fondo y espacio)
  * ===================================================================== */
 .tarpuy-card-physical {
   background-color: var(--tarjeta);
   color: var(--tinta);
-  border: var(--border-width-thick) solid var(--tinta);
+  border: 1px solid color-mix(in srgb, var(--piedra) 32%, transparent);
   border-radius: var(--radius-card);
+  box-shadow: none !important;
 }
 
-/* Franja superior de acento por zona en tarjetas o cabeceras */
+/* Franja superior tranquila en color papel/tarjeta con línea fina de 1px */
 .tarpuy-zona-stripe {
-  background-color: var(--acento-zona-suave);
-  border-bottom: var(--border-width-medium) solid var(--tinta);
+  background-color: var(--tarjeta);
+  border-bottom: 1px solid color-mix(in srgb, var(--piedra) 40%, transparent);
   color: var(--tinta);
 }
 
-/* Etiqueta crema con borde de tinta y esquinas redondeadas para logos en cualquier fondo */
+/* Etiqueta crema para logos institucionales */
 .tarpuy-logo-paper-tag {
   background-color: var(--tarjeta);
-  border: var(--border-width-medium) solid var(--tinta);
+  border: 1px solid color-mix(in srgb, var(--piedra) 45%, transparent);
   border-radius: var(--radius-btn);
 }
 

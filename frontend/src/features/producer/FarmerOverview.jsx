@@ -1,7 +1,7 @@
 import React from "react";
 import { CropIllustration } from "./FarmPictograms.jsx";
 import { BotonGrande, BotonAltavoz } from "../../components/ui/TarpuyBaseComponents.jsx";
-import { PersonajeGuia } from "../../components/personality/PersonajeGuia.jsx";
+import { MiChacra } from "../../components/personality/ElementosContextualesFase1C.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
 /**
@@ -40,6 +40,17 @@ export default function FarmerOverview({
 
   const nombreCultivo = (qu ? crop?.name_qu : crop?.name_es) || crop?.name_es || cropId;
 
+  // TODO-FUNCIONALIDAD: mapear cropId real del catálogo y etapa fenológica calculada para MiChacra.
+  const cultivoSimpleEjemplo = String(cropId || "").includes("papa")
+    ? "papa"
+    : String(cropId || "").includes("haba")
+    ? "haba"
+    : String(cropId || "").includes("quinua")
+    ? "quinua"
+    : String(cropId || "").includes("avena")
+    ? "avena"
+    : "maiz";
+
   return (
     <section
       aria-label={qu ? "Chakray" : "Mi parcela"}
@@ -47,24 +58,20 @@ export default function FarmerOverview({
       className="space-y-4"
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
-        {/* 4. LA PARCELA: Reducida a una línea clara con dibujo del cultivo y nombre de comunidad con franja de acento */}
+        {/* 4. LA PARCELA: Tarjeta tranquila sin bordes internos ni cajas dentro de cajas */}
         <div className="tarpuy-card-physical overflow-hidden lg:col-span-2 flex flex-col justify-between">
-          {/* Franja de acento de la zona */}
+          {/* Franja suave de la zona */}
           <div
-            className="px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 font-extrabold"
+            className="px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 font-medium"
             style={{
-              backgroundColor: "var(--acento-zona-suave)",
-              borderBottom: "var(--border-width-medium) solid var(--tinta)",
+              backgroundColor: "var(--arena)",
               color: "var(--tinta)",
             }}
           >
             <span className="inline-flex items-center gap-2">
               <span
-                className="w-4 h-4 rounded-full inline-block"
-                style={{
-                  backgroundColor: "var(--acento-zona)",
-                  border: "1.5px solid var(--tinta)",
-                }}
+                className="w-3.5 h-3.5 rounded-full inline-block"
+                style={{ backgroundColor: "var(--acento-zona)" }}
                 aria-hidden="true"
               />
               <span>
@@ -73,7 +80,7 @@ export default function FarmerOverview({
               </span>
             </span>
 
-            <span className="text-sm font-bold" style={{ color: "var(--tinta-suave)" }}>
+            <span className="text-sm font-normal" style={{ color: "var(--tinta-suave)" }}>
               {offline
                 ? `${tr(lang, "offline")} · ${
                     savedHere
@@ -92,20 +99,17 @@ export default function FarmerOverview({
           <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: "var(--arena)",
-                  border: "var(--border-width-medium) solid var(--tinta)",
-                }}
+                className="w-18 h-18 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ backgroundColor: "var(--arena)" }}
               >
-                <CropIllustration cropId={cropId} className="w-16 h-16" />
+                <CropIllustration cropId={cropId} className="w-14 h-14" />
               </div>
 
               <div className="min-w-0 space-y-0.5">
-                <h2 className="tarpuy-subtitle break-words">
-                  {community || zone?.name}
+                <h2 className="tarpuy-subtitle">
+                  {community || zone?.name} · {nombreCultivo}
                 </h2>
-                <p className="text-base font-bold" style={{ color: "var(--tinta-suave)" }}>
+                <p className="text-base font-normal" style={{ color: "var(--tinta-suave)" }}>
                   {tr(lang, "stepLastCrop")} {nombreCultivo}
                 </p>
               </div>
@@ -128,19 +132,13 @@ export default function FarmerOverview({
             </div>
           </div>
 
-          {/* Acciones secundarias de la parcela (Cambiar comunidad / Guardar sin internet) */}
-          <div
-            className="px-5 py-3 flex flex-wrap items-center justify-between gap-3"
-            style={{
-              backgroundColor: "var(--arena)",
-              borderTop: "var(--border-width-medium) solid var(--tinta)",
-            }}
-          >
+          {/* Acciones secundarias de la parcela */}
+          <div className="px-5 pb-4 pt-1 flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
               onClick={onMap}
-              className="font-extrabold text-base underline cursor-pointer py-1"
-              style={{ color: "var(--tinta)" }}
+              className="font-bold text-base underline cursor-pointer py-1"
+              style={{ color: "var(--tinta-suave)" }}
             >
               {qu ? tr(lang, "community") : "Cambiar comunidad en el mapa"}
             </button>
@@ -149,19 +147,20 @@ export default function FarmerOverview({
               type="button"
               onClick={onSave}
               disabled={offline}
-              className="font-extrabold text-base underline cursor-pointer py-1 disabled:opacity-50"
-              style={{ color: "var(--tinta)" }}
+              className="font-bold text-base underline cursor-pointer py-1 disabled:opacity-50"
+              style={{ color: "var(--tinta-suave)" }}
             >
               {qu ? tr(lang, "refreshCopy") : "Guardar copia para usar sin internet"}
             </button>
           </div>
         </div>
 
-        <div className="tarpuy-card-physical p-6 flex flex-col items-center justify-center gap-4 text-center" style={{backgroundColor:'var(--hoja-suave)'}}>
-          <PersonajeGuia nombre="Guía de Tarpuy" pose="saludo" size={124} />
-          <p className="tarpuy-subtitle">{qu ? "Chakraykita qhawasun." : "Tu tierra, tus decisiones."}</p>
-          <p className="text-base">{qu ? "Allpata yakuta qhaway." : "Escucha la guía y revisa las opciones para tu próxima siembra."}</p>
-        </div>
+        {/* 5. MI CHACRA (Fase 1C junto a la parcela, con valores de ejemplo y TODO-FUNCIONALIDAD) */}
+        <MiChacra
+          cultivo={cultivoSimpleEjemplo}
+          etapa="brote"
+          className="h-full"
+        />
       </div>
     </section>
   );
