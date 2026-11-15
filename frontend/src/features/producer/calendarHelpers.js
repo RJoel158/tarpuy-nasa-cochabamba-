@@ -63,6 +63,14 @@ export function shortCropWord(crop, lang = "es") {
   return String(crop.crop_name || "").split(/\s+/)[0] || "";
 }
 
+export function stageMonthIndices(stage) {
+  const start = stage?.start_month;
+  const end = stage?.end_month;
+  if (![start, end].every((m) => Number.isInteger(m) && m >= 1 && m <= 12)) return [];
+  const count = ((end - start + 12) % 12) + 1;
+  return Array.from({ length: count }, (_, offset) => (start - 1 + offset) % 12);
+}
+
 export function formatStageRange(startM, endM, lang = "es") {
   if (!startM || !endM) return "";
   const s = MONTH_SHORT[(startM - 1) % 12];

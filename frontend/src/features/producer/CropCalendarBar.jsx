@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CropIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
-import { formatStageRange, resolveMonthCell } from "./calendarHelpers.js";
+import { formatStageRange, resolveMonthCell, stageMonthIndices } from "./calendarHelpers.js";
 import { tr } from "../../utils/quechuaI18n.js";
 
 /**
@@ -23,8 +23,10 @@ export default function CropCalendarBar({
   const mesActualIdx = new Date().getMonth();
   const defaultMonth = Math.max(0, ((cropSequence?.[0]?.start_month || 10) - 1) % 12);
   const [selectedIdx, setSelectedIdx] = useState(defaultMonth);
+  const [selectedStage, setSelectedStage] = useState(null);
 
   useEffect(() => {
+    setSelectedStage(null);
     setSelectedIdx(Math.max(0, ((cropSequence?.[0]?.start_month || 1) - 1) % 12));
   }, [cropSequence]);
 
@@ -35,6 +37,9 @@ export default function CropCalendarBar({
   const bareCount = cells.filter((c) => c.category === "bare").length;
   const protectedCount = 12 - bareCount;
   const activeCell = cells[selectedIdx] || cells[0];
+  const selectedMonths = selectedStage === null
+    ? [selectedIdx]
+    : stageMonthIndices(cropSequence[selectedStage]);
 
   const obtenerEstiloAccion = (cell) => {
     switch (cell.accionVisual) {
@@ -87,11 +92,18 @@ export default function CropCalendarBar({
             <button
               key={`${crop.crop_id || idx}-${idx}`}
               type="button"
-              onClick={() => crop.start_month && setSelectedIdx((crop.start_month - 1) % 12)}
+              onClick={() => {
+                const months = stageMonthIndices(crop);
+                if (!months.length) return;
+                setSelectedStage(idx);
+                setSelectedIdx(months[0]);
+              }}
+              aria-pressed={selectedStage === idx}
               className="tarpuy-btn-physical p-4 flex items-center gap-4 text-left cursor-pointer"
               style={{
                 backgroundColor: "var(--tarjeta)",
                 color: "var(--tinta)",
+                outline: selectedStage === idx ? "3px solid var(--tinta)" : "none",
               }}
             >
               <div
@@ -125,6 +137,14 @@ export default function CropCalendarBar({
                 <span className="block font-extrabold text-xl leading-tight break-words">
                   {crop.crop_name}
                 </span>
+                <span lang="es" className="block text-base leading-relaxed break-words" style={{ color: "var(--tinta-suave)" }}>
+                  {crop.agronomic_role || "Consulta las tareas de este cultivo en el calendario."}
+                </span>
+                {selectedStage === idx && (
+                  <span className="block text-sm font-extrabold">
+                    {qu ? "Akllasqa" : "Paso seleccionado"} · {rangeText}
+                  </span>
+                )}
               </div>
             </button>
           );
@@ -213,15 +233,19 @@ export default function CropCalendarBar({
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3.5">
           {cells.map((c, idx) => {
             const estilo = obtenerEstiloAccion(c);
-            const isSel = selectedIdx === idx;
+            const isSel = selectedMonths.includes(idx);
             const esMesActual = idx === mesActualIdx;
 
             return (
               <button
                 key={c.m}
                 type="button"
-                onClick={() => setSelectedIdx(idx)}
+                onClick={() => {
+                  setSelectedStage(null);
+                  setSelectedIdx(idx);
+                }}
                 aria-pressed={isSel}
+                aria-current={esMesActual ? "date" : undefined}
                 title={`${c.monthName}: ${c.cropName}`}
                 className={`tarpuy-btn-physical p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center cursor-pointer relative ${
                   isSel ? "tarpuy-btn-physical--pressed" : ""
@@ -235,6 +259,7 @@ export default function CropCalendarBar({
                     : isSel
                     ? "3px solid var(--tinta)"
                     : "none",
+                  boxShadow: isSel ? "inset 0 0 0 3px var(--tinta)" : undefined,
                 }}
               >
                 {/* Marca "Estamos aquí" en --ladrillo para el mes actual */}
@@ -252,6 +277,7 @@ export default function CropCalendarBar({
                 )}
 
                 <span className="font-bold text-lg sm:text-xl">{c.monthShort}</span>
+                {isSel && <span className="text-xs font-extrabold">✓ {qu ? "Akllasqa" : "Seleccionado"}</span>}
 
                 {/* Dibujo de la acción del mes (Semilla, Gota o Cosecha) */}
                 <div
