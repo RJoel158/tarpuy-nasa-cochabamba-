@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CropIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
-import { formatStageRange, resolveMonthCell, stageMonthIndices } from "./calendarHelpers.js";
+import { formatStageRange, resolveMonthCell, stageMonthIndices, simpleStageDescription } from "./calendarHelpers.js";
 import { tr } from "../../utils/quechuaI18n.js";
 
 /**
@@ -168,7 +168,7 @@ export default function CropCalendarBar({
                   {crop.crop_name}
                 </span>
                 <span lang="es" className="block text-base leading-relaxed break-words" style={{ color: "var(--tinta-suave)" }}>
-                  {crop.agronomic_role || "Consulta las tareas de este cultivo en el calendario."}
+                  {simpleStageDescription(crop)}
                 </span>
                 {selectedStage === idx && (
                   <span className="block text-sm font-extrabold">

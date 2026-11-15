@@ -63,6 +63,23 @@ export function shortCropWord(crop, lang = "es") {
   return String(crop.crop_name || "").split(/\s+/)[0] || "";
 }
 
+// Texto para productores; conservar agronomic_role para clasificar el plan.
+export function simpleStageDescription(crop) {
+  const descriptions = {
+    maiz_valle: "Siembra maíz para cosechar choclo o grano y aprovechar la chala para tus animales.",
+    papa_huaycha: "Siembra papa para el consumo de tu familia o para vender en el mercado.",
+    avena_vicia: "Siembra avena con vicia para alimentar a tus animales y mantener cubierta la tierra.",
+    mulch_residue: "Deja chala y restos de la cosecha sobre la tierra para que conserve humedad y el viento no se la lleve.",
+    bare_soil_fallow: "Deja descansar la parcela sin sembrar. Si queda descubierta, el sol la seca y el viento puede llevarse la tierra.",
+    alfalfa: "Siembra alfalfa para alimentar a tus animales y ayudar a recuperar la tierra.",
+    haba: "Siembra haba para cosechar alimento y ayudar a recuperar la fuerza de la tierra.",
+    tarwi: "Siembra tarwi para ayudar a recuperar la fuerza de la tierra antes del siguiente cultivo.",
+    quinua: "Siembra quinua para cosechar grano para tu familia o para vender.",
+    cebada: "Siembra cebada para alimentar a tus animales y mantener cubierta la tierra.",
+  };
+  return descriptions[crop?.crop_id] || "Revisa en el calendario cuándo sembrar, cuidar y cosechar este cultivo.";
+}
+
 export function stageMonthIndices(stage) {
   const start = stage?.start_month;
   const end = stage?.end_month;
@@ -115,7 +132,7 @@ export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [],
   let cropId = matched?.crop_id || "";
   let cropName = qu ? "Samariy allpa" : "Descanso";
   let shortWord = qu ? "Samay" : "Libre";
-  let role = qu ? "Chakrapi samay pacha." : "Parcela en transición entre campañas.";
+  let role = qu ? "Chakrapi samay pacha." : "La parcela está en descanso entre una cosecha y la siguiente siembra.";
 
   /* Acción visual para la cinta de 12 meses:
    * - 'sembrar' (semilla, --hoja) en el mes de inicio del cultivo
@@ -161,7 +178,7 @@ export function resolveMonthCell(monthIndex, cropSequence = [], indicators = [],
     cropId,
     cropName,
     shortWord,
-    role,
+    role: matched ? simpleStageDescription(matched) : role,
     wx,
     rainMm,
     tmin,
