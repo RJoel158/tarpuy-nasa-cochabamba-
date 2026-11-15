@@ -3,9 +3,109 @@
 @import "./styles/tokens.css";
 @import "./styles/fonts.css";
 
-.pwa-install-entry { grid-column:1/-1; width:100%; }
-.pwa-install-trigger { display:flex; gap:10px; align-items:center; justify-content:center; width:100%; padding:12px; min-height:48px; border:1px solid currentColor; border-radius:16px; font-weight:800; cursor:pointer; }
-.pwa-install-trigger:focus-visible,.pwa-install-dialog button:focus-visible { outline:3px solid var(--dorado); outline-offset:3px; }
+.pwa-install-entry { grid-column: 1 / -1; width: 100%; margin-top: 2px; }
+.pwa-install-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  min-height: 56px;
+  background: var(--tarjeta);
+  color: var(--tinta);
+  border: 2px solid var(--tinta);
+  border-radius: 18px;
+  box-shadow: 0 3px 0 var(--tinta);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
+}
+.pwa-install-trigger:hover {
+  background: var(--arena);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--tinta);
+}
+.pwa-install-trigger:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--tinta);
+}
+.pwa-install-trigger:focus-visible, .pwa-install-dialog button:focus-visible {
+  outline: 3px solid var(--dorado);
+  outline-offset: 3px;
+}
+.pwa-install-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--hoja-suave);
+  color: var(--hoja-oscura);
+  border: 1.5px solid var(--tinta);
+  flex-shrink: 0;
+}
+.pwa-install-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.25;
+}
+.pwa-install-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--tinta);
+}
+.pwa-install-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pwa-install-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--dorado);
+  color: var(--tinta);
+  font-size: 12px;
+  font-weight: 800;
+  border: 1.5px solid var(--tinta);
+  box-shadow: 0 2px 0 var(--tinta);
+  flex-shrink: 0;
+}
+.tarpuy-sidebar .pwa-install-trigger {
+  background: color-mix(in srgb, var(--tinta-suave) 30%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--tarjeta) 25%, transparent);
+  color: var(--tarjeta);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.tarpuy-sidebar .pwa-install-trigger:hover {
+  background: color-mix(in srgb, var(--tinta-suave) 50%, transparent);
+  border-color: var(--tarjeta);
+}
+.tarpuy-sidebar .pwa-install-title {
+  color: var(--tarjeta);
+}
+.tarpuy-sidebar .pwa-install-subtitle {
+  color: color-mix(in srgb, var(--tarjeta) 75%, transparent);
+}
+.tarpuy-sidebar .pwa-install-icon-badge {
+  background: var(--dorado);
+  color: var(--tinta);
+  border-color: var(--tinta);
+}
+.tarpuy-sidebar .pwa-install-action {
+  background: var(--dorado);
+  color: var(--tinta);
+  border-color: var(--tinta);
+}
 .pwa-install-dialog { width:min(520px,calc(100% - 24px)); max-height:90dvh; margin:auto; padding:0; border:2px solid var(--tinta); border-radius:28px; background:var(--tarjeta); color:var(--tinta); overflow:auto; }
 .pwa-install-dialog::backdrop { background:#231a14b3; }
 .pwa-install-dialog[open] { animation:pwa-install-enter .25s ease-out; }

@@ -103,7 +103,7 @@ function Preferencias({ voiceLang, onChangeVoiceLang, appMode, onChangeAppMode }
         <option value="avanzado">{qu ? "Sut'i (Avanzado)" : "Avanzada"}</option>
       </select>
     </label>
-    <InstallPwa />
+    <InstallPwa lang={voiceLang} />
   </div>;
 }
 
@@ -331,11 +331,10 @@ export function CabeceraNavegacion({
       data-zona={zoneId}
       className="no-print relative w-full px-4 sm:px-8 pt-3 pb-2 max-w-5xl mx-auto space-y-3"
     >
-      {/* FILA 1 EN MÓVIL: Los 2 logos juntos en su etiqueta crema + Comunidad actual + Estado sin internet */}
+      {/* FILA 1 EN MÓVIL: Marca + Comunidad actual + Estado sin internet */}
       <div className="lg:hidden flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex flex-col gap-2 min-w-0">
+        <div className="flex items-center min-w-0">
           <MamaTomasaBrand compact />
-          <InstitutionalBrandBar variant="inline" size="sm" />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
