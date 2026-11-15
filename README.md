@@ -2,7 +2,7 @@
 
 Plataforma tecnológica **offline-first y multimodal** (visual intuitiva + audio bilingüe Quechua/Español) que traduce datos satelitales y climáticos globales de la NASA (`NASA POWER`, `SMAP`, `GPM/IMERG`, `MODIS/Sentinel-2`, `SRTM`, `ECOSTRESS`, `GLDAS`, `FAO GAEZ`) en recomendaciones comparativas de rotación de cultivos (al menos 3 estrategias por parcela/zona) para pequeños productores de Cochabamba, Bolivia con conectividad limitada y baja alfabetización.
 
-## 🏗️ Arquitectura General
+## Arquitectura General
 
 ```mermaid
 graph TD
@@ -18,7 +18,7 @@ Flujo: `etl/` (ingesta/procesamiento) -> `engine/` (lógica agronómica y cálcu
 
 ---
 
-## 👥 Roles del Equipo y Estructura del Repositorio
+## Roles del Equipo y Estructura del Repositorio
 
 La siguiente tabla detalla la distribución de carpetas y las ramas de trabajo sugeridas para los **6 miembros del equipo**:
 
@@ -33,7 +33,7 @@ La siguiente tabla detalla la distribución de carpetas y las ramas de trabajo s
 
 ---
 
-## 🚀 Guía de Configuración y Flujo de Trabajo Git
+## Guía de Configuración y Flujo de Trabajo Git
 
 ### 1. Requisitos Previos
 - **Python 3.13+**
