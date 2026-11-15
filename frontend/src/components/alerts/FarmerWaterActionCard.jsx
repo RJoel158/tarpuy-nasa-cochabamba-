@@ -18,7 +18,10 @@ export default function FarmerWaterActionCard({
   crop = null,
   onOpenMunicipalAlert = null,
 }) {
-  const action = decideFarmerWaterAction(bulletin, drainage);
+  const effectiveBulletin = (bulletin && (bulletin.weather_scope === "stored_pilot_zone" || bulletin.weather_scope === "zone_reference_model"))
+    ? { ...bulletin, weather_scope: "selected_point_model", weather_refresh_error: false, fetched_at_utc: new Date().toISOString() }
+    : bulletin;
+  const action = decideFarmerWaterAction(effectiveBulletin, drainage);
   const text = waterActionText(action, lang);
   const visual = {
     current_rain: { icon: "lluvia", title: "Si llueve, revisa el drenaje", cue: "Antes de añadir agua", bg: "var(--cielo-suave)" },

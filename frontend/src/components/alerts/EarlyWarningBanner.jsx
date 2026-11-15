@@ -85,10 +85,17 @@ export default function EarlyWarningBanner({
   const pred = bulletin.predictions_summary || {};
   const pred14 = bulletin.predictions_summary_14d || {};
   const alertPolicy = weatherAlertPolicy(bulletin);
-  const alerts = alertPolicy.alerts;
+  const realAlerts = bulletin.active_alerts && bulletin.active_alerts.length > 0 ? bulletin.active_alerts : [];
+  const alerts = (alertPolicy.usable && alertPolicy.alerts?.length)
+    ? alertPolicy.alerts
+    : (realAlerts.length ? realAlerts : alertPolicy.alerts || []);
   const days14 = bulletin.fourteen_day_forecast || bulletin.seven_day_forecast || [];
   const primaryWeather = bulletin.weather_provider === "WeatherAPI";
-  const days = primaryWeather ? days14.filter(day => day.forecast_provider === "WeatherAPI") : forecastHorizon === "14d" ? days14 : (bulletin.seven_day_forecast || []);
+  const todayIso = new Date().toLocaleDateString("en-CA");
+  const todayIdx = days14.findIndex(d => d.date === todayIso);
+  const alignedDays = todayIdx > 0 ? days14.slice(todayIdx) : days14;
+  const rawDays = primaryWeather ? alignedDays.filter(day => day.forecast_provider === "WeatherAPI") : forecastHorizon === "14d" ? alignedDays : (alignedDays.slice(0, 7));
+  const days = forecastHorizon === "14d" ? rawDays.slice(0, 14) : rawDays.slice(0, 7);
   const zId = bulletin.zone_id || "punata_valle_alto";
   const aKey = `alert_${zId}_${voiceLang}`;
   const shortZone = (zoneName || zId).split("—")[0].split("-")[0].trim();
@@ -100,11 +107,7 @@ export default function EarlyWarningBanner({
     onSpeak?.(message, voiceLang, aKey);
   };
 
-  const primaryAlert = (!alertPolicy.usable ? {
-    kind: "stable", severity: "unverified", semaforo: "cuidado",
-    bannerPill: "DATOS POR CONFIRMAR", cleanTitle: bulletin.offline_copy ? "Estás viendo un pronóstico guardado" : bulletin.weather_scope === "selected_point_model" ? "Falta actualizar el pronóstico" : "Confirma tu ubicación para consultar el clima",
-    action: bulletin.offline_copy ? "Revisa su fecha y comprueba cómo está tu parcela. Se intentará actualizar al recuperar la conexión." : alerts[0].action_es,
-  } : cleanAlertForFarmer(alerts[0], voiceLang)) || {
+  const primaryAlert = cleanAlertForFarmer(alerts[0], voiceLang) || {
     kind: "stable",
     severity: "info",
     semaforo: "tranquilo",
@@ -151,7 +154,14 @@ export default function EarlyWarningBanner({
   const soilCard = describeSoilCard(cur.soil_moisture_top_pct, voiceLang);
   const rainCard = describeRainCard(pred.total_precip_7d_mm, voiceLang);
   const sunCard = describeSunCard(pred.net_water_balance_7d_mm, voiceLang);
-  const hoyTresTarjetas = weatherTodayCards(days[0]);
+  const todayDay = days[0] || {};
+  const hoyTresTarjetas = weatherTodayCards({
+    temp_min_c: todayDay.temp_min_c ?? pred.min_temp_7d_c ?? cur.temp_c,
+    temp_max_c: todayDay.temp_max_c ?? pred.max_temp_7d_c ?? cur.temp_c,
+    precip_mm: todayDay.precip_mm ?? cur.precip_mm ?? 0,
+    wind_kmh: todayDay.wind_kmh ?? cur.wind_kmh ?? 0,
+    ...todayDay,
+  });
   const cardTones = {
     unknown: { bg: "var(--arena)", label: "Datos por confirmar" },
     warning: { bg: "var(--alerta-cuidado-suave)", label: "Atención" },
@@ -452,7 +462,7 @@ export default function EarlyWarningBanner({
         </div>
 
         <HorizontalCarousel label="Pronóstico de la semana" kind="day">
-          {days.map((d) => {
+          {days.map((d, idx) => {
             const dv = describeDayVisual(d, voiceLang);
             const bgCasilla =
               dv.tone === "rose"
@@ -477,7 +487,7 @@ export default function EarlyWarningBanner({
               >
                 {/* Día arriba */}
                 <span className="font-bold text-lg leading-tight">
-                  {d.day_label}
+                  {idx === 0 || d.date === todayIso ? (isQu ? `Kunan · ${d.day_label}` : `Hoy · ${d.day_label}`) : d.day_label}
                 </span>
 
                 {/* UN dibujo grande del clima sin borde interior */}
