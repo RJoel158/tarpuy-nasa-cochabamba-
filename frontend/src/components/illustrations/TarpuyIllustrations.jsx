@@ -412,6 +412,53 @@ export function DibujoHaba({ size = 64, className = "" }) {
   );
 }
 
+/* 14B. HORTALIZAS (Yuyukuna - Cebolla, Zanahoria, Lechuga) */
+export function DibujoHortaliza({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Hortalizas">
+      {/* Tallos / hojas verdes */}
+      <path d="M26 28C22 18 16 12 14 10C22 13 25 20 27 26" fill={LEAF} stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M30 26C31 16 32 8 32 6C34 12 34 20 33 26" fill={LEAF} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M34 27C38 18 44 12 47 10C42 14 38 21 35 27" fill={LEAF} stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+      {/* Bulbo de hortaliza */}
+      <path
+        d="M20 37C18 46 25 54 32 54C39 54 46 46 44 37C42 30 36 28 32 28C28 28 22 30 20 37Z"
+        fill={CLAY}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      {/* Raíces inferiores */}
+      <path d="M32 54V59M28 53L25 57M36 53L39 57" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      <path d="M26 34C24 39 25 45 28 48M38 34C40 39 39 45 36 48" stroke={SUN_SOFT} strokeWidth="2" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
+/* 14C. FRUTALES (Rurukuna - Durazno, Manzana, Frutilla) */
+export function DibujoFrutal({ size = 64, className = "" }) {
+  return (
+    <SvgFrame size={size} className={className} label="Frutales">
+      {/* Ramita con pedúnculo */}
+      <path d="M32 24C32 18 36 12 41 9" stroke={WOOD} strokeWidth="3.2" strokeLinecap="round" />
+      {/* Hoja verde */}
+      <path d="M35 17C43 15 48 18 47 23C42 24 37 21 35 17Z" fill={LEAF} stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
+      {/* Fruto durazno / manzana */}
+      <path
+        d="M20 36C18 27 28 23 33 27C38 23 48 27 46 36C44 47 38 53 33 53C28 53 22 47 20 36Z"
+        fill={SUN}
+        stroke={INK}
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+      />
+      {/* Hendidura natural */}
+      <path d="M33 27C33 34 32 42 33 50" stroke={CLAY} strokeWidth="2.2" strokeLinecap="round" />
+      {/* Brillo */}
+      <path d="M25 32C24 35 24 39 26 42" stroke={HIGHLIGHT} strokeWidth="2" strokeLinecap="round" />
+    </SvgFrame>
+  );
+}
+
 /* 15. QUINUA (Kinwa) */
 export function DibujoQuinua({ size = 64, className = "" }) {
   return (
