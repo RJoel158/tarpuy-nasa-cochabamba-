@@ -362,6 +362,17 @@ button, [role="button"], .tarpuy-btn-physical, .tarpuy-btn-physical * { overflow
 .sowing-step-actions button:disabled { opacity:.4; cursor:default; }
 .sync-indicator { display:inline-block; padding:8px 0; font-size:13px; color:var(--tinta-suave); }
 
+.water-advice-visual { display:grid; grid-template-columns:144px minmax(0,1fr); align-items:center; gap:20px; padding:20px; border-radius:20px; }
+.water-advice-drawing { display:flex; align-items:center; justify-content:center; }
+.water-advice-drawing svg { max-width:100%; height:auto; }
+.water-advice-visual h2 { max-width:30ch; }
+.water-advice-visual p { max-width:65ch; }
+@media(max-width:480px) {
+  .water-advice-visual { grid-template-columns:minmax(0,1fr); gap:12px; padding:16px; }
+  .water-advice-drawing svg { width:100px; }
+  .water-advice-visual h2 { max-width:none; }
+}
+
 /* shadcn theme tokens mapped to Tarpuy so Dialog keeps the app look */
 @theme inline {
   --font-heading: var(--font-family-base);

@@ -208,13 +208,6 @@ export default function Navbar({
         >
           <Preferencias voiceLang={voiceLang} onChangeVoiceLang={onChangeVoiceLang}
             appMode={appMode} onChangeAppMode={onChangeAppMode} />
-          <BotonAltavoz
-            sonando={isSpeaking}
-            mostrarTexto={true}
-            etiqueta={esQuechua ? "Yanapayta uyariy" : "Escuchar guía"}
-            onClick={isSpeaking ? onStopAudio : onSpeakGuide}
-            className="w-full"
-          />
         </div>
       </aside>
 

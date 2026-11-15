@@ -3,7 +3,7 @@ import { waterActionText } from "../utils/quechuaI18n.js";
 
 export function buildWaterActionNarration(action, lang = "es") {
   const text = waterActionText(action, lang);
-  return `${text.heading}. ${text.title}. ${text.message} ${text.scope}`;
+  return `${text.heading}. ${text.title}. ${text.message}${text.instruction ? ` ${text.instruction}` : ""} ${text.scope}`;
 }
 
 const number = (value) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) ? Number(value) : null;
@@ -61,13 +61,18 @@ export function buildStrategyNarration(strategy = {}, lang = "es", indicators = 
 
 export function buildWeatherNarration(bulletin, zoneName = "", lang = "es") {
   if (!bulletin?.seven_day_forecast?.length) return lang === "qu" ? "Mana pacha yachay kanchu." : "Falta el pronóstico para esta zona.";
-  const days = bulletin.seven_day_forecast;
+  const days = bulletin.weather_provider === "WeatherAPI" ? (bulletin.fourteen_day_forecast || bulletin.seven_day_forecast).filter(day => day.forecast_provider === "WeatherAPI") : bulletin.seven_day_forecast;
+  if (!days.length) return "No hay un pronóstico disponible.";
   if (lang === "qu") {
     return [zoneName, "Pacha willakuy.", ...days.map((day) =>
       `${day.date}. Para: ${number(day.precip_mm) ?? "—"} milímetros. Chiri: ${number(day.temp_min_c) ?? "—"} grados.`),
       "Allpata, yakuta qhaway."].join(" ");
   }
-  const summary = bulletin.predictions_summary || {};
+  const summary = bulletin.weather_provider === "WeatherAPI" ? {
+    total_precip_7d_mm: days.reduce((sum, day) => sum + (number(day.precip_mm) ?? 0), 0),
+    min_temp_7d_c: Math.min(...days.map(day => number(day.temp_min_c)).filter(value => value !== null)),
+    total_et0_7d_mm: days.reduce((sum, day) => sum + (number(day.et0_mm) ?? 0), 0),
+  } : bulletin.predictions_summary || {};
   const out = [
     `Clima para ${zoneName || "tu zona"}. Del ${dateLabel(days[0].date + "T12:00:00-04:00")} al ${dateLabel(days.at(-1).date + "T12:00:00-04:00")}.`,
   ];

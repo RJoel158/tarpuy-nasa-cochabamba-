@@ -1,0 +1,29 @@
+{
+  "reference_point": {
+    "lat": -17.39919,
+    "lon": -66.190703,
+    "scope": "district_center_not_user_parcel"
+  },
+  "results": [
+    {
+      "service": "periurbanos_categorizado",
+      "http_status": 200,
+      "attributes": []
+    },
+    {
+      "service": "drenaje_e_influencia",
+      "http_status": 200,
+      "attributes": []
+    },
+    {
+      "service": "limite_distritos",
+      "http_status": 200,
+      "attributes": [
+        {
+          "Distrito": "D4",
+          "Comuna": "MOLLE"
+        }
+      ]
+    }
+  ]
+}

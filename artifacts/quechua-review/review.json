@@ -1,0 +1,64 @@
+{
+  "locale": "quh-BO-Cochabamba",
+  "status": "draft_needs_native_review",
+  "purpose": "Muestras de comprensión; no reemplazan todavía los guiones completos ni los audios de producción.",
+  "sources": [
+    {
+      "id": "ilcq",
+      "url": "https://quechua.ipelc.gob.bo/?lang=es",
+      "scope": "Institución de referencia para revisión local; no ha validado estos guiones."
+    },
+    {
+      "id": "dictionary2018",
+      "url": "https://www.illaa.org/pirwa/diccionarios/Quechua_ILCNQ_2018_QHICHWA_SIMIPIRWA.pdf",
+      "scope": "Diccionario de la Nación Quechua, ILCQ/CENAQ, 2018. Referencia lexical, no traducción oficial de estos mensajes."
+    },
+    {
+      "id": "mms",
+      "url": "https://huggingface.co/facebook/mms-tts-quh",
+      "scope": "Modelo de voz sudboliviana actual; no certifica naturalidad cochabambina."
+    }
+  ],
+  "samples": [
+    {
+      "id": "clima_suelo",
+      "context": "Fragmento de consejo de clima; no es un pronóstico completo.",
+      "es": "Revisa la tierra de tu parcela. Antes de regar, revisa si está húmeda o seca.",
+      "qu_written": "Chakraykipa allpanta qhaway. Manaraq parquspa, allpa ch'aran icha ch'aki kasqanta qhaway.",
+      "qu_spoken": "Chakraykipa allpanta qhaway. Manaraq parquspa, allpa ch'aran icha ch'aki kasqanta qhaway.",
+      "back_translation_es": "Mira la tierra de tu parcela. Antes de regar, mira si la tierra está húmeda o seca.",
+      "semantic_checks": [
+        "Revisar la parcela propia",
+        "Comprobar humedad antes de regar",
+        "No dar una orden incondicional de riego"
+      ],
+      "local_review": [
+        "¿Se entiende parquy o prefieren otro verbo local para regar?",
+        "¿La voz distingue ch'aran y ch'aki?"
+      ],
+      "status": "draft_needs_native_review",
+      "audio_quh": "clima_suelo_quh.wav",
+      "audio_es": "clima_suelo_es.mp3"
+    },
+    {
+      "id": "siembra_agua",
+      "context": "Fragmento de advertencia del plan; no sustituye la secuencia ni sus fechas dinámicas.",
+      "es": "Antes de sembrar, revisa si tienes agua. Pregunta a un técnico de tu comunidad cuándo sembrar.",
+      "qu_written": "Manaraq tarpuspa, yaku kasqanta qhaway. Llaqtaykipa tecniconta tapuy, hayk'aq tarpunaykipaq.",
+      "qu_spoken": "Manaraq tarpuspa, yaku kasqanta qhaway. Llaqtaykipa tecniconta tapuy, hayk'aq tarpunaykipaq.",
+      "back_translation_es": "Antes de sembrar, revisa si hay agua. Pregunta al técnico de tu comunidad cuándo debes sembrar.",
+      "semantic_checks": [
+        "Verificar agua antes de sembrar",
+        "Consultar fecha local",
+        "No afirmar que las fechas estimadas son seguras"
+      ],
+      "local_review": [
+        "¿Se entiende el préstamo técnico en esta frase?",
+        "Confirmar que yaku kasqanta expresa disponibilidad de agua para esta tarea."
+      ],
+      "status": "draft_needs_native_review",
+      "audio_quh": "siembra_agua_quh.wav",
+      "audio_es": "siembra_agua_es.mp3"
+    }
+  ]
+}

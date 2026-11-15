@@ -83,6 +83,8 @@ export async function saveDeviceSnapshot(record = {}) {
     communityName: record.communityName || "Punata",
     cropId: record.cropId || "maiz_valle",
     irrigation: record.irrigation || "deficit_auxiliary",
+    userPoint: record.userPoint || null,
+    districtMeta: record.districtMeta || null,
     bundle: record.bundle ?? loadDeviceSnapshotSync()?.bundle ?? null,
     updatedAt: new Date().toISOString(),
     sizeKb: 0,

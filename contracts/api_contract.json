@@ -32,7 +32,11 @@
           "in": "path",
           "required": true,
           "type": "string",
-          "enum": ["punata_valle_alto", "tapacari_zona_andina", "mizque_cono_sur"]
+          "enum": [
+            "punata_valle_alto",
+            "tapacari_zona_andina",
+            "mizque_cono_sur"
+          ]
         }
       ],
       "response": {
@@ -71,12 +75,31 @@
           "in": "query",
           "required": false,
           "type": "string"
+        },
+        {
+          "name": "lat",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "WGS84 selected point; lat and lon must be supplied together and lie within Bolivia."
+        },
+        {
+          "name": "lon",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "WGS84 selected point; lat and lon must be supplied together and lie within Bolivia."
         }
       ],
       "response": {
         "status_code": 200,
         "content_type": "application/json"
-      }
+      },
+      "point_weather_behavior": "Optional lat/lon pair selects an Open-Meteo forecast at the chosen point, cached for 300 seconds. refresh=true also refreshes the zonal reference when no point was supplied. NASA daily history remains zonal. weather_scope distinguishes selected_point_model from stored_pilot_zone; weather_refresh_error marks provider fallback."
     },
     "/api/recommend": {
       "method": "POST",
@@ -146,7 +169,12 @@
           "in": "query",
           "required": true,
           "type": "string",
-          "enum": ["GetMap", "GetLegendGraphic", "GetFeatureInfo", "GetCapabilities"]
+          "enum": [
+            "GetMap",
+            "GetLegendGraphic",
+            "GetFeatureInfo",
+            "GetCapabilities"
+          ]
         }
       ],
       "response": {
@@ -184,23 +212,57 @@
   "definitions": {
     "ZoneSummary": {
       "type": "object",
-      "required": ["zone_id", "name", "quechua_name", "subregion", "municipality", "coordinates", "elevation_msnm", "slope_category"],
+      "required": [
+        "zone_id",
+        "name",
+        "quechua_name",
+        "subregion",
+        "municipality",
+        "coordinates",
+        "elevation_msnm",
+        "slope_category"
+      ],
       "properties": {
-        "zone_id": { "type": "string" },
-        "name": { "type": "string" },
-        "quechua_name": { "type": "string" },
-        "subregion": { "type": "string" },
-        "municipality": { "type": "string" },
+        "zone_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "quechua_name": {
+          "type": "string"
+        },
+        "subregion": {
+          "type": "string"
+        },
+        "municipality": {
+          "type": "string"
+        },
         "coordinates": {
           "type": "object",
-          "required": ["lat", "lon"],
+          "required": [
+            "lat",
+            "lon"
+          ],
           "properties": {
-            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
-            "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+            "lat": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "lon": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
           }
         },
-        "elevation_msnm": { "type": "integer" },
-        "slope_category": { "type": "string" }
+        "elevation_msnm": {
+          "type": "integer"
+        },
+        "slope_category": {
+          "type": "string"
+        }
       }
     },
     "SoilContext": {
@@ -222,31 +284,79 @@
         },
         "sources_used": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "List of soil data providers used for this Bolivian Andean zone (e.g., ISRIC SoilGrids 250m, FAO GAEZ v4, Centro Pairumani, CIAT Bolivia)."
         },
-        "texture_class": { "type": "string" },
+        "texture_class": {
+          "type": "string"
+        },
         "ph_range": {
           "type": "object",
-          "required": ["min", "max", "classification"],
+          "required": [
+            "min",
+            "max",
+            "classification"
+          ],
           "properties": {
-            "min": { "type": "number" },
-            "max": { "type": "number" },
-            "classification": { "type": "string" }
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "classification": {
+              "type": "string"
+            }
           }
         },
         "organic_matter_pct": {
           "type": "object",
-          "required": ["mean", "rating"],
+          "required": [
+            "mean",
+            "rating"
+          ],
           "properties": {
-            "mean": { "type": "number" },
-            "rating": { "type": "string", "enum": ["very_low", "low", "moderate", "optimal"] }
+            "mean": {
+              "type": "number"
+            },
+            "rating": {
+              "type": "string",
+              "enum": [
+                "very_low",
+                "low",
+                "moderate",
+                "optimal"
+              ]
+            }
           }
         },
-        "salinity_risk": { "type": "string", "enum": ["low", "moderate", "high", "severe"] },
-        "erosion_vulnerability": { "type": "string", "enum": ["low", "moderate", "high", "very_high", "severe"] },
-        "drainage_class": { "type": "string" },
-        "compaction_risk": { "type": "string" }
+        "salinity_risk": {
+          "type": "string",
+          "enum": [
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        },
+        "erosion_vulnerability": {
+          "type": "string",
+          "enum": [
+            "low",
+            "moderate",
+            "high",
+            "very_high",
+            "severe"
+          ]
+        },
+        "drainage_class": {
+          "type": "string"
+        },
+        "compaction_risk": {
+          "type": "string"
+        }
       }
     },
     "NasaDatasetsUsed": {
@@ -262,14 +372,38 @@
         "fao_gaez"
       ],
       "properties": {
-        "nasa_power": { "type": "string", "description": "Daily solar radiation, min/max air temperatures, relative humidity, precipitation, wind speed at 0.5x0.5 deg" },
-        "smap": { "type": "string", "description": "L3/L4 surface (0-5cm) and root-zone (0-100cm) soil moisture index (m3/m3)" },
-        "modis_sentinel": { "type": "string", "description": "MOD13Q1 250m & Sentinel-2 10m NDVI / EVI time-series for vegetation vigor and bare soil detection" },
-        "gpm_imerg": { "type": "string", "description": "Global Precipitation Measurement IMERG calibrated precipitation estimates and storm intensity" },
-        "srtm": { "type": "string", "description": "Shuttle Radar Topography Mission 30m digital elevation model and slope gradient calculation" },
-        "ecostress": { "type": "string", "description": "Evaporative Stress Index (ESI) and actual evapotranspiration (ET) from ISS thermal radiometer" },
-        "gldas": { "type": "string", "description": "Global Land Data Assimilation System Noah land surface model soil moisture and heat flux" },
-        "fao_gaez": { "type": "string", "description": "FAO Global Agro-Ecological Zones agro-climatic resources, thermal regimes, and crop suitability" }
+        "nasa_power": {
+          "type": "string",
+          "description": "Daily solar radiation, min/max air temperatures, relative humidity, precipitation, wind speed at 0.5x0.5 deg"
+        },
+        "smap": {
+          "type": "string",
+          "description": "L3/L4 surface (0-5cm) and root-zone (0-100cm) soil moisture index (m3/m3)"
+        },
+        "modis_sentinel": {
+          "type": "string",
+          "description": "MOD13Q1 250m & Sentinel-2 10m NDVI / EVI time-series for vegetation vigor and bare soil detection"
+        },
+        "gpm_imerg": {
+          "type": "string",
+          "description": "Global Precipitation Measurement IMERG calibrated precipitation estimates and storm intensity"
+        },
+        "srtm": {
+          "type": "string",
+          "description": "Shuttle Radar Topography Mission 30m digital elevation model and slope gradient calculation"
+        },
+        "ecostress": {
+          "type": "string",
+          "description": "Evaporative Stress Index (ESI) and actual evapotranspiration (ET) from ISS thermal radiometer"
+        },
+        "gldas": {
+          "type": "string",
+          "description": "Global Land Data Assimilation System Noah land surface model soil moisture and heat flux"
+        },
+        "fao_gaez": {
+          "type": "string",
+          "description": "FAO Global Agro-Ecological Zones agro-climatic resources, thermal regimes, and crop suitability"
+        }
       }
     },
     "MonthlyHarmonizedIndicator": {
@@ -287,46 +421,165 @@
         "data_status"
       ],
       "properties": {
-        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "month_name": { "type": "string" },
-        "temp_min_c": { "type": "number", "description": "Average monthly minimum temperature in Celsius (NASA POWER T2M_MIN)" },
-        "temp_max_c": { "type": "number", "description": "Average monthly maximum temperature in Celsius (NASA POWER T2M_MAX)" },
-        "precip_mm": { "type": "number", "description": "Harmonized monthly rainfall in mm (GPM IMERG + NASA POWER PRECTOTCORR)" },
-        "soil_moisture_index": { "type": "number", "minimum": 0, "maximum": 1, "description": "Normalized soil moisture saturation 0-1 derived from SMAP L4 root-zone" },
-        "ndvi_mean": { "type": "number", "minimum": -1, "maximum": 1, "description": "Mean Normalized Difference Vegetation Index (MODIS MOD13Q1 / Sentinel-2)" },
-        "frost_risk_days": { "type": "integer", "minimum": 0, "maximum": 31, "description": "Days with T2M_MIN <= 0°C (frost danger to vulnerable crops)" },
-        "bare_soil_flag": { "type": "boolean", "description": "True if NDVI < 0.20 and fractional vegetation cover < 15%, indicating high erosion vulnerability" },
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "month_name": {
+          "type": "string"
+        },
+        "temp_min_c": {
+          "type": "number",
+          "description": "Average monthly minimum temperature in Celsius (NASA POWER T2M_MIN)"
+        },
+        "temp_max_c": {
+          "type": "number",
+          "description": "Average monthly maximum temperature in Celsius (NASA POWER T2M_MAX)"
+        },
+        "precip_mm": {
+          "type": "number",
+          "description": "Harmonized monthly rainfall in mm (GPM IMERG + NASA POWER PRECTOTCORR)"
+        },
+        "soil_moisture_index": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normalized soil moisture saturation 0-1 derived from SMAP L4 root-zone"
+        },
+        "ndvi_mean": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Mean Normalized Difference Vegetation Index (MODIS MOD13Q1 / Sentinel-2)"
+        },
+        "frost_risk_days": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31,
+          "description": "Days with T2M_MIN <= 0°C (frost danger to vulnerable crops)"
+        },
+        "bare_soil_flag": {
+          "type": "boolean",
+          "description": "True if NDVI < 0.20 and fractional vegetation cover < 15%, indicating high erosion vulnerability"
+        },
         "data_status": {
           "type": "string",
-          "enum": ["phase0_seed_pending_etl", "etl_verified_provisional", "recalibrated_final"],
+          "enum": [
+            "phase0_seed_pending_etl",
+            "etl_verified_provisional",
+            "recalibrated_final"
+          ],
           "description": "Tag indicating whether data is Phase 0 baseline seed or live ETL verified product"
         }
       }
     },
     "BareSoilPeriod": {
       "type": "object",
-      "required": ["period_id", "start_month", "end_month", "duration_months", "satellite_signature", "associated_risks", "recommended_cover_intervention"],
+      "required": [
+        "period_id",
+        "start_month",
+        "end_month",
+        "duration_months",
+        "satellite_signature",
+        "associated_risks",
+        "recommended_cover_intervention"
+      ],
       "properties": {
-        "period_id": { "type": "string" },
-        "start_month": { "type": "string" },
-        "end_month": { "type": "string" },
-        "duration_months": { "type": "integer" },
-        "satellite_signature": { "type": "string" },
-        "associated_risks": { "type": "array", "items": { "type": "string" } },
-        "recommended_cover_intervention": { "type": "string" }
+        "period_id": {
+          "type": "string"
+        },
+        "start_month": {
+          "type": "string"
+        },
+        "end_month": {
+          "type": "string"
+        },
+        "duration_months": {
+          "type": "integer"
+        },
+        "satellite_signature": {
+          "type": "string"
+        },
+        "associated_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommended_cover_intervention": {
+          "type": "string"
+        }
       }
     },
     "ClimateRisksSummary": {
       "type": "object",
-      "required": ["primary_risk", "secondary_risk", "frost_risk_level", "drought_risk_level", "water_erosion_risk", "wind_erosion_risk", "heat_stress_risk"],
+      "required": [
+        "primary_risk",
+        "secondary_risk",
+        "frost_risk_level",
+        "drought_risk_level",
+        "water_erosion_risk",
+        "wind_erosion_risk",
+        "heat_stress_risk"
+      ],
       "properties": {
-        "primary_risk": { "type": "string" },
-        "secondary_risk": { "type": "string" },
-        "frost_risk_level": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
-        "drought_risk_level": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
-        "water_erosion_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
-        "wind_erosion_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] },
-        "heat_stress_risk": { "type": "string", "enum": ["none", "low", "moderate", "high", "severe"] }
+        "primary_risk": {
+          "type": "string"
+        },
+        "secondary_risk": {
+          "type": "string"
+        },
+        "frost_risk_level": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        },
+        "drought_risk_level": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        },
+        "water_erosion_risk": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        },
+        "wind_erosion_risk": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        },
+        "heat_stress_risk": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "severe"
+          ]
+        }
       }
     },
     "UncertaintyNotes": {
@@ -338,40 +591,119 @@
         "confidence_score_pct"
       ],
       "properties": {
-        "spatial_resolution_limits": { "type": "string" },
-        "cloud_cover_mitigation": { "type": "string" },
-        "topographic_microclimate_disclaimer": { "type": "string" },
-        "confidence_score_pct": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "spatial_resolution_limits": {
+          "type": "string"
+        },
+        "cloud_cover_mitigation": {
+          "type": "string"
+        },
+        "topographic_microclimate_disclaimer": {
+          "type": "string"
+        },
+        "confidence_score_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
       }
     },
     "VisualTrafficLight": {
       "type": "object",
-      "required": ["water", "soil", "frost", "erosion"],
+      "required": [
+        "water",
+        "soil",
+        "frost",
+        "erosion"
+      ],
       "properties": {
-        "water": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Water balance & drought resistance rating" },
-        "soil": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Soil health, biological N-fixation, & structure restoration" },
-        "frost": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Frost tolerance & thermal risk level" },
-        "erosion": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Erosion prevention & bare soil coverage" }
+        "water": {
+          "type": "string",
+          "enum": [
+            "green",
+            "yellow",
+            "red"
+          ],
+          "description": "Water balance & drought resistance rating"
+        },
+        "soil": {
+          "type": "string",
+          "enum": [
+            "green",
+            "yellow",
+            "red"
+          ],
+          "description": "Soil health, biological N-fixation, & structure restoration"
+        },
+        "frost": {
+          "type": "string",
+          "enum": [
+            "green",
+            "yellow",
+            "red"
+          ],
+          "description": "Frost tolerance & thermal risk level"
+        },
+        "erosion": {
+          "type": "string",
+          "enum": [
+            "green",
+            "yellow",
+            "red"
+          ],
+          "description": "Erosion prevention & bare soil coverage"
+        }
       }
     },
     "AudioRefs": {
       "type": "object",
-      "required": ["es", "qu"],
+      "required": [
+        "es",
+        "qu"
+      ],
       "properties": {
-        "es": { "type": "string", "description": "Audio file path or URL for Spanish explanation" },
-        "qu": { "type": "string", "description": "Audio file path or URL for Quechua cochabambino explanation" }
+        "es": {
+          "type": "string",
+          "description": "Audio file path or URL for Spanish explanation"
+        },
+        "qu": {
+          "type": "string",
+          "description": "Audio file path or URL for Quechua cochabambino explanation"
+        }
       }
     },
     "CropSequenceItem": {
       "type": "object",
-      "required": ["crop_id", "crop_name", "season_label", "start_month", "end_month", "agronomic_role"],
+      "required": [
+        "crop_id",
+        "crop_name",
+        "season_label",
+        "start_month",
+        "end_month",
+        "agronomic_role"
+      ],
       "properties": {
-        "crop_id": { "type": "string" },
-        "crop_name": { "type": "string" },
-        "season_label": { "type": "string" },
-        "start_month": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "end_month": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "agronomic_role": { "type": "string" }
+        "crop_id": {
+          "type": "string"
+        },
+        "crop_name": {
+          "type": "string"
+        },
+        "season_label": {
+          "type": "string"
+        },
+        "start_month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "end_month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "agronomic_role": {
+          "type": "string"
+        }
       }
     },
     "RotationStrategy": {
@@ -394,33 +726,69 @@
         "visual_traffic_light"
       ],
       "properties": {
-        "strategy_id": { "type": "string" },
-        "strategy_type": { "type": "string", "enum": ["current_baseline", "adaptive_alternative"] },
-        "title_es": { "type": "string" },
-        "title_qu": { "type": "string" },
+        "strategy_id": {
+          "type": "string"
+        },
+        "strategy_type": {
+          "type": "string",
+          "enum": [
+            "current_baseline",
+            "adaptive_alternative"
+          ]
+        },
+        "title_es": {
+          "type": "string"
+        },
+        "title_qu": {
+          "type": "string"
+        },
         "crop_sequence": {
           "type": "array",
-          "items": { "$ref": "#/definitions/CropSequenceItem" }
+          "items": {
+            "$ref": "#/definitions/CropSequenceItem"
+          }
         },
-        "priority_alignment_score": { "type": "number", "minimum": 0, "maximum": 1 },
-        "why_suggested": { "type": "string" },
-        "nasa_evidence": { "type": "string" },
+        "priority_alignment_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "why_suggested": {
+          "type": "string"
+        },
+        "nasa_evidence": {
+          "type": "string"
+        },
         "benefits": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "information_gaps": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "local_validation_risks": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "spanish_summary": { "type": "string" },
-        "quechua_summary": { "type": "string" },
-        "audio_refs": { "$ref": "#/definitions/AudioRefs" },
-        "visual_traffic_light": { "$ref": "#/definitions/VisualTrafficLight" }
+        "spanish_summary": {
+          "type": "string"
+        },
+        "quechua_summary": {
+          "type": "string"
+        },
+        "audio_refs": {
+          "$ref": "#/definitions/AudioRefs"
+        },
+        "visual_traffic_light": {
+          "$ref": "#/definitions/VisualTrafficLight"
+        }
       }
     },
     "ZoneDetail": {
@@ -443,49 +811,93 @@
         "strategies"
       ],
       "properties": {
-        "zone_id": { "type": "string" },
-        "name": { "type": "string" },
-        "quechua_name": { "type": "string" },
-        "subregion": { "type": "string" },
-        "municipality": { "type": "string" },
+        "zone_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "quechua_name": {
+          "type": "string"
+        },
+        "subregion": {
+          "type": "string"
+        },
+        "municipality": {
+          "type": "string"
+        },
         "coordinates": {
           "type": "object",
-          "required": ["lat", "lon"],
+          "required": [
+            "lat",
+            "lon"
+          ],
           "properties": {
-            "lat": { "type": "number" },
-            "lon": { "type": "number" }
+            "lat": {
+              "type": "number"
+            },
+            "lon": {
+              "type": "number"
+            }
           }
         },
-        "elevation_msnm": { "type": "integer" },
-        "slope_category": { "type": "string" },
-        "soil_context": { "$ref": "#/definitions/SoilContext" },
-        "nasa_datasets_used": { "$ref": "#/definitions/NasaDatasetsUsed" },
+        "elevation_msnm": {
+          "type": "integer"
+        },
+        "slope_category": {
+          "type": "string"
+        },
+        "soil_context": {
+          "$ref": "#/definitions/SoilContext"
+        },
+        "nasa_datasets_used": {
+          "$ref": "#/definitions/NasaDatasetsUsed"
+        },
         "monthly_harmonized_indicators": {
           "type": "array",
           "minItems": 12,
           "maxItems": 12,
-          "items": { "$ref": "#/definitions/MonthlyHarmonizedIndicator" }
+          "items": {
+            "$ref": "#/definitions/MonthlyHarmonizedIndicator"
+          }
         },
         "bare_soil_periods": {
           "type": "array",
-          "items": { "$ref": "#/definitions/BareSoilPeriod" }
+          "items": {
+            "$ref": "#/definitions/BareSoilPeriod"
+          }
         },
-        "climate_risks_summary": { "$ref": "#/definitions/ClimateRisksSummary" },
-        "uncertainty_notes": { "$ref": "#/definitions/UncertaintyNotes" },
+        "climate_risks_summary": {
+          "$ref": "#/definitions/ClimateRisksSummary"
+        },
+        "uncertainty_notes": {
+          "$ref": "#/definitions/UncertaintyNotes"
+        },
         "strategies": {
           "type": "array",
           "minItems": 3,
-          "items": { "$ref": "#/definitions/RotationStrategy" }
+          "items": {
+            "$ref": "#/definitions/RotationStrategy"
+          }
         }
       }
     },
     "RecommendationRequest": {
       "type": "object",
-      "required": ["zone_id", "current_crop_id", "farmer_priorities", "constraints"],
+      "required": [
+        "zone_id",
+        "current_crop_id",
+        "farmer_priorities",
+        "constraints"
+      ],
       "properties": {
         "zone_id": {
           "type": "string",
-          "enum": ["punata_valle_alto", "tapacari_zona_andina", "mizque_cono_sur"]
+          "enum": [
+            "punata_valle_alto",
+            "tapacari_zona_andina",
+            "mizque_cono_sur"
+          ]
         },
         "current_crop_id": {
           "type": "string",
@@ -522,19 +934,35 @@
         },
         "constraints": {
           "type": "object",
-          "required": ["irrigation_access", "equipment_level", "language_preference"],
+          "required": [
+            "irrigation_access",
+            "equipment_level",
+            "language_preference"
+          ],
           "properties": {
             "irrigation_access": {
               "type": "string",
-              "enum": ["none_secano", "deficit_auxiliary", "full_canal_well"]
+              "enum": [
+                "none_secano",
+                "deficit_auxiliary",
+                "full_canal_well"
+              ]
             },
             "equipment_level": {
               "type": "string",
-              "enum": ["manual_yunta", "mixed_tractor_service", "mechanized"]
+              "enum": [
+                "manual_yunta",
+                "mixed_tractor_service",
+                "mechanized"
+              ]
             },
             "language_preference": {
               "type": "string",
-              "enum": ["es", "qu", "bilingual"]
+              "enum": [
+                "es",
+                "qu",
+                "bilingual"
+              ]
             }
           }
         },
@@ -542,15 +970,38 @@
           "type": "object",
           "description": "Optional GAMC district / periurban / drainage signals (Phase 2).",
           "properties": {
-            "district_code": { "type": "string" },
-            "comuna": { "type": "string" },
-            "periurban_class": { "type": "string" },
-            "periurban_pressure": { "type": "string", "enum": ["none", "growth", "consolidated"] },
-            "periurban_detail": { "type": "string" },
-            "near_drainage": { "type": "boolean" },
-            "drainage_tipo": { "type": "string" },
-            "drainage_clasificacion": { "type": "string" },
-            "wet_bulletin": { "type": "boolean" }
+            "district_code": {
+              "type": "string"
+            },
+            "comuna": {
+              "type": "string"
+            },
+            "periurban_class": {
+              "type": "string"
+            },
+            "periurban_pressure": {
+              "type": "string",
+              "enum": [
+                "none",
+                "growth",
+                "consolidated"
+              ]
+            },
+            "periurban_detail": {
+              "type": "string"
+            },
+            "near_drainage": {
+              "type": "boolean"
+            },
+            "drainage_tipo": {
+              "type": "string"
+            },
+            "drainage_clasificacion": {
+              "type": "string"
+            },
+            "wet_bulletin": {
+              "type": "boolean"
+            }
           }
         }
       }
@@ -566,73 +1017,157 @@
         "data_provenance"
       ],
       "properties": {
-        "zone_id": { "type": "string" },
-        "evaluated_at": { "type": "string", "format": "date-time" },
-        "current_crop_id": { "type": "string" },
+        "zone_id": {
+          "type": "string"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "current_crop_id": {
+          "type": "string"
+        },
         "priorities_considered": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "strategies": {
           "type": "array",
           "minItems": 3,
-          "items": { "$ref": "#/definitions/RotationStrategy" },
+          "items": {
+            "$ref": "#/definitions/RotationStrategy"
+          },
           "description": "Must return at least 3 strategies: 1 current_baseline and at least 2 adaptive_alternative options"
         },
         "data_provenance": {
           "type": "object",
-          "required": ["nasa_datasets", "soil_dataset", "etl_status"],
+          "required": [
+            "nasa_datasets",
+            "soil_dataset",
+            "etl_status"
+          ],
           "properties": {
-            "nasa_datasets": { "type": "array", "items": { "type": "string" } },
-            "soil_dataset": { "type": "string" },
-            "etl_status": { "type": "string" }
+            "nasa_datasets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "soil_dataset": {
+              "type": "string"
+            },
+            "etl_status": {
+              "type": "string"
+            }
           }
         },
         "municipal_context": {
           "type": "object",
           "description": "Normalized municipal periurban context when provided in the request.",
           "properties": {
-            "district_code": { "type": "string" },
-            "label_es": { "type": "string" },
-            "alias": { "type": "string" },
-            "periurban_pressure": { "type": "string" },
-            "flood_sensitive": { "type": "boolean" },
-            "near_drainage": { "type": "boolean" },
-            "wet_bulletin": { "type": "boolean" },
-            "tip_es": { "type": "string" }
+            "district_code": {
+              "type": "string"
+            },
+            "label_es": {
+              "type": "string"
+            },
+            "alias": {
+              "type": "string"
+            },
+            "periurban_pressure": {
+              "type": "string"
+            },
+            "flood_sensitive": {
+              "type": "boolean"
+            },
+            "near_drainage": {
+              "type": "boolean"
+            },
+            "wet_bulletin": {
+              "type": "boolean"
+            },
+            "tip_es": {
+              "type": "string"
+            }
           }
         }
       }
     },
     "OfflineBundle": {
       "type": "object",
-      "required": ["bundle_id", "zone_id", "generated_at", "version", "zone_profile", "crops_catalog", "precomputed_recommendations"],
+      "required": [
+        "bundle_id",
+        "zone_id",
+        "generated_at",
+        "version",
+        "zone_profile",
+        "crops_catalog",
+        "precomputed_recommendations"
+      ],
       "properties": {
-        "bundle_id": { "type": "string" },
-        "zone_id": { "type": "string" },
-        "generated_at": { "type": "string" },
-        "version": { "type": "string" },
-        "zone_profile": { "$ref": "#/definitions/ZoneDetail" },
+        "bundle_id": {
+          "type": "string"
+        },
+        "zone_id": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "zone_profile": {
+          "$ref": "#/definitions/ZoneDetail"
+        },
         "crops_catalog": {
           "type": "array",
-          "items": { "type": "object" }
+          "items": {
+            "type": "object"
+          }
         },
         "precomputed_recommendations": {
           "type": "array",
-          "items": { "$ref": "#/definitions/RotationStrategy" }
+          "items": {
+            "$ref": "#/definitions/RotationStrategy"
+          }
         }
       }
     },
     "PosterMetadata": {
       "type": "object",
-      "required": ["zone_id", "zone_name_es", "zone_name_qu", "calendar_layout", "qr_code_audio_url", "visual_icons"],
+      "required": [
+        "zone_id",
+        "zone_name_es",
+        "zone_name_qu",
+        "calendar_layout",
+        "qr_code_audio_url",
+        "visual_icons"
+      ],
       "properties": {
-        "zone_id": { "type": "string" },
-        "zone_name_es": { "type": "string" },
-        "zone_name_qu": { "type": "string" },
-        "calendar_layout": { "type": "array", "items": { "type": "object" } },
-        "qr_code_audio_url": { "type": "string" },
-        "visual_icons": { "type": "object" }
+        "zone_id": {
+          "type": "string"
+        },
+        "zone_name_es": {
+          "type": "string"
+        },
+        "zone_name_qu": {
+          "type": "string"
+        },
+        "calendar_layout": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "qr_code_audio_url": {
+          "type": "string"
+        },
+        "visual_icons": {
+          "type": "object"
+        }
       }
     }
   },
@@ -851,4 +1386,3 @@
     }
   }
 }
-

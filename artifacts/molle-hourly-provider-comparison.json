@@ -1,0 +1,219 @@
+{
+  "queried_at_local": "2026-11-15T00:26:55.294980-04:00",
+  "reference": {
+    "lat": -17.39919,
+    "lon": -66.190703,
+    "scope": "Molle D4 district center"
+  },
+  "weatherapi_current": {
+    "last_updated": "2026-11-15 00:15",
+    "temp_c": 15.5,
+    "precip_mm": 1.05,
+    "condition": {
+      "text": "Light rain shower",
+      "icon": "//cdn.weatherapi.com/weather/64x64/night/353.png",
+      "code": 1240
+    }
+  },
+  "openmeteo_current": {
+    "time": "2026-11-15T00:15",
+    "interval": 900,
+    "temperature_2m": 15.4,
+    "precipitation": 0.0,
+    "rain": 0.0
+  },
+  "hourly": [
+    {
+      "hour": 0,
+      "wa_mm": 1.08,
+      "wa_probability": 67,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.1,
+      "om_probability": 71
+    },
+    {
+      "hour": 1,
+      "wa_mm": 1.05,
+      "wa_probability": 69,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.1,
+      "om_probability": 76
+    },
+    {
+      "hour": 2,
+      "wa_mm": 0.79,
+      "wa_probability": 65,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.7,
+      "om_probability": 78
+    },
+    {
+      "hour": 3,
+      "wa_mm": 1.04,
+      "wa_probability": 72,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.4,
+      "om_probability": 78
+    },
+    {
+      "hour": 4,
+      "wa_mm": 0.98,
+      "wa_probability": 73,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.1,
+      "om_probability": 77
+    },
+    {
+      "hour": 5,
+      "wa_mm": 0.41,
+      "wa_probability": 56,
+      "wa_condition": "Light rain shower",
+      "om_mm": 0.8,
+      "om_probability": 71
+    },
+    {
+      "hour": 6,
+      "wa_mm": 1.44,
+      "wa_probability": 73,
+      "wa_condition": "Light rain",
+      "om_mm": 0.3,
+      "om_probability": 60
+    },
+    {
+      "hour": 7,
+      "wa_mm": 0.8,
+      "wa_probability": 63,
+      "wa_condition": "Light rain",
+      "om_mm": 0.0,
+      "om_probability": 44
+    },
+    {
+      "hour": 8,
+      "wa_mm": 0.33,
+      "wa_probability": 48,
+      "wa_condition": "Light drizzle",
+      "om_mm": 0.0,
+      "om_probability": 31
+    },
+    {
+      "hour": 9,
+      "wa_mm": 0.15,
+      "wa_probability": 32,
+      "wa_condition": "Light drizzle",
+      "om_mm": 0.0,
+      "om_probability": 18
+    },
+    {
+      "hour": 10,
+      "wa_mm": 0.04,
+      "wa_probability": 15,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 7
+    },
+    {
+      "hour": 11,
+      "wa_mm": 0.01,
+      "wa_probability": 10,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 6
+    },
+    {
+      "hour": 12,
+      "wa_mm": 0.03,
+      "wa_probability": 11,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 24
+    },
+    {
+      "hour": 13,
+      "wa_mm": 0.05,
+      "wa_probability": 11,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 52
+    },
+    {
+      "hour": 14,
+      "wa_mm": 0.09,
+      "wa_probability": 17,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.1,
+      "om_probability": 73
+    },
+    {
+      "hour": 15,
+      "wa_mm": 0.05,
+      "wa_probability": 13,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 82
+    },
+    {
+      "hour": 16,
+      "wa_mm": 0.03,
+      "wa_probability": 12,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.1,
+      "om_probability": 85
+    },
+    {
+      "hour": 17,
+      "wa_mm": 0.02,
+      "wa_probability": 8,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.1,
+      "om_probability": 80
+    },
+    {
+      "hour": 18,
+      "wa_mm": 0.02,
+      "wa_probability": 14,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 65
+    },
+    {
+      "hour": 19,
+      "wa_mm": 0.01,
+      "wa_probability": 13,
+      "wa_condition": "Patchy rain nearby",
+      "om_mm": 0.0,
+      "om_probability": 43
+    },
+    {
+      "hour": 20,
+      "wa_mm": 0.0,
+      "wa_probability": 13,
+      "wa_condition": "Cloudy",
+      "om_mm": 0.0,
+      "om_probability": 24
+    },
+    {
+      "hour": 21,
+      "wa_mm": 0.0,
+      "wa_probability": 12,
+      "wa_condition": "Cloudy",
+      "om_mm": 0.0,
+      "om_probability": 13
+    },
+    {
+      "hour": 22,
+      "wa_mm": 0.0,
+      "wa_probability": 11,
+      "wa_condition": "Partly Cloudy",
+      "om_mm": 0.0,
+      "om_probability": 5
+    },
+    {
+      "hour": 23,
+      "wa_mm": 0.0,
+      "wa_probability": 10,
+      "wa_condition": "Partly Cloudy",
+      "om_mm": 0.0,
+      "om_probability": 0
+    }
+  ]
+}

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
 import { buildStrategyNarration } from "../../services/narration.js";
+import SowingGuideAudio from "./SowingGuideAudio.jsx";
+import React, { useState, useEffect } from "react";
 import CropCalendarBar from "./CropCalendarBar.jsx";
 import { CropIllustration, CheckIllustration } from "./FarmPictograms.jsx";
 import { IlustracionTarpuy } from "../../components/illustrations/TarpuyIllustrations.jsx";
-import { BotonGrande, BotonAltavoz } from "../../components/ui/TarpuyBaseComponents.jsx";
+import { BotonGrande } from "../../components/ui/TarpuyBaseComponents.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
 /**
@@ -85,6 +86,8 @@ export default function RotationCard({
   indicators = [],
   onSpeak,
   activeAudioKey,
+  onStopAudio,
+  audioLoading = false,
   isAdvanced = false,
   lang = "es",
 }) {
@@ -101,8 +104,6 @@ export default function RotationCard({
 
   const titleObj = PLAIN_TITLES[strategy.strategy_id];
   const title = titleObj ? (isQu ? titleObj.qu : titleObj.es) : strategy.title_es;
-  const qKey = `${strategy.strategy_id || index}_qu`;
-  const esKey = `${strategy.strategy_id || index}_es`;
   const tl = strategy.visual_traffic_light || {};
 
   /* Etiqueta clara de las 3 estrategias */
@@ -203,7 +204,7 @@ export default function RotationCard({
     { key: "erosion", name: tr(lang, "windRainCheck"), val: tl.erosion || "yellow" },
   ];
 
-  const primaryText = buildStrategyNarration(strategy, lang);
+  const primaryText = buildStrategyNarration(strategy, lang, indicators);
 
   /* 5. Consejos de suelo extraídos de los pasos de la estrategia */
   const consejosSuelo = (strategy.crop_sequence || []).slice(0, 3).map((paso, idx) => ({
@@ -262,20 +263,6 @@ export default function RotationCard({
           </div>
         </div>
 
-        {/* Botón de altavoz directo en la cabecera */}
-        <BotonAltavoz
-          sonando={activeAudioKey === (isQu ? qKey : esKey)}
-          mostrarTexto={true}
-          etiqueta={tr(lang, "listenBtn")}
-          onClick={() =>
-            onSpeak(
-              buildStrategyNarration(strategy, isQu ? "qu" : "es"),
-              isQu ? "qu" : "es",
-              isQu ? qKey : esKey,
-              `strat_${strategy.strategy_id}`
-            )
-          }
-        />
       </div>
 
       <div className="p-5 sm:p-6 space-y-6">
@@ -311,37 +298,9 @@ export default function RotationCard({
           lang={lang}
         />
 
-        {/* Botones de voz bilingüe originales (Castellano y Runasimi) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <BotonGrande
-            variante={activeAudioKey === qKey ? "agua" : "secundario"}
-            ilustracionId="altavoz"
-            estado={activeAudioKey === qKey ? "presionado" : "normal"}
-            texto={tr(lang, "listenQuBtn")}
-            onClick={() =>
-              onSpeak(
-                buildStrategyNarration(strategy, "qu"),
-                "qu",
-                qKey,
-                `strat_${strategy.strategy_id}`
-              )
-            }
-          />
-          <BotonGrande
-            variante={activeAudioKey === esKey ? "agua" : "secundario"}
-            ilustracionId="altavoz"
-            estado={activeAudioKey === esKey ? "presionado" : "normal"}
-            texto={tr(lang, "listenEsBtn")}
-            onClick={() =>
-              onSpeak(
-                buildStrategyNarration(strategy, "es"),
-                "es",
-                esKey,
-                `strat_${strategy.strategy_id}`
-              )
-            }
-          />
-        </div>
+        <SowingGuideAudio strategy={strategy} indicators={indicators} lang={lang}
+          onSpeak={onSpeak} onStopAudio={onStopAudio} activeAudioKey={activeAudioKey} loading={audioLoading} />
+
 
         {/* 6. SECCIÓN PLEGABLE "VER NÚMEROS" (Nitrógeno, balance hídrico, rentabilidad, semáforos y evidencia NASA) */}
         <div className="space-y-4 pt-2">

@@ -1,7 +1,7 @@
 import React from "react";
 import { Loader2, CheckCircle2, AlertTriangle, Info, X } from "lucide-react";
 import { WeatherIllustration, cleanAlertForFarmer } from "../alerts/WeatherPictograms.jsx";
-import { BotonGrande, BotonAltavoz } from "./TarpuyBaseComponents.jsx";
+import { BotonGrande } from "./TarpuyBaseComponents.jsx";
 import { tr } from "../../utils/quechuaI18n.js";
 
 /**
@@ -152,13 +152,6 @@ export function AlertsModal({ open, onClose, alerts = [], zoneName = "", lang = 
               {tr(lang, "seeAlerts")} · {zoneName}
             </h3>
           </div>
-
-          <BotonAltavoz
-            sonando={false}
-            mostrarTexto={true}
-            etiqueta={tr(lang, "listenBtn")}
-            onClick={onListen}
-          />
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto">

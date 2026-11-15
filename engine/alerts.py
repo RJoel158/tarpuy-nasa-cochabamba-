@@ -153,9 +153,10 @@ class AgroclimaticAlertEvaluator:
         district_code: str | None = None,
         comuna: str | None = None,
         drainage_type: str | None = None,
+        telemetry_override: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Return current conditions, 7/14-day forecasts, actionable alerts, municipal alert, and veracity notes."""
-        raw = self._load_telemetry()
+        raw = telemetry_override if telemetry_override is not None else self._load_telemetry()
         fetched_at = raw.get("fetched_at_utc")
         z_rt = raw.get("zones", {}).get(zone_id, {})
         current = z_rt.get("current", {})
@@ -218,13 +219,13 @@ class AgroclimaticAlertEvaluator:
                 })
 
         if net_water <= -12.0 or soil_pct < 26.0:
-            sev = "critical" if (soil_pct < 18.0 and net_water <= -15.0) else "warning"
+            sev = "warning"  # A weekly reference deficit is not confirmed local drought.
             alerts.append({
                 "id": "water_deficit", "severity": sev, "category": "Agua y Sequía",
-                "title_es": f"El Sol Secará Más Agua de la que Llueve ({net_water:+.1f} mm en 7 días)",
+                "title_es": f"Déficit de agua de referencia previsto en 7 días ({net_water:+.1f} mm en 7 días)",
                 "title_qu": "Ruphay Allpata Ch'akichishan",
-                "message_es": f"Lloverá aprox. {tot_rain} mm, pero el sol y viento evaporarán {tot_et0} mm. Humedad actual de superficie: {soil_pct:.0f}%.",
-                "action_es": "Deja chala, paja o rastrojo tapando la tierra; si tienes riego, riega al amanecer o al caer el sol.",
+                "message_es": f"En 7 días se prevén {tot_rain} mm de lluvia y {tot_et0} mm de demanda de referencia ET0. Es un balance previsto, compatible con lluvia puntual. Humedad superficial del modelo: {soil_pct:.0f}%.",
+                "action_es": "Comprueba la lluvia actual, el drenaje y la humedad a la profundidad de las raíces antes de decidir regar.",
             })
         else:
             alerts.append({
@@ -276,6 +277,13 @@ class AgroclimaticAlertEvaluator:
         )
         return {
             "zone_id": zone_id,
+            "weather_provider": z_rt.get("weather_provider", "Open-Meteo"),
+            "primary_provider_status": z_rt.get("primary_provider_status", "stored_reference"),
+            "provider_forecast_days": z_rt.get("provider_forecast_days", 0),
+            "weather_sources": z_rt.get("weather_sources", {}),
+            "weather_location": {"lat": z_rt.get("lat"), "lon": z_rt.get("lon"), "model_grid": z_rt.get("model_grid")},
+            "weather_scope": raw.get("weather_scope", "stored_pilot_zone"),
+            "weather_refresh_error": raw.get("weather_refresh_error", False),
             "data_status": z_rt.get("data_status", "unavailable_realtime_fallback"),
             "fetched_at_utc": fetched_at,
             "current_conditions": current,

@@ -55,10 +55,6 @@ export default function CochabambaMap({
   isAdvanced = false,
   onChooseDistrict,
   guided = false,
-  previewOpen = false,
-  onDismissPreview,
-  onNavigate,
-  nextView = "clima",
   onContinue,
   onDistrictResolved,
   onBack,
@@ -450,6 +446,17 @@ export default function CochabambaMap({
           </button>
         </section>
       )}
+
+      {guided && onContinue && !previewOpen ? (
+        <button
+          type="button"
+          onClick={onContinue}
+          disabled={!userPoint}
+          className="flow-primary absolute bottom-[calc(88px+env(safe-area-inset-bottom))] right-4 left-4 sm:left-auto z-[510] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          Siguiente: ver clima →
+        </button>
+      ) : null}
 
       {guided ? (
         <nav className="tarpuy-map-bottom-nav" aria-label="Navegación principal">
